@@ -12,7 +12,7 @@ defmodule Facebook.Mixfile do
 	def application do
 		[
 			mod: { Facebook, [] },
-			applications: [:json]
+			applications: [:json, :exlager, :hackney]
 		]
 	end
 
@@ -24,7 +24,8 @@ defmodule Facebook.Mixfile do
 	defp deps do
 		[
 			{:json, "~>0.2.7", [github: "cblage/elixir-json", tag: "v0.2.7"]},
-			{:hackney, "~>0.9.1", [github: "benoitc/hackney", tag: "0.9.1"]}
+			{:hackney, "~>0.9.1", [github: "benoitc/hackney", tag: "0.9.1"]},
+			{:exlager, "~>0.2.1", github: "khia/exlager"},
 		]
 	end
 end

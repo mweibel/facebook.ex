@@ -8,7 +8,7 @@ defmodule Facebook.Supervisor do
 	def init([]) do
 		children = [
 			# Define workers and child supervisors to be supervised
-			# worker(Facebook.Worker, [])
+			worker(Facebook.Graph, [])
 		]
 
 		# See http://elixir-lang.org/docs/stable/Supervisor.Behaviour.html
