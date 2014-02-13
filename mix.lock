@@ -1,0 +1,4 @@
+[ "hackney": {:git, "git://github.com/benoitc/hackney.git", "911426c03c4699ffced5453504f9bcec1466a42a", [tag: "0.9.1"]},
+  "hackney_lib": {:git, "https://github.com/benoitc/hackney_lib.git", "69b97266893703b180c9e5930027b5ca09d29f71", [tag: "0.1.1"]},
+  "json": {:git, "git://github.com/cblage/elixir-json.git", "a16a82805771b99fab5b567eb3678bca1dce424e", [tag: "v0.2.7"]},
+  "mimetypes": {:git, "git://github.com/spawngrid/mimetypes.git", "47d37a977a7d633199822bf6b08353007483d00f", [ref: "master"]} ]
