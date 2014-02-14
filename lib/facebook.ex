@@ -3,6 +3,10 @@ defmodule Facebook do
 		{:ok, self}
 	end
 
+	def me(fields, access_token) do
+		me(fields, access_token, nil)
+	end
+
 	def me(fields, access_token, options) do
 		Graph.get("/me", [
 			{"fields": fields, "access_token": access_token}
