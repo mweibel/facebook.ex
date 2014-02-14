@@ -1,9 +1,11 @@
 defmodule Facebook do
-	use Application.Behaviour
-
-	# See http://elixir-lang.org/docs/stable/Application.Behaviour.html
-	# for more information on OTP Applications
 	def start(_type, _args) do
-		Facebook.Supervisor.start_link
+		{:ok, self}
+	end
+
+	def me(fields, access_token, options) do
+		Graph.get("/me", [
+			{"fields": fields, "access_token": access_token}
+		], options)
 	end
 end
