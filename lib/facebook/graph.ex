@@ -6,14 +6,14 @@ defmodule Facebook.Graph do
 	end
 
 	def get(path) do
-		get(path, nil, nil)
+		get(path, [], [])
 	end
 
 	@doc """
 
 	"""
 	def get(path, options) do
-		get(path, nil, options)
+		get(path, [], options)
 	end
 
 	@doc """
@@ -25,7 +25,7 @@ defmodule Facebook.Graph do
 	end
 
 	defp request(method, url, options) do
-		request(method, url, nil, options)
+		request(method, url, <<>>, options)
 	end
 
 	defp request(method, url, payload, options) do
