@@ -8,7 +8,7 @@ defmodule Facebook do
 	end
 
 	def me(fields, access_token, options) do
-		Graph.get("/me", [
+		Facebook.Graph.get("/me", [
 			{"fields": fields, "access_token": access_token}
 		], options)
 	end
