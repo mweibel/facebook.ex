@@ -1,5 +1,5 @@
 defmodule Facebook.Graph do
-	@graph_url "https://graph.facebook.com"
+	@graph_url <<"https://graph.facebook.com">>
 
 	def start_link do
 		:ok
