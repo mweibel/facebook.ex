@@ -1,4 +1,6 @@
 defmodule Facebook.Graph do
+	require Lager
+
 	@moduledoc """
 	HTTP Wrapper for the Graph API using hackney.
 	"""
@@ -57,6 +59,7 @@ defmodule Facebook.Graph do
 		case :hackney.request(method, url, headers, payload, options) do
 			{:ok, _status_code, _headers, client_ref} ->
 				{:ok, body} = :hackney.body(client_ref)
+				Lager.info("body: ~p", [body])
 				case JSON.decode(body) do
 					{:ok, data} ->
 						{:json, data}
@@ -64,6 +67,7 @@ defmodule Facebook.Graph do
 						{:body, body}
 				end
 			error ->
+				Lager.error("error: ~p", [error])
 				error
 		end
 	end

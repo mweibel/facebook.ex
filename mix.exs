@@ -3,7 +3,7 @@ defmodule Facebook.Mixfile do
 
 	def project do
 		[ app: :facebook,
-			version: "0.0.1",
+			version: "0.0.2",
 			elixir: "~> 0.12.4",
 			deps: deps ]
 	end
@@ -23,8 +23,8 @@ defmodule Facebook.Mixfile do
 	# { :barbat, "~> 0.1", github: "elixir-lang/barbat" }
 	defp deps do
 		[
-			{:json, "~>0.2.7", [github: "cblage/elixir-json", tag: "v0.2.7"]},
-			{:hackney, "~>0.9.1", [github: "benoitc/hackney", tag: "0.9.1"]},
+			{:json, "~>0.2.8", [github: "cblage/elixir-json", tag: "v0.2.8"]},
+			{:hackney, "~>0.11.1", [github: "benoitc/hackney", tag: "0.11.1"]},
 			{:exlager, "~>0.2.1", github: "khia/exlager"},
 		]
 	end

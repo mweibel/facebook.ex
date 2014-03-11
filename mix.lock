@@ -1,7 +1,9 @@
-[ "exlager": {:git, "git://github.com/khia/exlager.git", "779a75350c6bf6a30b779f6d63e2d50a94c4d9a1", []},
+[ "ets_lru": {:git, "https://github.com/cloudant/ets_lru.git", "54df566f02412595f69500ce2326d31cfa55ae7a", [ref: "master"]},
+  "exlager": {:git, "git://github.com/khia/exlager.git", "779a75350c6bf6a30b779f6d63e2d50a94c4d9a1", []},
   "goldrush": {:git, "git://github.com/DeadZen/goldrush.git", "71e63212f12c25827e0c1b4198d37d5d018a7fec", [tag: "0.1.6"]},
-  "hackney": {:git, "git://github.com/benoitc/hackney.git", "911426c03c4699ffced5453504f9bcec1466a42a", [tag: "0.9.1"]},
-  "hackney_lib": {:git, "https://github.com/benoitc/hackney_lib.git", "69b97266893703b180c9e5930027b5ca09d29f71", [tag: "0.1.1"]},
-  "json": {:git, "git://github.com/cblage/elixir-json.git", "a16a82805771b99fab5b567eb3678bca1dce424e", [tag: "v0.2.7"]},
+  "hackney": {:git, "git://github.com/benoitc/hackney.git", "448025a8856b66da550ad8bb96a26477523f9f66", [tag: "0.11.1"]},
+  "hackney_lib": {:git, "https://github.com/benoitc/hackney_lib.git", "bf4e6fde4dd6e08b7434af7b092596b3633a872c", [tag: "0.2.4"]},
+  "idna": {:git, "https://github.com/benoitc/erlang-idna.git", "1cdbcd985ddbc06ec4504d1081ca5372006f71ed", [ref: "master"]},
+  "json": {:git, "git://github.com/cblage/elixir-json.git", "725ea02b992aba35c18d0e9c7c3da54689670baf", [tag: "v0.2.8"]},
   "lager": {:git, "https://github.com/basho/lager.git", "b6b6cebcb27ccff8acc59ae775acebc2f52e4926", []},
   "mimetypes": {:git, "git://github.com/spawngrid/mimetypes.git", "47d37a977a7d633199822bf6b08353007483d00f", [ref: "master"]} ]
