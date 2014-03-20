@@ -32,11 +32,11 @@ defmodule Facebook.Graph do
 	end
 
 	@doc """
-	HTTP GET using path and options
+	HTTP GET using path and params
 	"""
-	@spec get(path, options) :: response
-	def get(path, options) do
-		get(path, [], options)
+	@spec get(path, params) :: response
+	def get(path, params) do
+		get(path, params, [])
 	end
 
 	@doc """

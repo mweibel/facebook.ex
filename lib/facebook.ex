@@ -57,4 +57,16 @@ defmodule Facebook do
 			{<<"access_token">>, access_token}
 		], options)
 	end
+
+	@doc """
+	Retrieves a list of granted permissions
+
+	See: https://developers.facebook.com/docs/graph-api/reference/user/permissions
+	"""
+	@spec permissions(user_id :: integer | String.t, access_token) :: response
+	def permissions(user_id, access_token) do
+		Facebook.Graph.get(~s(/#{user_id}/permissions), [
+			{<<"access_token">>, access_token}
+		])
+	end
 end
