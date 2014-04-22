@@ -7,10 +7,10 @@ Please note, this is very much a work in progress. Feel free to contribute using
 
 ### mix.exs
 ```
-{:facebook,"0.0.1",[github: "mweibel/facebook.ex"]}
+{:facebook,"0.0.4",[github: "mweibel/facebook.ex"]}
 ```
 
-Visit [hex.pm/packages/facebook](https://hex.pm/packages/facebook)
+Visit [hex.pm/packages/facebook](https://hex.pm/packages/facebook) or
 [expm.co/facebook](http://expm.co/facebook) for package manager infos.
 
 ## API
