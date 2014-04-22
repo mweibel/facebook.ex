@@ -1,10 +1,14 @@
+ Code.ensure_loaded?(Hex) and Hex.start
+
 defmodule Facebook.Mixfile do
 	use Mix.Project
 
 	def project do
 		[ app: :facebook,
-			version: "0.0.3",
-			elixir: "~> 0.12.5",
+			version: "0.0.4",
+			elixir: "~> 0.13.0",
+			description: description,
+			package: package,
 			deps: deps ]
 	end
 
@@ -13,6 +17,20 @@ defmodule Facebook.Mixfile do
 		[
 			mod: { Facebook, [] },
 			applications: [:json, :exlager, :hackney]
+		]
+	end
+
+	defp description do
+		"""
+		Facebook Graph API Wrapper written in Elixir.
+		Please note, this is very much a work in progress. Feel free to contribute using pull requests.
+		"""
+	end
+
+	defp package do
+		licenses: ["MIT"],
+		links: [
+			{"GitHub", "https://github.com/mweibel/facebook.ex"}
 		]
 	end
 
