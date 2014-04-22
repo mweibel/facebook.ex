@@ -28,9 +28,11 @@ defmodule Facebook.Mixfile do
 	end
 
 	defp package do
-		licenses: ["MIT"],
-		links: [
-			{"GitHub", "https://github.com/mweibel/facebook.ex"}
+		[
+			licenses: ["MIT"],
+			links: [
+				{"GitHub", "https://github.com/mweibel/facebook.ex"}
+			]
 		]
 	end
 
