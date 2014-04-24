@@ -43,9 +43,9 @@ defmodule Facebook.Mixfile do
 	# { :barbat, "~> 0.1", github: "elixir-lang/barbat" }
 	defp deps do
 		[
-			{:json, "~>0.2.8", [github: "cblage/elixir-json", tag: "v0.2.8"]},
-			{:hackney, "~>0.12.1", [github: "benoitc/hackney", tag: "0.12.1"]},
-			{:exlager, "~>0.2.1", github: "khia/exlager"},
+			{:json, [github: "cblage/elixir-json"]},
+			{:hackney, [github: "benoitc/hackney"]},
+			{:exlager, github: "khia/exlager"},
 		]
 	end
 end
