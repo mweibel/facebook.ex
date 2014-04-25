@@ -44,6 +44,7 @@ defmodule Facebook.Mixfile do
 	defp deps do
 		[
 			{:json, [github: "cblage/elixir-json"]},
+			{:hackney_lib, [github: "benoitc/hackney_lib"]},
 			{:hackney, [github: "benoitc/hackney"]},
 			{:exlager, github: "khia/exlager"},
 		]
