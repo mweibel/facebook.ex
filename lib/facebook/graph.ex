@@ -57,7 +57,7 @@ defmodule Facebook.Graph do
 	defp request(method, url, payload, options) do
 		headers = []
 		case :hackney.request(method, url, headers, payload, options) do
-			{:ok, _status_code, _headers, client_ref} ->[]
+			{:ok, _status_code, _headers, client_ref} ->
 				{:ok, body} = :hackney.body(client_ref)
 				Lager.info("body: ~p", [body])
 				case JSON.decode(body) do
