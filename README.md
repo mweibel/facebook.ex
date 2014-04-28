@@ -20,7 +20,7 @@ Visit [hex.pm/packages/facebook](https://hex.pm/packages/facebook) or
 
 ## API
 
-### Facebook.me(fields, access_token, options \\ []) -> {:json, data}
+### Facebook.me([fields: "yourfields"], "access_token", options \\ []) -> {:json, data}
 Basic user infos of the logged in user (specified by the access_token)
 
 ### Facebook.myLikes(access_token, options \\ []) -> {:json, data}
