@@ -17,6 +17,8 @@ defmodule Facebook do
 
 	@doc """
 	Basic user infos of the logged in user (specified by the access_token)
+	If you want to use an appsecret proof (per https://developers.facebook.com/docs/graph-api/securing-requests), pass it in as a field:
+	me([appsecret_proof: "yourstringhere"], "youraccesstoken")
 
 	See: https://developers.facebook.com/docs/graph-api/reference/user/
 	"""
@@ -30,10 +32,7 @@ defmodule Facebook do
 	"""
 	@spec me(fields, access_token, options) :: response
 	def me(fields, access_token, options) do
-		Facebook.Graph.get("/me", [
-			{<<"fields">>, fields},
-			{<<"access_token">>, access_token}
-		], options)
+		Facebook.Graph.get("/me", fields ++ [access_token: access_token], options)
 	end
 
 	@doc """
