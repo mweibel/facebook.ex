@@ -1,7 +1,0 @@
-[ "exlager": {:git, "git://github.com/khia/exlager.git", "d3d73b2a3d0f7b8f3da11a02b5f9384da6c62110", []},
-  "goldrush": {:git, "git://github.com/DeadZen/goldrush.git", "71e63212f12c25827e0c1b4198d37d5d018a7fec", [tag: "0.1.6"]},
-  "hackney": {:git, "git://github.com/benoitc/hackney.git", "e18bdd2f68840c8fddd77875b06079087290e5cc", []},
-  "hackney_lib": {:git, "git://github.com/benoitc/hackney_lib.git", "8050fe58fa6e6321fd38a255d0b61f7200f8648d", []},
-  "idna": {:git, "git://github.com/benoitc/erlang-idna.git", "21aa158b7f36bf2a000f12fe40d7f21eece9cf65", [tag: "hackney-0.11.2"]},
-  "json": {:git, "git://github.com/cblage/elixir-json.git", "725ea02b992aba35c18d0e9c7c3da54689670baf", []},
-  "lager": {:git, "https://github.com/basho/lager.git", "4d8291edb72a25ac0efde907e2ecaa115108ff90", []} ]
