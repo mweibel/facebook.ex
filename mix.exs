@@ -46,7 +46,7 @@ defmodule Facebook.Mixfile do
 			{:json, [github: "cblage/elixir-json"]},
 			# Until hackney updates it's dependency on hackney_lib
 			# an override is required here.
-			{:hackney_lib, "=> 0.2.5", [github: "benoitc/hackney_lib", override: true]},
+			{:hackney_lib, ">= 0.2.5", [github: "benoitc/hackney_lib", override: true]},
 			{:hackney, [github: "benoitc/hackney"]},
 			{:exlager, github: "khia/exlager"},
 		]
