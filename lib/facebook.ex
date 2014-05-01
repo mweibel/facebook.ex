@@ -5,24 +5,39 @@ defmodule Facebook do
 	See: https://developers.facebook.com/docs/graph-api
 	"""
 
+	alias Facebook.Config
+
 	@doc "Start hook"
 	def start(_type, _args) do
 		{:ok, self}
-	end
+	end	
 
 	@type fields :: list
 	@type access_token :: String.t
 	@type response :: {:json, HashDict.t} | {:body, String.t}
 	@type options :: list
+	@type using_appsecret :: boolean	
+
+	@doc """
+	If you want to use an appsecret proof, pass it into set_appsecret:
+	Facebook.set_appsecret("appsecret")	
+
+	See: https://developers.facebook.com/docs/graph-api/securing-requests
+	"""
+	def set_appsecret(appsecret) do
+		Config.appsecret(appsecret)
+	end
 
 	@doc """
 	Basic user infos of the logged in user (specified by the access_token)
-	If you want to use an appsecret proof (per https://developers.facebook.com/docs/graph-api/securing-requests), pass it in as a field:
-	me([appsecret_proof: "yourstringhere"], "youraccesstoken")
 
 	See: https://developers.facebook.com/docs/graph-api/reference/user/
 	"""
 	@spec me(fields, access_token) :: response
+	def me(fields, access_token) when is_binary(fields) do
+		me([fields: fields], access_token, [])
+	end
+
 	def me(fields, access_token) do
 		me(fields, access_token, [])
 	end
@@ -31,7 +46,15 @@ defmodule Facebook do
 	Basic user infos of the logged in user (specified by the access_token).
 	"""
 	@spec me(fields, access_token, options) :: response
+	def me(fields, access_token, options) when is_binary(fields) do
+		me([fields: fields], access_token, options)
+	end
+
 	def me(fields, access_token, options) do
+		if !nil?Config.appsecret do
+			fields = fields ++ [appsecret_token: encrypt(access_token)]
+		end
+
 		Facebook.Graph.get("/me", fields ++ [access_token: access_token], options)
 	end
 
@@ -67,5 +90,9 @@ defmodule Facebook do
 		Facebook.Graph.get(~s(/#{user_id}/permissions), [
 			{<<"access_token">>, access_token}
 		])
+	end
+
+	defp encrypt(token) do
+		:crypto.hmac(:sha256, Config.appsecret, token)
 	end
 end

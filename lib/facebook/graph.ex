@@ -5,7 +5,7 @@ defmodule Facebook.Graph do
 	HTTP Wrapper for the Graph API using hackney.
 	"""
 
-	@graph_url <<"https://graph.facebook.com">>
+	@graph_url <<"https://graph.facebook.com/">>
 
 	@doc """
 	Start the API
@@ -67,7 +67,7 @@ defmodule Facebook.Graph do
 						{:body, body}
 				end
 			error ->
-				Lager.error("error: ~p", [error])
+				#Lager.error("error: ~p", [error])
 				error
 		end
 	end
