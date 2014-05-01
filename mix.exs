@@ -16,7 +16,10 @@ defmodule Facebook.Mixfile do
 	def application do
 		[
 			mod: { Facebook, [] },
-			applications: [:json, :exlager, :hackney]
+			applications: [:json, :exlager, :hackney],
+      env: [env: :dev,
+      	graph_url: "https://graph.facebook.com/v2.0",
+				appsecret: nil]
 		]
 	end
 
@@ -49,6 +52,7 @@ defmodule Facebook.Mixfile do
 			{:hackney_lib, ">= 0.2.5", [github: "benoitc/hackney_lib", override: true]},
 			{:hackney, [github: "benoitc/hackney"]},
 			{:exlager, github: "khia/exlager"},
+			{:libex_config, github: "reset/libex-config"}
 		]
 	end
 end
