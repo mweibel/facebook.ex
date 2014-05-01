@@ -17,7 +17,8 @@ defmodule Facebook.Mixfile do
 		[
 			mod: { Facebook, [] },
 			applications: [:json, :exlager, :hackney],
-      env: [env: :dev, 
+      env: [env: :dev,
+      	graph_url: "https://graph.facebook.com/v2.0",
 				appsecret: nil]
 		]
 	end
