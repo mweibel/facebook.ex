@@ -21,10 +21,11 @@ Visit [hex.pm/packages/facebook](https://hex.pm/packages/facebook) or
 ## API
 
 ### Facebook.me([fields: "yourfields"], "access_token", options \\ []) -> {:json, data}
-Basic user infos of the logged in user (specified by the access_token)
+Basic user infos of the logged in user (specified by the access_token). /1 takes either a list or string.
 
 ### Facebook.myLikes(access_token, options \\ []) -> {:json, data}
 Likes of the currently logged in user (specified by the access_token)  
   
-Want to use [appsecret_proof](https://developers.facebook.com/docs/graph-api/securing-requests)? Add it as a param to the fields argument, like so:  
-`Facebook.me([appsecret_proof: "your sha256 string"], "your access token", options \\ []) -> {:json, data}`
+### Facebook.set_appsecret(appsecret) -> {:ok}
+[Facebook recommends securing requests using an appsecret proof.](https://developers.facebook.com/docs/graph-api/securing-requests)
+Set the appsecret if you would like to do so.
