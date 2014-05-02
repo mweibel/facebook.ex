@@ -1,7 +1,7 @@
 Expm.Package.new(
 	name: "facebook",
 	description: "Facebook Graph API Wrapper",
-	version: "0.0.3",
+	version: "0.1.0",
 	licenses: [[name: "MIT"]],
 	keywords: ["facebook", "graph", "oauth", "api"],
 	maintainers: [[name: "Michael Weibel", email: "michael.weibel@gmail.com"]],
