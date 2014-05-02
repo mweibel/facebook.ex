@@ -7,10 +7,10 @@ Please note, this is very much a work in progress. Feel free to contribute using
 
 ### mix.exs
 
-* Clone repo  
-* `Run mix deps.get`  
-* To give it a try, run `iex -S mix`  
-  
+* Clone repo
+* `Run mix deps.get`
+* To give it a try, run `iex -S mix`
+
 ```
 {:facebook,"0.0.4",[github: "mweibel/facebook.ex"]}
 ```
@@ -24,8 +24,11 @@ Visit [hex.pm/packages/facebook](https://hex.pm/packages/facebook) or
 Basic user infos of the logged in user (specified by the access_token). /1 takes either a list or string.
 
 ### Facebook.myLikes(access_token, options \\ []) -> {:json, data}
-Likes of the currently logged in user (specified by the access_token)  
-  
+Likes of the currently logged in user (specified by the access_token)
+
+### Facebook.permissions(user_id, access_token, options \\ []) -> {:json, data}
+Retrieves a list of granted permissions the user has given for this application.
+
 ### Facebook.set_appsecret(appsecret) -> {:ok}
 [Facebook recommends securing requests using an appsecret proof.](https://developers.facebook.com/docs/graph-api/securing-requests)
 Set the appsecret if you would like to do so.

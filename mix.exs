@@ -4,12 +4,14 @@ defmodule Facebook.Mixfile do
 	use Mix.Project
 
 	def project do
-		[ app: :facebook,
+		[
+			app: :facebook,
 			version: "0.0.4",
 			elixir: "~> 0.12.4 or ~> 0.13.0",
 			description: description,
 			package: package,
-			deps: deps ]
+			deps: deps
+		]
 	end
 
 	# Configuration for the OTP application
@@ -17,9 +19,11 @@ defmodule Facebook.Mixfile do
 		[
 			mod: { Facebook, [] },
 			applications: [:json, :exlager, :hackney],
-      env: [env: :dev,
-      	graph_url: "https://graph.facebook.com/v2.0",
-				appsecret: nil]
+			env: [
+				env: :dev,
+				graph_url: "https://graph.facebook.com/v2.0",
+				appsecret: nil
+			]
 		]
 	end
 
@@ -35,6 +39,10 @@ defmodule Facebook.Mixfile do
 			licenses: ["MIT"],
 			links: [
 				{"GitHub", "https://github.com/mweibel/facebook.ex"}
+			],
+			contributors: [
+				"Michael Weibel",
+				"Garrett Amini"
 			]
 		]
 	end
