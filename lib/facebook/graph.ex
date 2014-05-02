@@ -1,11 +1,11 @@
 defmodule Facebook.Graph do
 	require Lager
 
+	alias Facebook.Config
+
 	@moduledoc """
 	HTTP Wrapper for the Graph API using hackney.
 	"""
-
-	@graph_url <<"https://graph.facebook.com">>
 
 	@doc """
 	Start the API
@@ -44,7 +44,7 @@ defmodule Facebook.Graph do
 	"""
 	@spec get(path, params, options) :: response
 	def get(path, params, options) do
-		url = :hackney_url.make_url(@graph_url, path, params)
+		url = :hackney_url.make_url(Config.graph_url, path, params)
 		request(:get, url, options)
 	end
 
