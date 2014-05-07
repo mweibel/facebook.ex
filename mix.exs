@@ -59,7 +59,7 @@ defmodule Facebook.Mixfile do
 			# an override is required here.
 			{:hackney_lib, ">= 0.2.5", [github: "benoitc/hackney_lib", override: true]},
 			{:hackney, "~> 0.12.1", [github: "benoitc/hackney"]},
-			{:exlager, "~> 0.2.1"},
+			{:exlager, "~> 0.2.1", github: "khia/exlager"},
 			{:libex_config, "~> 0.1.0"}
 		]
 	end
