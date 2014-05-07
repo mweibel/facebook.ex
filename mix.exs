@@ -54,7 +54,7 @@ defmodule Facebook.Mixfile do
 	# { :barbat, "~> 0.1", github: "elixir-lang/barbat" }
 	defp deps do
 		[
-			{:json, "~> 0.2.8"},
+			{:json, "~> 0.2.8", github: "cblage/elixir-json"},
 			# Until hackney updates it's dependency on hackney_lib
 			# an override is required here.
 			{:hackney_lib, ">= 0.2.5", [github: "benoitc/hackney_lib", override: true]},
