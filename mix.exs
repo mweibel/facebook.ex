@@ -7,7 +7,7 @@ defmodule Facebook.Mixfile do
 		[
 			app: :facebook,
 			version: "0.1.0",
-			elixir: "~> 0.12.4 or ~> 0.13.0",
+			elixir: "~> 0.13.0",
 			description: description,
 			package: package,
 			deps: deps
@@ -54,13 +54,13 @@ defmodule Facebook.Mixfile do
 	# { :barbat, "~> 0.1", github: "elixir-lang/barbat" }
 	defp deps do
 		[
-			{:json, "~> 0.2.8", [github: "cblage/elixir-json"]},
+			{:json, "~> 0.2.8"},
 			# Until hackney updates it's dependency on hackney_lib
 			# an override is required here.
 			{:hackney_lib, ">= 0.2.5", [github: "benoitc/hackney_lib", override: true]},
 			{:hackney, "~> 0.12.1", [github: "benoitc/hackney"]},
-			{:exlager, "~> 0.2.1", github: "khia/exlager"},
-			{:libex_config, "~> 0.1.0", github: "reset/libex-config"}
+			{:exlager, "~> 0.2.1"},
+			{:libex_config, "~> 0.1.0"}
 		]
 	end
 end
