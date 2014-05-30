@@ -4,3 +4,4 @@ erl_crash.dump
 *.ez
 log
 mix.lock
+.exenv-version
