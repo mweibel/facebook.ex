@@ -1,3 +1,5 @@
+Code.ensure_compiled(Lager)
+
 defmodule Facebook.Graph do
 	require Lager
 
