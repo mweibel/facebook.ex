@@ -6,7 +6,7 @@ defmodule Facebook.Mixfile do
 	def project do
 		[
 			app: :facebook,
-			version: "0.1.3",
+			version: "0.1.4",
 			elixir: "~> 0.14.1",
 			description: description,
 			package: package,
