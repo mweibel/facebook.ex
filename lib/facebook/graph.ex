@@ -58,7 +58,7 @@ defmodule Facebook.Graph do
 	@spec request(method, url, payload, options) :: response
 	defp request(method, url, payload, options) do
 		headers = []
-		Lager.debug(~"[#{method}] #{url} #{inspect headers} #{inspect payload}")
+		Lager.debug(~s"[#{method}] #{url} #{inspect headers} #{inspect payload}")
 		case :hackney.request(method, url, headers, payload, options) do
 			{:ok, _status_code, _headers, client_ref} ->
 				{:ok, body} = :hackney.body(client_ref)
