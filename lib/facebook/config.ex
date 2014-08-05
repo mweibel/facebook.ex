@@ -12,5 +12,4 @@ defmodule Facebook.Config do
     "appsecrettokenhere"
   """
   defkey :appsecret
-
 end
