@@ -7,7 +7,7 @@ defmodule Facebook.Mixfile do
 		[
 			app: :facebook,
 			version: "0.1.5",
-			elixir: "~> 0.14.1",
+			elixir: "~> 0.15.0",
 			description: description,
 			package: package,
 			deps: deps
@@ -18,7 +18,7 @@ defmodule Facebook.Mixfile do
 	def application do
 		[
 			mod: { Facebook, [] },
-			applications: [:json, :exlager, :hackney],
+			applications: [:json, :hackney],
 			env: [
 				env: :dev,
 				graph_url: "https://graph.facebook.com/v2.0",
@@ -55,11 +55,7 @@ defmodule Facebook.Mixfile do
 	defp deps do
 		[
 			{:json, ">= 0.2.8", github: "cblage/elixir-json"},
-			# Until hackney updates it's dependency on hackney_lib
-			# an override is required here.
-			{:hackney_lib, ">= 0.3.0", [github: "benoitc/hackney_lib", override: true]},
-			{:hackney, ">= 0.12.1", [github: "benoitc/hackney"]},
-			{:exlager, github: "khia/exlager"},
+			{:hackney, "~> 0.13.1"},
 			{:libex_config, ">= 0.1.0"}
 		]
 	end

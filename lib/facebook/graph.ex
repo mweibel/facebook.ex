@@ -1,7 +1,5 @@
-Code.ensure_compiled(Lager)
-
 defmodule Facebook.Graph do
-	require Lager
+	require Logger
 
 	alias Facebook.Config
 
@@ -58,11 +56,11 @@ defmodule Facebook.Graph do
 	@spec request(method, url, payload, options) :: response
 	defp request(method, url, payload, options) do
 		headers = []
-		Lager.info(~s"[#{method}] #{url} #{inspect headers} #{inspect payload}")
+		Logger.info("[#{method}] #{url} #{inspect headers} #{inspect payload}")
 		case :hackney.request(method, url, headers, payload, options) do
 			{:ok, _status_code, _headers, client_ref} ->
 				{:ok, body} = :hackney.body(client_ref)
-				Lager.info(~s"body: #{body}")
+				Logger.info("body: #{body}")
 				case JSON.decode(body) do
 					{:ok, data} ->
 						{:json, data}
@@ -70,7 +68,7 @@ defmodule Facebook.Graph do
 						{:body, body}
 				end
 			error ->
-				Lager.error(~s"error: #{error}")
+				Logger.error("error: #{error}")
 				error
 		end
 	end
