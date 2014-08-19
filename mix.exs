@@ -54,7 +54,7 @@ defmodule Facebook.Mixfile do
 	# { :barbat, "~> 0.1", github: "elixir-lang/barbat" }
 	defp deps do
 		[
-			{:json, ">= 0.2.8", github: "cblage/elixir-json"},
+			{:json, ">= 0.3.0"},
 			{:hackney, "~> 0.13.1"},
 			{:libex_config, ">= 0.1.0"}
 		]
