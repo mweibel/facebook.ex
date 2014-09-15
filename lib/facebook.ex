@@ -59,7 +59,7 @@ defmodule Facebook do
 	"""
 	@spec me(fields, access_token, options) :: response
 	def me(fields, access_token, options) do
-		if !nil?(Config.appsecret) do
+		if !is_nil(Config.appsecret) do
 			fields = fields ++ [appsecret_token: encrypt(access_token)]
 		end
 
@@ -84,7 +84,7 @@ defmodule Facebook do
 	@spec myLikes(access_token, options) :: response
 	def myLikes(access_token, options) do
 		fields = [access_token: access_token]
-		if !nil?(Config.appsecret) do
+		if !is_nil(Config.appsecret) do
 			fields = fields ++ [appsecret_token: encrypt(access_token)]
 		end
 		Facebook.Graph.get("/me/likes", fields, options)
@@ -108,7 +108,7 @@ defmodule Facebook do
 	@spec permissions(user_id :: integer | String.t, access_token, options) :: response
 	def permissions(user_id, access_token, options) do
 		fields = [access_token: access_token]
-		if !nil?(Config.appsecret) do
+		if !is_nil(Config.appsecret) do
 			fields = fields ++ [appsecret_token: encrypt(access_token)]
 		end
 		Facebook.Graph.get(~s(/#{user_id}/permissions), fields, options)
