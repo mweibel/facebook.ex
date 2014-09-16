@@ -37,9 +37,9 @@ defmodule Facebook.Mixfile do
 	defp package do
 		[
 			licenses: ["MIT"],
-			links: [
-				{"GitHub", "https://github.com/mweibel/facebook.ex"}
-			],
+			links: %{
+				"GitHub" => "https://github.com/mweibel/facebook.ex"
+			},
 			contributors: [
 				"Michael Weibel",
 				"Garrett Amini"
