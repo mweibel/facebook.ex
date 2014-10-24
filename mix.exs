@@ -55,7 +55,7 @@ defmodule Facebook.Mixfile do
 	defp deps do
 		[
 			{:json, ">= 0.3.0"},
-			{:hackney, "~> 0.13.1"},
+			{:hackney, "~> 0.14.1"},
 			{:libex_config, ">= 0.1.0"}
 		]
 	end
