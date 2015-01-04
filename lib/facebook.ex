@@ -60,7 +60,7 @@ defmodule Facebook do
 	@spec me(fields, access_token, options) :: response
 	def me(fields, access_token, options) do
 		if !is_nil(Config.appsecret) do
-			fields = fields ++ [appsecret_token: encrypt(access_token)]
+			fields = fields ++ [appsecret_proof: encrypt(access_token)]
 		end
 
 		Facebook.Graph.get("/me", fields ++ [access_token: access_token], options)
@@ -85,7 +85,7 @@ defmodule Facebook do
 	def myLikes(access_token, options) do
 		fields = [access_token: access_token]
 		if !is_nil(Config.appsecret) do
-			fields = fields ++ [appsecret_token: encrypt(access_token)]
+			fields = fields ++ [appsecret_proof: encrypt(access_token)]
 		end
 		Facebook.Graph.get("/me/likes", fields, options)
 	end
@@ -109,12 +109,12 @@ defmodule Facebook do
 	def permissions(user_id, access_token, options) do
 		fields = [access_token: access_token]
 		if !is_nil(Config.appsecret) do
-			fields = fields ++ [appsecret_token: encrypt(access_token)]
+			fields = fields ++ [appsecret_proof: encrypt(access_token)]
 		end
 		Facebook.Graph.get(~s(/#{user_id}/permissions), fields, options)
 	end
 
 	defp encrypt(token) do
-		:crypto.hmac(:sha256, Config.appsecret, token)
+		:hmac.hexlify(:crypto.hmac(:sha256, Config.appsecret, token), [:string, :lower])
 	end
 end

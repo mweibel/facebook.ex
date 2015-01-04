@@ -6,7 +6,7 @@ defmodule Facebook.Mixfile do
 	def project do
 		[
 			app: :facebook,
-			version: "0.2.1",
+			version: "0.2.2",
 			elixir: "~> 1.0.0",
 			description: description,
 			package: package,
@@ -56,7 +56,8 @@ defmodule Facebook.Mixfile do
 		[
 			{:json, ">= 0.3.0"},
 			{:hackney, "~> 0.14.1"},
-			{:libex_config, ">= 0.1.0"}
+			{:libex_config, ">= 0.1.0"},
+			{:erlsha2, github: "vinoski/erlsha2", tag: "2.1"}
 		]
 	end
 end
