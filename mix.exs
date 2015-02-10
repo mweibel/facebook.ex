@@ -55,7 +55,7 @@ defmodule Facebook.Mixfile do
 	defp deps do
 		[
 			{:json, ">= 0.3.0"},
-			{:hackney, "~> 0.14.1"},
+			{:hackney, "~> 1.0"},
 			{:libex_config, ">= 0.1.0"},
 			{:erlsha2, github: "vinoski/erlsha2", tag: "2.1"}
 		]
