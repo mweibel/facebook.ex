@@ -5,3 +5,4 @@ erl_crash.dump
 log
 mix.lock
 .exenv-version
+doc
