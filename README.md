@@ -15,20 +15,9 @@ Please note, this is very much a work in progress. Feel free to contribute using
 {:facebook,"0.1.0",[github: "mweibel/facebook.ex"]}
 ```
 
-Visit [hex.pm/packages/facebook](https://hex.pm/packages/facebook) or
-[expm.co/facebook](http://expm.co/facebook) for package manager infos.
+Visit [hex.pm/packages/facebook](https://hex.pm/packages/facebook) for more infos.
 
 ## API
 
-### Facebook.me([fields: "yourfields"], "access_token", options \\ []) -> {:json, data}
-Basic user infos of the logged in user (specified by the access_token). /1 takes either a list or string.
+See [API Documentation for facebook.ex](http://hexdocs.pm/facebook/).
 
-### Facebook.myLikes(access_token, options \\ []) -> {:json, data}
-Likes of the currently logged in user (specified by the access_token)
-
-### Facebook.permissions(user_id, access_token, options \\ []) -> {:json, data}
-Retrieves a list of granted permissions the user has given for this application.
-
-### Facebook.set_appsecret(appsecret) -> {:ok}
-[Facebook recommends securing requests using an appsecret proof.](https://developers.facebook.com/docs/graph-api/securing-requests)
-Set the appsecret if you would like to do so.
