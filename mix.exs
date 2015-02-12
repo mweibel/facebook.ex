@@ -6,8 +6,8 @@ defmodule Facebook.Mixfile do
 	def project do
 		[
 			app: :facebook,
-			version: "0.2.3",
-			elixir: "~> 1.0.0",
+			version: "0.2.4",
+			elixir: "~> 1.0",
 			description: description,
 			package: package,
 			deps: deps,
@@ -43,7 +43,8 @@ defmodule Facebook.Mixfile do
 			},
 			contributors: [
 				"Michael Weibel",
-				"Garrett Amini"
+				"Garrett Amini",
+				"Jamie Winsor"
 			]
 		]
 	end
@@ -56,7 +57,7 @@ defmodule Facebook.Mixfile do
 	defp deps do
 		[
 			{:json, ">= 0.3.0"},
-			{:hackney, "~> 1.0.0"},
+			{:hackney, "~> 1.0"},
 			{:libex_config, ">= 0.1.0"},
 			{:erlsha2, github: "vinoski/erlsha2", tag: "2.1"},
 			{:earmark, "~> 0.1", only: :dev},
