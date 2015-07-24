@@ -56,11 +56,15 @@ defmodule Facebook.Graph do
 	@spec request(method, url, payload, options) :: response
 	defp request(method, url, payload, options) do
 		headers = []
-		Logger.info("[#{method}] #{url} #{inspect headers} #{inspect payload}")
+		Logger.info fn ->
+			"[#{method}] #{url} #{inspect headers} #{inspect payload}"
+		end
 		case :hackney.request(method, url, headers, payload, options) do
 			{:ok, _status_code, _headers, client_ref} ->
 				{:ok, body} = :hackney.body(client_ref)
-				Logger.info("body: #{body}")
+				Logger.info fn ->
+					"body: #{inspect body}"
+				end
 				case JSON.decode(body) do
 					{:ok, data} ->
 						{:json, data}
@@ -68,7 +72,9 @@ defmodule Facebook.Graph do
 						{:body, body}
 				end
 			error ->
-				Logger.error("error: #{error}")
+				Logger.error fn ->
+					"error: #{inspect error}"
+				end
 				error
 		end
 	end
