@@ -114,6 +114,43 @@ defmodule Facebook do
 		Facebook.Graph.get(~s(/#{user_id}/permissions), fields, options)
 	end
 
+	@doc """
+	Get the number of likes for the provided page_id
+	"""
+	@spec pageLikes(page_id :: integer | String.t, access_token) :: integer
+	def pageLikes(page_id, access_token) do
+		{:json, %{"likes" => likes}} = page(page_id, access_token, ["likes"], [])
+		likes
+	end
+
+	@doc """
+	Basic page information for the provided page_id
+
+	See: https://developers.facebook.com/docs/graph-api/reference/page
+	"""
+	@spec page(page_id :: integer | String.t) :: response
+	def page(page_id) do
+		page(page_id, nil, [], [])
+	end
+
+	@spec page(page_id :: integer | String.t, access_token) :: response
+	def page(page_id, access_token) do
+		page(page_id, access_token, [], [])
+	end
+
+	@spec page(page_id :: integer | String.t, access_token, fields, options) :: response
+	def page(page_id, access_token, fields, options) do
+		params = [fields: fields]
+		if !is_nil(access_token) do
+			params = params ++ [access_token: access_token]
+			if !is_nil(Config.appsecret) do
+				params = params ++ [appsecret_proof: encrypt(access_token)]
+			end
+		end
+		Facebook.Graph.get(~s(/#{page_id}), params, options)
+	end
+
+
 	defp encrypt(token) do
 		:hmac.hexlify(:crypto.hmac(:sha256, Config.appsecret, token), [:string, :lower])
 	end
