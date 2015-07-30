@@ -19,7 +19,7 @@ defmodule Facebook.Mixfile do
 	def application do
 		[
 			mod: { Facebook, [] },
-			applications: [:json, :hackney],
+			applications: [:json, :hackney, :logger],
 			env: [
 				env: :dev,
 				graph_url: "https://graph.facebook.com/v2.0",
@@ -44,7 +44,8 @@ defmodule Facebook.Mixfile do
 			contributors: [
 				"Michael Weibel",
 				"Garrett Amini",
-				"Jamie Winsor"
+				"Jamie Winsor",
+				"Adam Solove"
 			]
 		]
 	end
