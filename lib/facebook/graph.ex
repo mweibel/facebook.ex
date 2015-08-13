@@ -12,7 +12,7 @@ defmodule Facebook.Graph do
 	"""
 	@spec start_link :: :ok
 	def start_link do
-		:ok
+		:ignore
 	end
 
 	@type path :: String.t

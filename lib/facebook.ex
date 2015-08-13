@@ -1,4 +1,7 @@
 defmodule Facebook do
+	use Application
+	use Supervisor
+
 	@moduledoc """
 	Provides API wrappers for the Facebook Graph API
 
@@ -9,7 +12,20 @@ defmodule Facebook do
 
 	@doc "Start hook"
 	def start(_type, _args) do
-		{:ok, self}
+		start_link([])
+	end
+
+	@doc "Supervisor start"
+	def start_link do
+		Supervisor.start_link(__MODULE__, [])
+	end
+
+	def init(_) do
+		children = [
+			worker(Facebook.Graph, [])
+		]
+
+		supervise(children, strategy: :one_for_one)
 	end
 
 	@type fields :: list
