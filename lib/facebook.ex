@@ -16,7 +16,7 @@ defmodule Facebook do
 	end
 
 	@doc "Supervisor start"
-	def start_link do
+	def start_link(_) do
 		Supervisor.start_link(__MODULE__, [])
 	end
 
