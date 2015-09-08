@@ -12,7 +12,7 @@ Please note, this is very much a work in progress. Feel free to contribute using
 * To give it a try, run `iex -S mix`
 
 ```
-{:facebook,"0.3.0",[github: "mweibel/facebook.ex"]}
+{:facebook,"0.4.0",[github: "mweibel/facebook.ex"]}
 ```
 
 Visit [hex.pm/packages/facebook](https://hex.pm/packages/facebook) for more infos.
