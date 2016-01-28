@@ -42,7 +42,8 @@ defmodule Facebook.Mixfile do
         "GitHub" => "https://github.com/mweibel/facebook.ex"
       },
       maintainers: [
-        "Michael Weibel"
+        "mweibel",
+        "hectorip"
       ]
     ]
   end
