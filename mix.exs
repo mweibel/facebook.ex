@@ -41,11 +41,8 @@ defmodule Facebook.Mixfile do
       links: %{
         "GitHub" => "https://github.com/mweibel/facebook.ex"
       },
-      contributors: [
-        "Michael Weibel",
-        "Garrett Amini",
-        "Jamie Winsor",
-        "Adam Solove"
+      maintainers: [
+        "Michael Weibel"
       ]
     ]
   end
