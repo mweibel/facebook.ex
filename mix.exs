@@ -58,7 +58,6 @@ defmodule Facebook.Mixfile do
       {:json, ">= 0.3.3"},
       {:hackney, "~> 1.0"},
       {:libex_config, ">= 0.1.0"},
-      {:erlsha2, github: "vinoski/erlsha2", tag: "2.1"},
       {:earmark, "~> 0.1", only: :dev},
       {:ex_doc, "~> 0.6", only: :dev}
     ]

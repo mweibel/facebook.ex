@@ -165,6 +165,7 @@ defmodule Facebook do
 
 
   defp encrypt(token) do
-    :hmac.hexlify(:crypto.hmac(:sha256, Config.appsecret, token), [:string, :lower])
+    :crypto.hmac(:sha256, Config.appsecret, token)
+    |> Base.encode16(case: :lower)
   end
 end
