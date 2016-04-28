@@ -83,6 +83,22 @@ defmodule Facebook do
   end
 
   @doc """
+  A Picture for a Facebook User
+
+  See: https://developers.facebook.com/docs/graph-api/reference/user/picture/
+  """
+  @spec picture(user_id :: String.t, type :: String.t, access_token, options) :: response
+  def picture(user_id, type, access_token, options \\ []) do
+    fields = [type: type, redirect: false, access_token: access_token]
+
+    if !is_nil(Config.appsecret) do
+      fields = fields ++ [appsecret_proof: encrypt(access_token)]
+    end
+
+    Facebook.Graph.get("/#{user_id}/picture", fields, options)
+  end
+
+  @doc """
   Likes of the currently logged in user (specified by the access_token)
 
   See: https://developers.facebook.com/docs/graph-api/reference/user/likes
