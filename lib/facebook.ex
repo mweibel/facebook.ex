@@ -179,6 +179,39 @@ defmodule Facebook do
     Facebook.Graph.get(~s(/#{page_id}), params, options)
   end
 
+  @doc """
+  Feed of posts for the provided page_id.
+  The maximum posts returned is 25, which is the facebook's default.
+
+  ## Example
+      iex> Facebook.pageFeed("CocaColaMx", "<Your Token>")
+
+  See: https://developers.facebook.com/docs/graph-api/reference/page/feed
+  """
+  def pageFeed(page_id, access_token) do
+    pageFeed(page_id, access_token, 25)
+  end
+
+  @doc """
+  Get the feed of posts (including status updates) and links published by others
+  or the page specified in page_id.
+
+  A limit of posts may be given. The maximim number that must be provided, is
+  100.
+
+  ## Example
+      iex> Facebook.pageFeed("CocaColaMx", "<Your Token>", 55)
+
+  See: https://developers.facebook.com/docs/graph-api/reference/page/feed
+  """
+  def pageFeed(page_id, access_token, limit) when limit <= 100 do
+    params = [access_token: access_token, limit: limit]
+    if !is_nil(Config.appsecret) do
+      params = params ++ [appsecret_proof: encrypt(access_token)]
+    end
+
+    Facebook.Graph.get(~s(/#{page_id}/feed), params)
+  end
 
   defp encrypt(token) do
     :crypto.hmac(:sha256, Config.appsecret, token)
