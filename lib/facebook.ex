@@ -228,8 +228,8 @@ defmodule Facebook do
   def objectCount(:likes, object_id, access_token) do
     :likes
       |> Atom.to_string
-      |> _objectSummary(object_id, access_token)
-      |> _summaryCount
+      |> objectSummary(object_id, access_token)
+      |> summaryCount
   end
 
   @doc """
@@ -245,8 +245,8 @@ defmodule Facebook do
   def objectCount(:comments, object_id, access_token) do
     :comments
       |> Atom.to_string
-      |> _objectSummary(object_id, access_token)
-      |> _summaryCount
+      |> objectSummary(object_id, access_token)
+      |> summaryCount
   end
 
   """
