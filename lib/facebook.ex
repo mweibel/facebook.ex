@@ -220,28 +220,6 @@ defmodule Facebook do
   If you want to get the likes of a page, please see *pageLikes*.
 
   ## Example
-      iex> Facebook.objectLikes("1326382730725053_1326476257382367", "<Token>")
-      2
-
-  See: developers.facebook.com/docs/graph-api/reference/object/likes
-  """
-  def objectLikes(object_id, access_token) do
-    likes_count = fn
-      {:json, %{"error" => error}} -> %{:error => error}
-      {:json, info_map} ->
-        info_map
-          |> Map.fetch!("summary")
-          |> Map.fetch!("total_count")
-    end
-  end
-
-  @doc """
-  Gets the total number of people who liked an object.
-  An *object* stands for: post, comment, link, status update, photo.
-
-  If you want to get the likes of a page, please see *pageLikes*.
-
-  ## Example
       iex> Facebook.objectCount(:likes, "1326382730725053_1326476257382367", "<Token>")
       2
 
