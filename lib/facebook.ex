@@ -226,8 +226,7 @@ defmodule Facebook do
   See: https://developers.facebook.com/docs/graph-api/reference/object/likes
   """
   def objectCount(:likes, object_id, access_token) do
-    :likes
-      |> Atom.to_string
+    "likes"
       |> objectSummary(object_id, access_token)
       |> summaryCount
   end
@@ -243,8 +242,7 @@ defmodule Facebook do
   See: https://developers.facebook.com/docs/graph-api/reference/object/comments
   """
   def objectCount(:comments, object_id, access_token) do
-    :comments
-      |> Atom.to_string
+    "comments"
       |> objectSummary(object_id, access_token)
       |> summaryCount
   end
