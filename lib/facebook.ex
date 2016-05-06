@@ -233,16 +233,78 @@ defmodule Facebook do
           |> Map.fetch!("summary")
           |> Map.fetch!("total_count")
     end
-
-    params = [access_token: access_token, summary: true]
-    if !is_nil(Config.appsecret) do
-      params = params ++ [appsecret_proof: encrypt(access_token)]
-    end
-
-    Facebook.Graph.get(~s(/#{object_id}/likes), params)
-      |> likes_count.()
-
   end
+
+  @doc """
+  Gets the total number of people who liked an object.
+  An *object* stands for: post, comment, link, status update, photo.
+
+  If you want to get the likes of a page, please see *pageLikes*.
+
+  ## Example
+      iex> Facebook.objectCount(:likes, "1326382730725053_1326476257382367", "<Token>")
+      2
+
+  See: https://developers.facebook.com/docs/graph-api/reference/object/likes
+  """
+  def objectCount(:likes, object_id, access_token) do
+    :likes
+      |> Atom.to_string
+      |> _objectSummary(object_id, access_token)
+      |> _summaryCount
+  end
+
+  @doc """
+  Gets the total number of people who commented an object.
+  An *object* stands for: post, comment, link, status update, photo.
+
+  ## Example
+      iex> Facebook.objectCount(:comments, "1326382730725053_1326476257382367", "<Token>")
+      2
+
+  See: https://developers.facebook.com/docs/graph-api/reference/object/comments
+  """
+  def objectCount(:comments, object_id, access_token) do
+    :comments
+      |> Atom.to_string
+      |> _objectSummary(object_id, access_token)
+      |> _summaryCount
+  end
+
+  """
+  Provides the summary of a GET request when the 'summary' query parameter is
+  set to true.
+
+  ## Example
+      iex> _objectSummary("comments", "1326382730725053_1326476257382367", "<Token>")
+      %{"total_count" => 47}
+  """
+  defp _objectSummary(scope, object_id, access_token) do
+      summary = fn
+        {:json, %{"error" => error}} -> %{:error => error}
+        {:json, info_map} ->
+          info_map
+            |> Map.fetch!("summary")
+      end
+
+      params = [access_token: access_token, summary: true]
+      if !is_nil(Config.appsecret) do
+        params = params ++ [appsecret_proof: encrypt(access_token)]
+      end
+
+      Facebook.Graph.get(~s(/#{object_id}/#{scope}), params)
+        |> summary.()
+  end
+
+  """
+  Gets the 'total_count' attribute from a summary request.
+  """
+  defp _summaryCount(%{"total_count" => count}), do: count
+
+  """
+  Returns a error if the summary requests failed.
+  """
+  defp _summaryCount(%{"error" => error}), do: error
 
   defp encrypt(token) do
     :crypto.hmac(:sha256, Config.appsecret, token)
