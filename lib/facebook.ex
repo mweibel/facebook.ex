@@ -257,7 +257,7 @@ defmodule Facebook do
       iex> _objectSummary("comments", "1326382730725053_1326476257382367", "<Token>")
       %{"total_count" => 47}
   """
-  defp _objectSummary(scope, object_id, access_token) do
+  defp objectSummary(scope, object_id, access_token) do
       summary = fn
         {:json, %{"error" => error}} -> %{:error => error}
         {:json, info_map} ->
@@ -277,12 +277,12 @@ defmodule Facebook do
   """
   Gets the 'total_count' attribute from a summary request.
   """
-  defp _summaryCount(%{"total_count" => count}), do: count
+  defp summaryCount(%{"total_count" => count}), do: count
 
   """
   Returns a error if the summary requests failed.
   """
-  defp _summaryCount(%{"error" => error}), do: error
+  defp summaryCount(%{"error" => error}), do: error
 
   defp encrypt(token) do
     :crypto.hmac(:sha256, Config.appsecret, token)
