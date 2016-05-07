@@ -252,7 +252,7 @@ defmodule Facebook do
   set to true.
 
   ## Example
-      iex> _objectSummary("comments", "1326382730725053_1326476257382367", "<Token>")
+      iex> objectSummary("comments", "1326382730725053_1326476257382367", "<Token>")
       %{"total_count" => 47}
   """
   defp objectSummary(scope, object_id, access_token) do
@@ -282,6 +282,9 @@ defmodule Facebook do
   """
   defp summaryCount(%{"error" => error}), do: error
 
+  """
+  'Encrypts' the token together with the app secret according to the guidelines of facebook.
+  """
   defp encrypt(token) do
     :crypto.hmac(:sha256, Config.appsecret, token)
     |> Base.encode16(case: :lower)
