@@ -7,7 +7,7 @@ defmodule Facebook.Mixfile do
     [
       app: :facebook,
       version: "0.7.0",
-      elixir: "~> 1.0",
+      elixir: "=> 1.0",
       description: description,
       package: package,
       deps: deps,
@@ -22,7 +22,7 @@ defmodule Facebook.Mixfile do
       applications: [:json, :hackney, :logger],
       env: [
         env: :dev,
-        graph_url: "https://graph.facebook.com/v2.0",
+        graph_url: "https://graph.facebook.com/v2.6",
         appsecret: nil
       ]
     ]
@@ -42,8 +42,7 @@ defmodule Facebook.Mixfile do
         "GitHub" => "https://github.com/mweibel/facebook.ex"
       },
       maintainers: [
-        "mweibel",
-        "hectorip"
+        "mweibel"
       ]
     ]
   end
