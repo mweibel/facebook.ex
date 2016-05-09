@@ -234,7 +234,8 @@ defmodule Facebook do
   """
   def objectCount(:likes, object_id, access_token) do
     "likes"
-      |> objectSummary(object_id, access_token)
+      |> getScopeData(object_id, access_token)
+      |> getSummary
       |> summaryCount
   end
 
@@ -250,33 +251,76 @@ defmodule Facebook do
   """
   def objectCount(:comments, object_id, access_token) do
     "comments"
-      |> objectSummary(object_id, access_token)
+      |> getScopeData(object_id, access_token)
+      |> getSummary
       |> summaryCount
+  end
+
+  @doc """
+  Gets the number of reactions that an object has.
+
+  Expected type of reactions:
+    * :haha
+    * :wow
+    * :thankful
+    * :wow
+    * :angry
+    * :love
+    * :none
+
+  ## Examples
+      iex> Facebook.objectCount(:reaction, :wow, "769860109692136_1173416799336463", "<Token>")
+      2
+      iex> Facebook.objectCount(:reaction, :haha, "769860109692136_1173416799336463", "<Token>")
+      12
+      iex> Facebook.objectCount(:reaction, :thankful, "769860109692136_1173416799336463", "<Token>")
+      33
+  """
+  def objectCount(:reaction, react_type, object_id, access_token)  when is_atom(react_type) do
+    type = react_type
+      |> Atom.to_string
+      |> String.upcase
+
+    params = [access_token: access_token, type: type, summary: "total_count"]
+    if !is_nil(Config.appsecret) do
+      params = params ++ [appsecret_proof: encrypt(access_token)]
+    end
+
+    Facebook.Graph.get(~s(/#{object_id}/reactions), params)
+      |> getSummary
+      |> summaryCount
+  end
+
+  """
+  Gets information related to the scope sent as argument.
+
+  Expected scopes:
+    * likes
+    * comments
+
+  See: https://developers.facebook.com/docs/graph-api/reference/object/comments
+  See: https://developers.facebook.com/docs/graph-api/reference/object/likes
+  """
+  defp getScopeData(scope, object_id, access_token) do
+    params = [access_token: access_token, summary: true]
+    if !is_nil(Config.appsecret) do
+      params = params ++ [appsecret_proof: encrypt(access_token)]
+    end
+
+    Facebook.Graph.get(~s(/#{object_id}/#{scope}), params)
   end
 
   """
   Provides the summary of a GET request when the 'summary' query parameter is
   set to true.
-
-  ## Example
-      iex> objectSummary("comments", "1326382730725053_1326476257382367", "<Token>")
-      %{"total_count" => 47}
   """
-  defp objectSummary(scope, object_id, access_token) do
-      summary = fn
-        {:json, %{"error" => error}} -> %{:error => error}
-        {:json, info_map} ->
-          info_map
-            |> Map.fetch!("summary")
-      end
-
-      params = [access_token: access_token, summary: true]
-      if !is_nil(Config.appsecret) do
-        params = params ++ [appsecret_proof: encrypt(access_token)]
-      end
-
-      Facebook.Graph.get(~s(/#{object_id}/#{scope}), params)
-        |> summary.()
+  defp getSummary(summary_response) do
+    case summary_response do
+      {:json, %{"error" => error}} -> %{"error" => error}
+      {:json, info_map} ->
+        info_map
+          |> Map.fetch!("summary")
+    end
   end
 
   """
@@ -287,7 +331,7 @@ defmodule Facebook do
   """
   Returns an error if the summary request fails.
   """
-  defp summaryCount(%{"error" => error}), do: error
+  defp summaryCount(%{"error" => error}), do: %{"error" => error}
 
   """
   'Encrypts' the token together with the app secret according to the guidelines of facebook.
