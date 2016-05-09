@@ -285,7 +285,7 @@ defmodule Facebook do
   defp summaryCount(%{"total_count" => count}), do: count
 
   """
-  Returns a error if the summary requests failed.
+  Returns an error if the summary request fails.
   """
   defp summaryCount(%{"error" => error}), do: error
 
