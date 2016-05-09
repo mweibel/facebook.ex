@@ -187,37 +187,52 @@ defmodule Facebook do
   end
 
   @doc """
-  Feed of posts for the provided page_id.
-  The maximum posts returned is 25, which is the facebook's default.
+  Gets the feed of posts (including status updates) and links published by this
+  page, or by others on this page.
 
-  ## Example
-      iex> Facebook.pageFeed("CocaColaMx", "<Your Token>")
+  This function can retrieve the four types:
+    * feed
+    * posts
+    * promotable posts (*Admin permission needed*)
+    * tagged posts
+
+  A scope must be provided. It is a string, which represents the type of feed.
+
+  *A limit of posts may be given. The maximum number that must be provided is
+  100.*
+
+  ## Examples
+      iex> Facebook.pageFeed(:posts, "CocaColaMx", "<Your Token>")
+      iex> Facebook.pageFeed(:tagged, "CocaColaMx", "<Your Token>", 55)
+      iex> Facebook.pageFeed(:promotable, "CocaColaMx", "<Your Token>")
+      iex> Facebook.pageFeed(:feed, "CocaColaMx", "<Your Token>", 55, "id,name")
 
   See: https://developers.facebook.com/docs/graph-api/reference/page/feed
   """
-  def pageFeed(page_id, access_token) do
-    pageFeed(page_id, access_token, 25)
+  def pageFeed(scope, page_id, access_token, limit \\ 25, fields \\ "") do
+    case scope do
+      :feed -> feed("feed", page_id, access_token, limit, fields)
+      :posts -> feed("posts", page_id, access_token, limit, fields)
+      :promotable -> feed("promotable_posts", page_id, access_token, limit, fields)
+      :tagged -> feed("tagged", page_id, access_token, limit, fields)
+      _ -> %{"error" => %{"message" => "Unknown type of feed"}}
+    end
   end
 
-  @doc """
-  Get the feed of posts (including status updates) and links published by others
-  or the page specified in page_id.
-
-  A limit of posts may be given. The maximim number that must be provided, is
-  100.
-
-  ## Example
-      iex> Facebook.pageFeed("CocaColaMx", "<Your Token>", 55)
+  """
+  Gets the feed of posts from Facebook.
 
   See: https://developers.facebook.com/docs/graph-api/reference/page/feed
   """
-  def pageFeed(page_id, access_token, limit) when limit <= 100 do
-    params = [access_token: access_token, limit: limit]
+  defp feed(scope, page_id, access_token, limit, fields) when limit <= 100 do
+    params = [access_token: access_token, limit: limit, fields: fields]
     if !is_nil(Config.appsecret) do
       params = params ++ [appsecret_proof: encrypt(access_token)]
     end
 
-    Facebook.Graph.get(~s(/#{page_id}/feed), params)
+    {_, content} = Facebook.Graph.get(~s(/#{page_id}/#{scope}), params)
+
+    content
   end
 
   @doc """
