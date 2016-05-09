@@ -187,37 +187,37 @@ defmodule Facebook do
   end
 
   @doc """
-  Feed of posts for the provided page_id.
-  The maximum posts returned is 25, which is the facebook's default.
+  Gets the feed of posts (including status updates) and links published by this
+  page, or by others on this page.
 
-  ## Example
-      iex> Facebook.pageFeed("CocaColaMx", "<Your Token>")
+  This function can retrieve the four types:
+    * feed
+    * posts
+    * promotable posts (*Admin permission needed*)
+    * tagged posts
 
-  See: https://developers.facebook.com/docs/graph-api/reference/page/feed
-  """
-  def pageFeed(page_id, access_token) do
-    pageFeed(page_id, access_token, 25)
-  end
+  A scope must be provided. It is a string, which represents the type of feed.
 
-  @doc """
-  Get the feed of posts (including status updates) and links published by others
-  or the page specified in page_id.
+  *A limit of posts may be given. The maximum number that must be provided is
+  100.*
 
-  A limit of posts may be given. The maximim number that must be provided, is
-  100.
-
-  ## Example
-      iex> Facebook.pageFeed("CocaColaMx", "<Your Token>", 55)
+  ## Examples
+      iex> Facebook.pageFeed(:posts, "CocaColaMx", "<Your Token>")
+      iex> Facebook.pageFeed(:tagged, "CocaColaMx", "<Your Token>", 55)
+      iex> Facebook.pageFeed(:promotable_posts, "CocaColaMx", "<Your Token>")
+      iex> Facebook.pageFeed(:feed, "CocaColaMx", "<Your Token>", 55, "id,name")
 
   See: https://developers.facebook.com/docs/graph-api/reference/page/feed
   """
-  def pageFeed(page_id, access_token, limit) when limit <= 100 do
-    params = [access_token: access_token, limit: limit]
+  def pageFeed(scope, page_id, access_token, limit \\ 25, fields \\ "") when limit <= 100 do
+    params = [access_token: access_token, limit: limit, fields: fields]
     if !is_nil(Config.appsecret) do
       params = params ++ [appsecret_proof: encrypt(access_token)]
     end
 
-    Facebook.Graph.get(~s(/#{page_id}/feed), params)
+    {_, content} = Facebook.Graph.get(~s(/#{page_id}/#{scope}), params)
+
+    content
   end
 
   @doc """
@@ -285,7 +285,7 @@ defmodule Facebook do
   defp summaryCount(%{"total_count" => count}), do: count
 
   """
-  Returns a error if the summary requests failed.
+  Returns an error if the summary request fails.
   """
   defp summaryCount(%{"error" => error}), do: error
 
