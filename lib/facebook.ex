@@ -204,27 +204,12 @@ defmodule Facebook do
   ## Examples
       iex> Facebook.pageFeed(:posts, "CocaColaMx", "<Your Token>")
       iex> Facebook.pageFeed(:tagged, "CocaColaMx", "<Your Token>", 55)
-      iex> Facebook.pageFeed(:promotable, "CocaColaMx", "<Your Token>")
+      iex> Facebook.pageFeed(:promotable_posts, "CocaColaMx", "<Your Token>")
       iex> Facebook.pageFeed(:feed, "CocaColaMx", "<Your Token>", 55, "id,name")
 
   See: https://developers.facebook.com/docs/graph-api/reference/page/feed
   """
-  def pageFeed(scope, page_id, access_token, limit \\ 25, fields \\ "") do
-    case scope do
-      :feed -> feed("feed", page_id, access_token, limit, fields)
-      :posts -> feed("posts", page_id, access_token, limit, fields)
-      :promotable -> feed("promotable_posts", page_id, access_token, limit, fields)
-      :tagged -> feed("tagged", page_id, access_token, limit, fields)
-      _ -> %{"error" => %{"message" => "Unknown type of feed"}}
-    end
-  end
-
-  """
-  Gets the feed of posts from Facebook.
-
-  See: https://developers.facebook.com/docs/graph-api/reference/page/feed
-  """
-  defp feed(scope, page_id, access_token, limit, fields) when limit <= 100 do
+  def pageFeed(scope, page_id, access_token, limit \\ 25, fields \\ "") when limit <= 100 do
     params = [access_token: access_token, limit: limit, fields: fields]
     if !is_nil(Config.appsecret) do
       params = params ++ [appsecret_proof: encrypt(access_token)]
