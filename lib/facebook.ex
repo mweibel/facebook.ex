@@ -221,37 +221,36 @@ defmodule Facebook do
   end
 
   @doc """
-  Gets the total number of people who liked an object.
+  Gets the number of elements that a scope has in a given object.
+
   An *object* stands for: post, comment, link, status update, photo.
 
-  If you want to get the likes of a page, please see *pageLikes*.
+  If you want to get the likes of a page, please see *fanCount*.
+
+  Expected scopes:
+    * :likes
+    * :comments
 
   ## Example
       iex> Facebook.objectCount(:likes, "1326382730725053_1326476257382367", "<Token>")
       2
-
-  See: https://developers.facebook.com/docs/graph-api/reference/object/likes
-  """
-  def objectCount(:likes, object_id, access_token) do
-    "likes"
-      |> getScopeData(object_id, access_token)
-      |> getSummary
-      |> summaryCount
-  end
-
-  @doc """
-  Gets the total number of people who commented an object.
-  An *object* stands for: post, comment, link, status update, photo.
-
-  ## Example
       iex> Facebook.objectCount(:comments, "1326382730725053_1326476257382367", "<Token>")
       2
 
+  See: https://developers.facebook.com/docs/graph-api/reference/object/likes
   See: https://developers.facebook.com/docs/graph-api/reference/object/comments
   """
-  def objectCount(:comments, object_id, access_token) do
-    "comments"
-      |> getScopeData(object_id, access_token)
+  def objectCount(scope, object_id, access_token) when is_atom(scope) do
+    params = [access_token: access_token, summary: true]
+    if !is_nil(Config.appsecret) do
+      params = params ++ [appsecret_proof: encrypt(access_token)]
+    end
+
+    scp = scope
+      |> Atom.to_string
+      |> String.downcase
+
+    Facebook.Graph.get(~s(/#{object_id}/#{scp}), params)
       |> getSummary
       |> summaryCount
   end
@@ -263,7 +262,7 @@ defmodule Facebook do
     * :haha
     * :wow
     * :thankful
-    * :wow
+    * :sad
     * :angry
     * :love
     * :none
@@ -276,7 +275,7 @@ defmodule Facebook do
       iex> Facebook.objectCount(:reaction, :thankful, "769860109692136_1173416799336463", "<Token>")
       33
   """
-  def objectCount(:reaction, react_type, object_id, access_token)  when is_atom(react_type) do
+  def objectCount(:reaction, react_type, object_id, access_token) when is_atom(react_type) do
     type = react_type
       |> Atom.to_string
       |> String.upcase
@@ -289,25 +288,6 @@ defmodule Facebook do
     Facebook.Graph.get(~s(/#{object_id}/reactions), params)
       |> getSummary
       |> summaryCount
-  end
-
-  """
-  Gets information related to the scope sent as argument.
-
-  Expected scopes:
-    * likes
-    * comments
-
-  See: https://developers.facebook.com/docs/graph-api/reference/object/comments
-  See: https://developers.facebook.com/docs/graph-api/reference/object/likes
-  """
-  defp getScopeData(scope, object_id, access_token) do
-    params = [access_token: access_token, summary: true]
-    if !is_nil(Config.appsecret) do
-      params = params ++ [appsecret_proof: encrypt(access_token)]
-    end
-
-    Facebook.Graph.get(~s(/#{object_id}/#{scope}), params)
   end
 
   """
