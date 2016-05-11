@@ -32,6 +32,7 @@ defmodule Facebook do
   @type access_token :: String.t
   @type response :: {:json, HashDict.t} | {:body, String.t}
   @type using_appsecret :: boolean
+  @type reaction :: :reaction
 
   @doc """
   If you want to use an appsecret proof, pass it into set_appsecret:
@@ -275,6 +276,7 @@ defmodule Facebook do
       iex> Facebook.objectCount(:reaction, :thankful, "769860109692136_1173416799336463", "<Token>")
       33
   """
+  @spec objectCount(reaction, react_type :: atom, object_id :: String.t, access_token) :: number
   def objectCount(:reaction, react_type, object_id, access_token) when is_atom(react_type) do
     type = react_type
       |> Atom.to_string
