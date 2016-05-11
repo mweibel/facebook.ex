@@ -6,3 +6,4 @@ log
 mix.lock
 .exenv-version
 doc
+.DS_Store
