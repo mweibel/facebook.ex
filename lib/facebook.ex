@@ -153,6 +153,7 @@ defmodule Facebook do
 
   See: https://developers.facebook.com/docs/graph-api/reference/page/
   """
+  @spec pageLikes(page_id :: integer | String.t, access_token) :: integer
   def pageLikes(page_id, access_token) do
     fanCount(page_id, access_token)
   end
@@ -210,6 +211,7 @@ defmodule Facebook do
 
   See: https://developers.facebook.com/docs/graph-api/reference/page/feed
   """
+  @spec pageFeed(scope :: atom | String.t, page_id :: String.t, access_token, limit :: number, fields :: String.t) :: Map.t
   def pageFeed(scope, page_id, access_token, limit \\ 25, fields \\ "") when limit <= 100 do
     params = [access_token: access_token, limit: limit, fields: fields]
     if !is_nil(Config.appsecret) do
@@ -241,6 +243,7 @@ defmodule Facebook do
   See: https://developers.facebook.com/docs/graph-api/reference/object/likes
   See: https://developers.facebook.com/docs/graph-api/reference/object/comments
   """
+  @spec objectCount(scope :: atom, object_id :: String.t, access_token) :: number
   def objectCount(scope, object_id, access_token) when is_atom(scope) do
     params = [access_token: access_token, summary: true]
     if !is_nil(Config.appsecret) do
