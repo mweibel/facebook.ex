@@ -295,6 +295,27 @@ defmodule Facebook do
       |> summaryCount
   end
 
+  @doc """
+  Exchange an authorization code for an access token
+
+  ## Examples
+      iex> Facebook.accessToken("client_id", "client_secret", "redirect_uri", "code")
+      "access_token"
+
+  See: https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow#confirm
+  """
+  @spec accessToken(String.t, String.t, String.t, String.t) :: String.t
+  def accessToken(client_id, client_secret, redirect_uri, code) do
+    params = [
+      client_id: client_id,
+      client_secret: client_secret,
+      redirect_uri: redirect_uri,
+      code: code]
+
+    Facebook.Graph.get(~s(/oauth/access_token), params)
+      |> getAccessToken
+  end
+
   """
   Provides the summary of a GET request when the 'summary' query parameter is
   set to true.
@@ -305,6 +326,18 @@ defmodule Facebook do
       {:json, info_map} ->
         info_map
           |> Map.fetch!("summary")
+    end
+  end
+
+  """
+  Extract the access token from the access token response
+  """
+  defp getAccessToken(access_token_response) do
+    case access_token_response do
+      {:json, %{"error" => error}} -> %{"error" => error}
+      {:json, info_map} ->
+        info_map
+          |> Map.fetch!("access_token")
     end
   end
 
