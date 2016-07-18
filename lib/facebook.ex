@@ -69,11 +69,8 @@ defmodule Facebook do
   """
   @spec me(fields, access_token) :: response
   def me(fields, access_token) do
-    fields = if !is_nil(Config.appsecret) do
-      fields ++ [appsecret_proof: encrypt(access_token)]
-    else
-      fields
-    end
+    fields = fields
+      |> add_app_secret(access_token)
 
     Facebook.Graph.get("/me", fields ++ [access_token: access_token])
   end
@@ -89,12 +86,7 @@ defmodule Facebook do
   @spec picture(user_id :: String.t, type :: String.t, access_token) :: response
   def picture(user_id, type, access_token) do
     fields = [type: type, redirect: false, access_token: access_token]
-
-    fields = if !is_nil(Config.appsecret) do
-      fields ++ [appsecret_proof: encrypt(access_token)]
-    else
-      fields
-    end
+      |> add_app_secret(access_token)
 
     Facebook.Graph.get("/#{user_id}/picture", fields)
   end
@@ -110,12 +102,7 @@ defmodule Facebook do
   @spec myLikes(access_token) :: response
   def myLikes(access_token) do
     fields = [access_token: access_token]
-
-    fields = if !is_nil(Config.appsecret) do
-      fields ++ [appsecret_proof: encrypt(access_token)]
-    else
-      fields
-    end
+      |> add_app_secret(access_token)
 
     Facebook.Graph.get("/me/likes", fields)
   end
@@ -131,13 +118,7 @@ defmodule Facebook do
   @spec permissions(user_id :: integer | String.t, access_token) :: response
   def permissions(user_id, access_token) do
     fields = [access_token: access_token]
-
-    fields = if !is_nil(Config.appsecret) do
-      fields ++ [appsecret_proof: encrypt(access_token)]
-    else
-      fields
-    end
-
+      |> add_app_secret(access_token)
     Facebook.Graph.get(~s(/#{user_id}/permissions), fields)
   end
 
@@ -194,13 +175,7 @@ defmodule Facebook do
   @spec page(page_id :: integer | String.t, access_token, fields) :: response
   def page(page_id, access_token, fields) do
     params = [fields: fields, access_token: access_token]
-
-    params = if !is_nil(Config.appsecret) do
-      params ++ [appsecret_proof: encrypt(access_token)]
-    else
-      params
-    end
-
+      |> add_app_secret(access_token)
     Facebook.Graph.get(~s(/#{page_id}), params)
   end
 
@@ -230,12 +205,7 @@ defmodule Facebook do
   @spec pageFeed(scope :: atom | String.t, page_id :: String.t, access_token, limit :: number, fields :: String.t) :: Map.t
   def pageFeed(scope, page_id, access_token, limit \\ 25, fields \\ "") when limit <= 100 do
     params = [access_token: access_token, limit: limit, fields: fields]
-
-    params = if !is_nil(Config.appsecret) do
-      params ++ [appsecret_proof: encrypt(access_token)]
-    else
-      params
-    end
+      |> add_app_secret(access_token)
 
     {_, content} = Facebook.Graph.get(~s(/#{page_id}/#{scope}), params)
 
@@ -265,12 +235,7 @@ defmodule Facebook do
   @spec objectCount(scope :: atom, object_id :: String.t, access_token) :: number
   def objectCount(scope, object_id, access_token) when is_atom(scope) do
     params = [access_token: access_token, summary: true]
-
-    params = if !is_nil(Config.appsecret) do
-      params ++ [appsecret_proof: encrypt(access_token)]
-    else
-      params
-    end
+      |> add_app_secret(access_token)
 
     scp = scope
       |> Atom.to_string
@@ -308,11 +273,7 @@ defmodule Facebook do
       |> String.upcase
 
     params = [access_token: access_token, type: type, summary: "total_count"]
-    params = if !is_nil(Config.appsecret) do
-      params ++ [appsecret_proof: encrypt(access_token)]
-    else
-      params
-    end
+      |> add_app_secret(access_token)
 
     Facebook.Graph.get(~s(/#{object_id}/reactions), params)
       |> getSummary
@@ -371,5 +332,15 @@ defmodule Facebook do
   defp encrypt(token) do
     :crypto.hmac(:sha256, Config.appsecret, token)
     |> Base.encode16(case: :lower)
+  end
+
+  # Add the appsecret_proof to the GraphAPI request params if the app secret is
+  # defined
+  defp add_app_secret(params, access_token) do
+    if !is_nil(Config.appsecret) do
+      params ++ [appsecret_proof: encrypt(access_token)]
+    else
+      params
+    end
   end
 end
