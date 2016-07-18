@@ -69,8 +69,10 @@ defmodule Facebook do
   """
   @spec me(fields, access_token) :: response
   def me(fields, access_token) do
-    if !is_nil(Config.appsecret) do
-      fields = fields ++ [appsecret_proof: encrypt(access_token)]
+    fields = if !is_nil(Config.appsecret) do
+      fields ++ [appsecret_proof: encrypt(access_token)]
+    else
+      fields
     end
 
     Facebook.Graph.get("/me", fields ++ [access_token: access_token])
@@ -88,8 +90,10 @@ defmodule Facebook do
   def picture(user_id, type, access_token) do
     fields = [type: type, redirect: false, access_token: access_token]
 
-    if !is_nil(Config.appsecret) do
-      fields = fields ++ [appsecret_proof: encrypt(access_token)]
+    fields = if !is_nil(Config.appsecret) do
+      fields ++ [appsecret_proof: encrypt(access_token)]
+    else
+      fields
     end
 
     Facebook.Graph.get("/#{user_id}/picture", fields)
@@ -106,9 +110,13 @@ defmodule Facebook do
   @spec myLikes(access_token) :: response
   def myLikes(access_token) do
     fields = [access_token: access_token]
-    if !is_nil(Config.appsecret) do
-      fields = fields ++ [appsecret_proof: encrypt(access_token)]
+
+    fields = if !is_nil(Config.appsecret) do
+      fields ++ [appsecret_proof: encrypt(access_token)]
+    else
+      fields
     end
+
     Facebook.Graph.get("/me/likes", fields)
   end
 
@@ -123,9 +131,13 @@ defmodule Facebook do
   @spec permissions(user_id :: integer | String.t, access_token) :: response
   def permissions(user_id, access_token) do
     fields = [access_token: access_token]
-    if !is_nil(Config.appsecret) do
-      fields = fields ++ [appsecret_proof: encrypt(access_token)]
+
+    fields = if !is_nil(Config.appsecret) do
+      fields ++ [appsecret_proof: encrypt(access_token)]
+    else
+      fields
     end
+
     Facebook.Graph.get(~s(/#{user_id}/permissions), fields)
   end
 
@@ -182,9 +194,13 @@ defmodule Facebook do
   @spec page(page_id :: integer | String.t, access_token, fields) :: response
   def page(page_id, access_token, fields) do
     params = [fields: fields, access_token: access_token]
-    if !is_nil(Config.appsecret) do
-      params = params ++ [appsecret_proof: encrypt(access_token)]
+
+    params = if !is_nil(Config.appsecret) do
+      params ++ [appsecret_proof: encrypt(access_token)]
+    else
+      params
     end
+
     Facebook.Graph.get(~s(/#{page_id}), params)
   end
 
@@ -214,8 +230,11 @@ defmodule Facebook do
   @spec pageFeed(scope :: atom | String.t, page_id :: String.t, access_token, limit :: number, fields :: String.t) :: Map.t
   def pageFeed(scope, page_id, access_token, limit \\ 25, fields \\ "") when limit <= 100 do
     params = [access_token: access_token, limit: limit, fields: fields]
-    if !is_nil(Config.appsecret) do
-      params = params ++ [appsecret_proof: encrypt(access_token)]
+
+    params = if !is_nil(Config.appsecret) do
+      params ++ [appsecret_proof: encrypt(access_token)]
+    else
+      params
     end
 
     {_, content} = Facebook.Graph.get(~s(/#{page_id}/#{scope}), params)
@@ -246,8 +265,11 @@ defmodule Facebook do
   @spec objectCount(scope :: atom, object_id :: String.t, access_token) :: number
   def objectCount(scope, object_id, access_token) when is_atom(scope) do
     params = [access_token: access_token, summary: true]
-    if !is_nil(Config.appsecret) do
-      params = params ++ [appsecret_proof: encrypt(access_token)]
+
+    params = if !is_nil(Config.appsecret) do
+      params ++ [appsecret_proof: encrypt(access_token)]
+    else
+      params
     end
 
     scp = scope
@@ -286,8 +308,10 @@ defmodule Facebook do
       |> String.upcase
 
     params = [access_token: access_token, type: type, summary: "total_count"]
-    if !is_nil(Config.appsecret) do
-      params = params ++ [appsecret_proof: encrypt(access_token)]
+    params = if !is_nil(Config.appsecret) do
+      params ++ [appsecret_proof: encrypt(access_token)]
+    else
+      params
     end
 
     Facebook.Graph.get(~s(/#{object_id}/reactions), params)
@@ -320,10 +344,8 @@ defmodule Facebook do
       |> getAccessToken
   end
 
-  """
-  Provides the summary of a GET request when the 'summary' query parameter is
-  set to true.
-  """
+  # Provides the summary of a GET request when the 'summary' query parameter is
+  # set to true.
   defp getSummary(summary_response) do
     case summary_response do
       {:json, %{"error" => error}} -> %{"error" => error}
@@ -331,9 +353,7 @@ defmodule Facebook do
     end
   end
 
-  """
-  Extract the access token from the access token response
-  """
+  # Extract the access token from the access token response
   defp getAccessToken(access_token_response) do
     case access_token_response do
       {:json, %{"error" => error}} -> %{"error" => error}
@@ -341,19 +361,13 @@ defmodule Facebook do
     end
   end
 
-  """
-  Gets the 'total_count' attribute from a summary request.
-  """
+  # Gets the 'total_count' attribute from a summary request.
   defp summaryCount(%{"total_count" => count}), do: count
 
-  """
-  Returns an error if the summary request fails.
-  """
+  # Returns an error if the summary request fails.
   defp summaryCount(%{"error" => error}), do: %{"error" => error}
 
-  """
-  'Encrypts' the token together with the app secret according to the guidelines of facebook.
-  """
+  # 'Encrypts' the token together with the app secret according to the guidelines of facebook.
   defp encrypt(token) do
     :crypto.hmac(:sha256, Config.appsecret, token)
     |> Base.encode16(case: :lower)
