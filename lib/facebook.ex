@@ -300,7 +300,11 @@ defmodule Facebook do
 
   ## Examples
       iex> Facebook.accessToken("client_id", "client_secret", "redirect_uri", "code")
-      "access_token"
+      %{
+        "access_token" => "ACCESS_TOKEN",
+        "expires_in" => 5183976,
+        "token_type" => "bearer"
+      }
 
   See: https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow#confirm
   """
@@ -323,9 +327,7 @@ defmodule Facebook do
   defp getSummary(summary_response) do
     case summary_response do
       {:json, %{"error" => error}} -> %{"error" => error}
-      {:json, info_map} ->
-        info_map
-          |> Map.fetch!("summary")
+      {:json, info_map} -> info_map
     end
   end
 
@@ -335,9 +337,7 @@ defmodule Facebook do
   defp getAccessToken(access_token_response) do
     case access_token_response do
       {:json, %{"error" => error}} -> %{"error" => error}
-      {:json, info_map} ->
-        info_map
-          |> Map.fetch!("access_token")
+      {:json, info_map} -> info_map
     end
   end
 
