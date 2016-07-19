@@ -1,15 +1,16 @@
 defmodule Facebook.Config do
-  use LibEx.Config, application: :facebook
 
-  @doc """
-    iex> Facebook.Config.graph_url
-    "graph_url"
-  """
-  defkey :graph_url
+  # URL to the Facebook Graph including the version.
+  def graph_url do
+    Application.fetch_env! :facebook, :graph_url
+  end
 
-  @doc """
-    iex> Facebook.Config.appsecret
-    "appsecrettokenhere"
-  """
-  defkey :appsecret
+  # App secret
+  def appsecret do
+    Application.fetch_env! :facebook, :appsecret
+  end
+
+  def appsecret(appsecret) do
+    Application.put_env :facebook, :appsecret, appsecret
+  end
 end
