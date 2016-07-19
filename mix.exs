@@ -48,18 +48,10 @@ defmodule Facebook.Mixfile do
     ]
   end
 
-  # Returns the list of dependencies in the format:
-  # { :foobar, git: "https://github.com/elixir-lang/foobar.git", tag: "0.1" }
-  #
-  # To specify particular versions, regardless of the tag, do:
-  # { :barbat, "~> 0.1", github: "elixir-lang/barbat" }
   defp deps do
     [
       {:json, ">= 0.3.3"},
-      {:hackney, "~> 1.0"},
-      {:libex_config, ">= 0.1.0"},
-      {:earmark, "~> 0.1", only: :dev},
-      {:ex_doc, "~> 0.6", only: :dev}
+      {:hackney, "~> 1.6"}
     ]
   end
 end
