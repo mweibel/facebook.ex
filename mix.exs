@@ -51,7 +51,8 @@ defmodule Facebook.Mixfile do
   defp deps do
     [
       {:json, ">= 0.3.3"},
-      {:hackney, "~> 1.6"}
+      {:hackney, "~> 1.6"},
+      {:ex_doc, ">= 0.13.0", only: :dev}
     ]
   end
 end
