@@ -8,9 +8,9 @@ defmodule Facebook.Mixfile do
       app: :facebook,
       version: "0.11.0",
       elixir: "~> 1.0",
-      description: description,
-      package: package,
-      deps: deps,
+      description: description(),
+      package: package(),
+      deps: deps(),
       source_url: "https://github.com/mweibel/facebook.ex"
     ]
   end
