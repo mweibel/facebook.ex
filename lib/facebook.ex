@@ -281,6 +281,31 @@ defmodule Facebook do
   end
 
   @doc """
+  Get all the object reactions with single request.
+
+  ## Examples
+      iex> Facebook.objectCountAll("769860109692136_1173416799336463", "<Token>")
+      %{"angry" => 0, "haha" => 1, "like" => 0, "love" => 0, "sad" => 0, "wow" => 0}
+  """
+  def objectCountAll(object_id, access_token) do
+    graph_query = """
+    reactions.type(LIKE).summary(total_count).limit(0).as(like),
+    reactions.type(LOVE).summary(total_count).limit(0).as(love),
+    reactions.type(WOW).summary(total_count).limit(0).as(wow),
+    reactions.type(HAHA).summary(total_count).limit(0).as(haha),
+    reactions.type(SAD).summary(total_count).limit(0).as(sad),
+    reactions.type(ANGRY).summary(total_count).limit(0).as(angry)
+    """
+
+    params = [access_token: access_token, fields: graph_query]
+      |> add_app_secret(access_token)
+
+    Facebook.Graph.get(~s(/#{object_id}), params)
+      |> getSummary
+      |> summaryCountAll
+  end
+
+  @doc """
   Exchange an authorization code for an access token
 
   ## Examples
@@ -328,6 +353,19 @@ defmodule Facebook do
 
   # Returns an error if the summary request fails.
   defp summaryCount(%{"error" => error}), do: %{"error" => error}
+
+  # Returns an error if the summary request fails.
+  defp summaryCountAll(%{"error" => error}), do: %{"error" => error}
+
+  # Calculate the reactions summary
+  defp summaryCountAll(summary) do
+    Map.keys(summary)
+      |> Enum.reject(fn(x) -> x === "id" end)
+      |> Enum.map(fn(x) ->
+        [x, get_in(summary[x], ["summary", "total_count"])] end)
+      |> Enum.reduce(%{}, fn([name, count], acc) ->
+        Map.put(acc, name, count) end)
+  end
 
   # 'Encrypts' the token together with the app secret according to the guidelines of facebook.
   defp encrypt(token) do
