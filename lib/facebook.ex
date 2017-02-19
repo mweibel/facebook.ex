@@ -287,6 +287,7 @@ defmodule Facebook do
       iex> Facebook.objectCountAll("769860109692136_1173416799336463", "<Token>")
       %{"angry" => 0, "haha" => 1, "like" => 0, "love" => 0, "sad" => 0, "wow" => 0}
   """
+  @spec objectCountAll(object_id :: String.t, access_token) :: map
   def objectCountAll(object_id, access_token) do
     graph_query = """
     reactions.type(LIKE).summary(total_count).limit(0).as(like),
