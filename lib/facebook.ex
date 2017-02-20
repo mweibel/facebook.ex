@@ -295,28 +295,49 @@ defmodule Facebook do
   """
   @spec accessToken(String.t, String.t, String.t, String.t) :: String.t
   def accessToken(client_id, client_secret, redirect_uri, code) do
-    params = [
-      client_id: client_id,
+    [ client_id: client_id,
       client_secret: client_secret,
       redirect_uri: redirect_uri,
-      code: code]
-
-    Facebook.Graph.get(~s(/oauth/access_token), params)
+      code: code ]
       |> getAccessToken
   end
 
-  # Provides the summary of a GET request when the 'summary' query parameter is
-  # set to true.
-  defp getSummary(summary_response) do
-    case summary_response do
+  @doc """
+  Exchange a short lived access token for a long lived one 
+
+  ## Examples
+      iex> Facebook.longLivedAccessToken("client_id", "client_secret", "access_token")
+      %{
+        "access_token" => "ACCESS_TOKEN",
+        "expires_in" => 5183976,
+        "token_type" => "bearer"
+      }
+
+  See: https://developers.facebook.com/docs/facebook-login/access-tokens/expiration-and-extension
+  """
+  @spec longLivedAccessToken(String.t, String.t, String.t) :: String.t
+  def longLivedAccessToken(client_id, client_secret, access_token) do
+    [ grant_type: "fb_exchange_token",
+      client_id: client_id,
+      client_secret: client_secret,
+      fb_exchange_token: access_token ]
+      |> getAccessToken
+  end
+
+
+  # Request access token and extract the access token from the access token
+  # response  
+  defp getAccessToken(params) do
+    case Facebook.Graph.get(~s(/oauth/access_token), params) do
       {:json, %{"error" => error}} -> %{"error" => error}
       {:json, info_map} -> info_map
     end
   end
-
-  # Extract the access token from the access token response
-  defp getAccessToken(access_token_response) do
-    case access_token_response do
+  
+  # Provides the summary of a GET request when the 'summary' query parameter is
+  # set to true.
+  defp getSummary(summary_response) do
+    case summary_response do
       {:json, %{"error" => error}} -> %{"error" => error}
       {:json, info_map} -> info_map
     end
