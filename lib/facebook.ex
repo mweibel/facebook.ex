@@ -306,7 +306,7 @@ defmodule Facebook do
   Exchange a short lived access token for a long lived one 
 
   ## Examples
-      iex> Facebook.accessToken("client_id", "client_secret", "access_token")
+      iex> Facebook.longLivedAccessToken("client_id", "client_secret", "access_token")
       %{
         "access_token" => "ACCESS_TOKEN",
         "expires_in" => 5183976,
