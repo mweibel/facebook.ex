@@ -5,10 +5,10 @@ defmodule FacebookTest do
   @appSecret System.get_env("FBEX_APP_SECRET")
 
   setup_all do
-  assert(@appId != nil)
+    assert(@appId != nil)
     assert(@appSecret != nil)
 
-    Facebook.Config.appsecret(@appSecret)
+    Facebook.setAppsecret(@appSecret)
 
     [user | _] = Facebook.testUsers(@appId, ~s(#{@appId}|#{@appSecret}))
 

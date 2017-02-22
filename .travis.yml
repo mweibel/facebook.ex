@@ -7,8 +7,7 @@ otp_release:
   - 18.1
   - 19.0
 env:
-  global:
-    # FBEX_APP_ID
-    secure: "Dn+TvjmTDeTC9AlOFqBx+vVVFn6ibf3y6HF8PmMFoL+m5ZloE8knfs3RVgu+lVwyii9DhQz3pFtPAOjn6BDN3ME+oWeqDhvEqibVC3OakuamvIv6eof7uExhs0hRK59orCIuuQzbCOIhf56VrKEo8y6Cip38vXNUu7vZ7pjejos="
-    # FBEX_APP_SECRET
-    secure: "Wtp6kpwyRWJ3JYxKiwqxK45+05PCsUoOPvUaVMsOek/sNn/QaTkDiLETLAQHw1wbyrNhMaHONlJgq9WtVgsnge5y+Rz/1znXH3SrQz21BzGv3yp0nkzfnj+jsyr7+/GEnmVFvNLT0HILaTbmepUmHSgckk+q4nc0WhFwF+lglP8="
+  # FBEX_APP_ID
+  secure: "dIYmw1TtHx4PzH+vAEaYbkEm+dYRdouPLWQRrmpJLzJuKsE66vYFEyvHIRBsWrum+weYIfYHQM2f+Pttv2eZjeJxWcatBbNqCnlhEzcY38HiWi0hWhPWj/3OlDkfm4I/4jMek83wWyq+4xyzHx1S7Uu2PEAd3tAM+JAQBs+q0uM="
+  # FBEX_APP_SECRET
+  secure: "Wtp6kpwyRWJ3JYxKiwqxK45+05PCsUoOPvUaVMsOek/sNn/QaTkDiLETLAQHw1wbyrNhMaHONlJgq9WtVgsnge5y+Rz/1znXH3SrQz21BzGv3yp0nkzfnj+jsyr7+/GEnmVFvNLT0HILaTbmepUmHSgckk+q4nc0WhFwF+lglP8="
