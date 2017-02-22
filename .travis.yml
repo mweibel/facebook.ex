@@ -1,20 +1,14 @@
 language: elixir
 elixir:
-  - 1.1
-  - 1.2
   - 1.3
   - 1.4
 sudo: false
 otp_release:
-  - 17.5
   - 18.1
   - 19.0
-matrix:
-  exclude:
-    - elixir: 1.1
-    - opt_release: 19.0
 env:
-  # FBEX_APP_ID
-  secure: "Dn+TvjmTDeTC9AlOFqBx+vVVFn6ibf3y6HF8PmMFoL+m5ZloE8knfs3RVgu+lVwyii9DhQz3pFtPAOjn6BDN3ME+oWeqDhvEqibVC3OakuamvIv6eof7uExhs0hRK59orCIuuQzbCOIhf56VrKEo8y6Cip38vXNUu7vZ7pjejos="
-  # FBEX_APP_SECRET
-  secure: "Wtp6kpwyRWJ3JYxKiwqxK45+05PCsUoOPvUaVMsOek/sNn/QaTkDiLETLAQHw1wbyrNhMaHONlJgq9WtVgsnge5y+Rz/1znXH3SrQz21BzGv3yp0nkzfnj+jsyr7+/GEnmVFvNLT0HILaTbmepUmHSgckk+q4nc0WhFwF+lglP8="
+  global:
+    # FBEX_APP_ID
+    secure: "Dn+TvjmTDeTC9AlOFqBx+vVVFn6ibf3y6HF8PmMFoL+m5ZloE8knfs3RVgu+lVwyii9DhQz3pFtPAOjn6BDN3ME+oWeqDhvEqibVC3OakuamvIv6eof7uExhs0hRK59orCIuuQzbCOIhf56VrKEo8y6Cip38vXNUu7vZ7pjejos="
+    # FBEX_APP_SECRET
+    secure: "Wtp6kpwyRWJ3JYxKiwqxK45+05PCsUoOPvUaVMsOek/sNn/QaTkDiLETLAQHw1wbyrNhMaHONlJgq9WtVgsnge5y+Rz/1znXH3SrQz21BzGv3yp0nkzfnj+jsyr7+/GEnmVFvNLT0HILaTbmepUmHSgckk+q4nc0WhFwF+lglP8="
