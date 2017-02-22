@@ -303,7 +303,7 @@ defmodule Facebook do
   end
 
   @doc """
-  Exchange a short lived access token for a long lived one 
+  Exchange a short lived access token for a long lived one
 
   ## Examples
       iex> Facebook.longLivedAccessToken("client_id", "client_secret", "access_token")
@@ -324,16 +324,41 @@ defmodule Facebook do
       |> getAccessToken
   end
 
+  @doc """
+  Get all test users for an app.
+
+  The access token in this case needs to be an app access token.
+  See:
+    - https://developers.facebook.com/docs/facebook-login/access-tokens#apptokens
+    - https://developers.facebook.com/docs/graph-api/reference/v2.8/app/accounts/test-users
+
+  ## Examples
+    iex> Facebook.testUsers("appId", "appId|appSecret")
+    [
+      %{
+        "access_token" => "ACCESS_TOKEN",
+        "id" => "USER_ID",
+        "login_url" => "https://developers.facebook.com/checkpoint/test-user-login/USER_ID/"
+      }
+    ]
+  """
+  @spec testUsers(String.t, String.t) :: Map.t
+  def testUsers(app_id, access_token) do
+    case Facebook.Graph.get(~s(/#{app_id}/accounts/test-users), [access_token: access_token]) do
+      {:json, %{"error" => _} = error} -> error
+      {:json, %{"data" => data}} -> data
+    end
+  end
 
   # Request access token and extract the access token from the access token
-  # response  
+  # response
   defp getAccessToken(params) do
     case Facebook.Graph.get(~s(/oauth/access_token), params) do
       {:json, %{"error" => error}} -> %{"error" => error}
       {:json, info_map} -> info_map
     end
   end
-  
+
   # Provides the summary of a GET request when the 'summary' query parameter is
   # set to true.
   defp getSummary(summary_response) do
