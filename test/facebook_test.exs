@@ -16,25 +16,44 @@ defmodule FacebookTest do
     assert(String.length(user["id"]) > 0)
     assert(String.length(user["login_url"]) > 0)
 
-    [test_user: user]
+    [id: user["id"], access_token: user["access_token"]]
   end
 
   test "me", context do
-    {:json, userData} = Facebook.me("id,first_name", context[:test_user]["access_token"])
+    %{id: id, access_token: access_token} = context
 
-    assert(userData["id"] == context[:test_user]["id"])
+    {:json, userData} = Facebook.me("id,first_name", access_token)
+
+    assert(userData["id"] == id)
     assert(String.length(userData["first_name"]) > 0)
   end
 
   test "picture", context do
-    {:json, pictureData} = Facebook.picture(context[:test_user]["id"], "small", context[:test_user]["access_token"])
+    %{id: id, access_token: access_token} = context
+
+    {:json, pictureData} = Facebook.picture(id, "small", access_token)
 
     assert(String.length(pictureData["data"]["url"]) > 0)
   end
 
   test "myLikes", context do
-    {:json, likesData} = Facebook.myLikes(context[:test_user]["access_token"])
+    %{access_token: access_token} = context
+
+    {:json, likesData} = Facebook.myLikes(access_token)
 
     assert(likesData["data"] != nil)
   end
+
+  test "permissions", context do
+    %{id: id, access_token: access_token} = context
+
+    {:json, perms} = Facebook.permissions(id, access_token)
+
+    assert(perms["data"] != nil)
+
+    [ permission | _ ] = perms["data"]
+    assert(permission["permission"] != nil)
+    assert(permission["status"] != nil)
+  end
+
 end
