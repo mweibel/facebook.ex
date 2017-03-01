@@ -1,15 +1,14 @@
 language: elixir
 elixir:
-  - 1.1
-  - 1.2
   - 1.3
   - 1.4
 sudo: false
 otp_release:
-  - 17.5
   - 18.1
   - 19.0
-matrix:
-  exclude:
-    - elixir: 1.1
-    - opt_release: 19.0
+env:
+  global:
+    # FBEX_APP_ID
+    - secure: "dIYmw1TtHx4PzH+vAEaYbkEm+dYRdouPLWQRrmpJLzJuKsE66vYFEyvHIRBsWrum+weYIfYHQM2f+Pttv2eZjeJxWcatBbNqCnlhEzcY38HiWi0hWhPWj/3OlDkfm4I/4jMek83wWyq+4xyzHx1S7Uu2PEAd3tAM+JAQBs+q0uM="
+    # FBEX_APP_SECRET
+    - secure: "Wtp6kpwyRWJ3JYxKiwqxK45+05PCsUoOPvUaVMsOek/sNn/QaTkDiLETLAQHw1wbyrNhMaHONlJgq9WtVgsnge5y+Rz/1znXH3SrQz21BzGv3yp0nkzfnj+jsyr7+/GEnmVFvNLT0HILaTbmepUmHSgckk+q4nc0WhFwF+lglP8="
