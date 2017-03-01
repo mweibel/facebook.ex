@@ -116,6 +116,25 @@ defmodule FacebookTest do
     assert(count >= 0)
   end
 
+  test "object reaction count", context do
+    %{access_token: access_token} = context
+
+    count = Facebook.objectCount(:reaction, :wow, "#{@testPageId}_629967087187379", access_token)
+    assert(count >= 0)
+  end
+
+  test "object count all", context do
+    %{access_token: access_token} = context
+
+    counts = Facebook.objectCountAll("#{@testPageId}_629967087187379", access_token)
+    assert(counts["angry"] >= 0)
+    assert(counts["haha"] >= 0)
+    assert(counts["like"] >= 0)
+    assert(counts["love"] >= 0)
+    assert(counts["sad"] >= 0)
+    assert(counts["wow"] >= 0)
+  end
+
   test "long lived access token", context do
     %{access_token: access_token} = context
     data = Facebook.longLivedAccessToken(@appId, @appSecret, access_token)
