@@ -3,6 +3,8 @@ defmodule FacebookTest do
 
   @appId System.get_env("FBEX_APP_ID")
   @appSecret System.get_env("FBEX_APP_SECRET")
+  # 19292868552 = facebook for developers page
+  @pageId 19292868552
 
   setup_all do
     assert(@appId != nil)
@@ -10,13 +12,19 @@ defmodule FacebookTest do
 
     Facebook.setAppsecret(@appSecret)
 
-    [user | _] = Facebook.testUsers(@appId, ~s(#{@appId}|#{@appSecret}))
+    appAccessToken = "#{@appId}|#{@appSecret}"
+
+    [user | _] = Facebook.testUsers(@appId, appAccessToken)
 
     assert(String.length(user["access_token"]) > 0)
     assert(String.length(user["id"]) > 0)
     assert(String.length(user["login_url"]) > 0)
 
-    [id: user["id"], access_token: user["access_token"]]
+    [
+      app_access_token: appAccessToken,
+      id: user["id"],
+      access_token: user["access_token"]
+    ]
   end
 
   test "me", context do
@@ -56,4 +64,39 @@ defmodule FacebookTest do
     assert(permission["status"] != nil)
   end
 
+  test "fanCount", context do
+    %{app_access_token: app_access_token} = context
+
+    count = Facebook.fanCount(@pageId, app_access_token)
+    assert(count > 0)
+  end
+
+  test "pageLikes", context do
+    %{app_access_token: app_access_token} = context
+
+    count = Facebook.pageLikes(@pageId, app_access_token)
+    assert(count > 0)
+  end
+
+  test "page", context do
+    %{app_access_token: app_access_token} = context
+
+    {:json, data} = Facebook.page(@pageId, app_access_token)
+    assert(data != nil)
+
+    %{"name" => name, "id" => id} = data
+    assert(String.length(name) > 0)
+    assert(id == Integer.to_string(@pageId, 10))
+  end
+
+  test "page with fields", context do
+    %{app_access_token: app_access_token} = context
+
+    {:json, data} = Facebook.page(@pageId, app_access_token, ["about"])
+    assert(data != nil)
+
+    %{"id" => id, "about" => about} = data
+    assert(String.length(about) > 0)
+    assert(id == Integer.to_string(@pageId, 10))
+  end
 end
