@@ -5,6 +5,8 @@ defmodule FacebookTest do
   @appSecret System.get_env("FBEX_APP_SECRET")
   # 19292868552 = facebook for developers page
   @pageId 19292868552
+  # 629965917187496 = page id the test user created
+  @testPageId 629965917187496
 
   setup_all do
     assert(@appId != nil)
@@ -98,5 +100,28 @@ defmodule FacebookTest do
     %{"id" => id, "about" => about} = data
     assert(String.length(about) > 0)
     assert(id == Integer.to_string(@pageId, 10))
+  end
+
+  test "page feed", context do
+    %{access_token: access_token} = context
+
+    data = Facebook.pageFeed(:feed, @testPageId, access_token)
+    assert(data != nil)
+  end
+
+  test "object count", context do
+    %{access_token: access_token} = context
+
+    count = Facebook.objectCount(:likes, "#{@testPageId}_629967087187379", access_token)
+    assert(count >= 0)
+  end
+
+  test "long lived access token", context do
+    %{access_token: access_token} = context
+    data = Facebook.longLivedAccessToken(@appId, @appSecret, access_token)
+
+    assert(String.length(data["access_token"]) > 0)
+    assert(data["token_type"] == "bearer")
+    assert(data["expires"] > 0)
   end
 end

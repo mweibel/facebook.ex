@@ -364,7 +364,7 @@ defmodule Facebook do
   defp getSummary(summary_response) do
     case summary_response do
       {:json, %{"error" => error}} -> %{"error" => error}
-      {:json, info_map} -> info_map
+      {:json, %{"summary" => summary}} -> summary
     end
   end
 
