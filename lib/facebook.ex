@@ -10,6 +10,8 @@ defmodule Facebook do
 
   alias Facebook.Config
 
+  defstruct [:current, :next]
+  
   @doc "Start hook"
   def start(_type, _args) do
     start_link([])
@@ -375,6 +377,29 @@ defmodule Facebook do
     end
   end
 
+
+  @doc """
+  Build a stream resource from a paged facebook response
+
+  ## Examples
+    iex> stream = Facebook.pageFeed(:feed, "CocaColaMx", "<Your Token>", "id,name") |> Facebook.build_stream
+    iex> stream |> Stream.filter( name == "CocaCola") |> Stream.take(100) |> Enum.to_list
+  """
+  @spec buildStream(Map.t) :: Enumerable.t
+  def buildStream(paged_struct) do
+    Stream.resource(
+      fn -> %__MODULE__{next: paged_struct, current: :empty} end,
+      fn(feed) ->
+	case nextPage(feed) do
+	  %__MODULE__{current: nil   }   -> {:halt, nil}
+	  %__MODULE__{current: response} ->
+	    {response |> getData, %{feed | current: response}}
+	end
+      end,
+      fn(_) -> :ok end
+    )
+  end
+  
   # Request access token and extract the access token from the access token
   # response
   defp getAccessToken(params) do
@@ -430,4 +455,43 @@ defmodule Facebook do
       params
     end
   end
+
+  # Get next object using FB Graph API pagination
+  defp nextPage(%__MODULE__{current: :empty, next: next} = feed) do
+    %{feed | current: next, next: :empty}
+  end
+
+  defp nextPage(%__MODULE__{current: current} = feed) do
+    case getNextPagedData(current) do
+      {:json, next_obj} -> %{feed | current: next_obj}
+      {:error, _} ->
+	Process.sleep(1_000)
+	nextPage(feed)
+      nil -> %{feed | current: nil}
+    end
+  end
+
+  # Builds URL and gets next data page  
+  defp getNextPagedData(%{"paging" => %{"next" => next_url}}) do
+    next_url |> Facebook.Graph.getFullURL
+  end
+
+  defp getNextPagedData(%{"paging" => %{"cursors" => %{"next" => next_url}}}) do
+    next_url |> Facebook.Graph.getFullURL
+  end
+
+  defp getNextPagedData(_), do: nil
+
+  # Extracts next page from url
+  defp argsURL(url) do
+    {:ok, regex} = Regex.compile("#{Facebook.Config.graph_url}(.+)")
+    [_, args] = Regex.run(regex, url)
+    args
+  end
+
+  
+  # Get data from FB Graph Object  
+  defp getData(%{"data" => data}), do: data
+  defp getData(_), do: nil
+
 end

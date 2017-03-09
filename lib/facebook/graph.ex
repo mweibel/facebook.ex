@@ -48,6 +48,14 @@ defmodule Facebook.Graph do
     request(:get, url, options)
   end
 
+  @doc """
+  HTTP GET using a full URL and options
+  """
+  @spec getFullURL(url, options) :: response
+  def getFullURL(url, options \\ []) do
+    request(:get, url, options)
+  end
+  
   @spec request(method, url, options) :: response
   defp request(method, url, options) do
     request(method, url, <<>>, options)

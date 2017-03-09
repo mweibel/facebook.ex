@@ -3,6 +3,7 @@ defmodule FacebookTest do
 
   @appId System.get_env("FBEX_APP_ID")
   @appSecret System.get_env("FBEX_APP_SECRET")
+  @realAccessToken System.get_env("FBEX_ACCESS_TOKEN")
   # 19292868552 = facebook for developers page
   @pageId 19292868552
   # 629965917187496 = page id the test user created
@@ -142,5 +143,16 @@ defmodule FacebookTest do
     assert(String.length(data["access_token"]) > 0)
     assert(data["token_type"] == "bearer")
     assert(data["expires"] > 0)
+  end
+
+  test "build stream", _context do
+    stream =
+      Facebook.pageFeed(:feed, @pageId, @realAccessToken, 25, "id,name")
+      |> Facebook.buildStream
+
+    # get 150 posts
+    posts = stream |> Stream.take(150) |> Enum.to_list
+
+    assert(length(posts) == 150)
   end
 end
