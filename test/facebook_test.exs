@@ -148,7 +148,7 @@ defmodule FacebookTest do
   test "build stream", _context do
     stream =
       Facebook.pageFeed(:feed, @pageId, @realAccessToken, 25, "id,name")
-      |> Facebook.buildStream
+      |> Facebook.Stream.new
 
     # get 150 posts
     posts = stream |> Stream.take(150) |> Enum.to_list
