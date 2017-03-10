@@ -21,11 +21,10 @@ defmodule Facebook.Stream do
   def new(paged_response) do
     Stream.resource(
       fn -> %__MODULE__{next: paged_response, current: :empty} end,
-      fn(feed) ->
-	case nextPage(feed) do
-	  %__MODULE__{current: nil   }   -> {:halt, nil}
-	  %__MODULE__{current: response} -> {getData(response), %{feed | current: response}}
-	end
+      fn(feed) -> case nextPage(feed) do
+		    %__MODULE__{current: nil   }   -> {:halt, nil}
+		    %__MODULE__{current: response} -> {getData(response), %{feed | current: response}}
+		  end
       end,
       fn(_) -> :ok end
     )
