@@ -49,20 +49,18 @@ defmodule Facebook.Graph do
   end
 
   @doc """
-  HTTP GET using a full URL and options
+  HTTP generic request (GET, POST, etc) using a full URL and options
   """
-  @spec getFullURL(url, options) :: response
-  def getFullURL(url, options \\ []) do
-    request(:get, url, options)
-  end
-  
   @spec request(method, url, options) :: response
-  defp request(method, url, options) do
+  def request(method, url, options) do
     request(method, url, <<>>, options)
   end
 
+  @doc """
+  HTTP generic request (GET, POST, etc) using a full URL, payload and options
+  """
   @spec request(method, url, payload, options) :: response
-  defp request(method, url, payload, options) do
+  def request(method, url, payload, options) do
     headers = []
     Logger.info fn ->
       "[#{method}] #{url} #{inspect headers} #{inspect payload}"

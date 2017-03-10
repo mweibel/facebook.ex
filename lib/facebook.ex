@@ -382,7 +382,7 @@ defmodule Facebook do
   Build a stream resource from a paged facebook response
 
   ## Examples
-    iex> stream = Facebook.pageFeed(:feed, "CocaColaMx", "<Your Token>", "id,name") |> Facebook.build_stream
+    iex> stream = Facebook.pageFeed(:feed, "CocaColaMx", "<Your Token>", "id,name") |> Facebook.buildStream
     iex> stream |> Stream.filter( name == "CocaCola") |> Stream.take(100) |> Enum.to_list
   """
   @spec buildStream(Map.t) :: Enumerable.t
@@ -471,13 +471,13 @@ defmodule Facebook do
     end
   end
 
-  # Builds URL and gets next data page  
+  # Gets next data page  
   defp getNextPagedData(%{"paging" => %{"next" => next_url}}) do
-    next_url |> Facebook.Graph.getFullURL
+    Facebook.Graph.request(:get, next_url, [])
   end
 
   defp getNextPagedData(%{"paging" => %{"cursors" => %{"next" => next_url}}}) do
-    next_url |> Facebook.Graph.getFullURL
+    Facebook.Graph.request(:get, next_url, [])
   end
 
   defp getNextPagedData(_), do: nil
