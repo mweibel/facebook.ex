@@ -145,7 +145,7 @@ defmodule FacebookTest do
     assert(data["expires"] > 0)
   end
 
-  test "build stream", _context do
+  test "new stream", _context do
     stream =
       Facebook.pageFeed(:feed, @pageId, @realAccessToken, 25, "id,name")
       |> Facebook.Stream.new
