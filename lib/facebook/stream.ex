@@ -25,7 +25,7 @@ defmodule Facebook.Stream do
 
   # Custom error handler with linear backoff
   iex> feed = Facebook.pageFeed(:feed, "CocaColaMx", "<Your Token>", "id,name")
-  iex> stream = Facebook.Stream.new(feed, fn(error, retry) -> Process.sleep(retry*500) end)
+  iex> stream = Facebook.Stream.new(feed, fn(error, retry) -> IO.puts("Retry #{retry} Error #{inspect error}"); Process.sleep(retry*500) end)
   iex> stream |> Stream.filter( name == "Coca Cola") |> Stream.take(100) |> Enum.to_list
   """
   @spec new(Map.t, ((error, retry) -> any), pos_integer) :: Enumerable.t
