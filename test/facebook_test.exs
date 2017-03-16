@@ -3,7 +3,6 @@ defmodule FacebookTest do
 
   @appId System.get_env("FBEX_APP_ID")
   @appSecret System.get_env("FBEX_APP_SECRET")
-  @realAccessToken System.get_env("FBEX_ACCESS_TOKEN")
   # 19292868552 = facebook for developers page
   @pageId 19292868552
   # 629965917187496 = page id the test user created
@@ -145,9 +144,11 @@ defmodule FacebookTest do
     assert(data["expires"] > 0)
   end
 
-  test "new stream", _context do
+  test "new stream", context do
+    %{access_token: access_token} = context
+
     stream =
-      Facebook.pageFeed(:feed, @pageId, @realAccessToken, 25, "id,name")
+      Facebook.pageFeed(:feed, @testPageId, access_token, 25)
       |> Facebook.Stream.new
 
     # get 150 posts
