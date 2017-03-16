@@ -17,16 +17,17 @@ defmodule Facebook.Stream do
   define error handler and a maximum of retries
 
   The user defined error handler can be used to log errors, delay next retry,
-  raise an exception, etc.  The default error handler only sleeps by 1 second.
+  raise an exception, etc.
+  The default error handler sleeps 1 second between retries.
 
   ## Examples
   iex> stream = Facebook.pageFeed(:feed, "CocaColaMx", "<Your Token>", "id,name") |> Facebook.Stream.new
-  iex> stream |> Stream.filter( name == "Coca Cola") |> Stream.take(100) |> Enum.to_list
+  iex> stream |> Stream.filter(fn(name) -> name == "Coca Cola" end) |> Stream.take(100) |> Enum.to_list
 
   # Custom error handler with linear backoff
-  iex> feed = Facebook.pageFeed(:feed, "CocaColaMx", "<Your Token>", "id,name")
-  iex> stream = Facebook.Stream.new(feed, fn(error, retry) -> IO.puts("Retry #{retry} Error #{inspect error}"); Process.sleep(retry*500) end)
-  iex> stream |> Stream.filter( name == "Coca Cola") |> Stream.take(100) |> Enum.to_list
+  iex> feed = Facebook.pageFeed(:feed, "CocaColaMx", "<Your Token>", 25, "id,name")
+  iex> stream = Facebook.Stream.new(feed, fn(error, retry) -> Process.sleep(retry*500) end)
+  iex> stream |> Stream.filter(fn(name) -> name == "Coca Cola" end) |> Stream.take(100) |> Enum.to_list
   """
   @spec new(Map.t, ((error, retry) -> any), pos_integer) :: Enumerable.t
   def new(paged_response,
