@@ -143,4 +143,17 @@ defmodule FacebookTest do
     assert(data["token_type"] == "bearer")
     assert(data["expires"] > 0)
   end
+
+  test "new stream", context do
+    %{access_token: access_token} = context
+
+    stream =
+      Facebook.pageFeed(:feed, @testPageId, access_token, 25)
+      |> Facebook.Stream.new
+
+    # get 150 posts
+    posts = stream |> Stream.take(150) |> Enum.to_list
+
+    assert(length(posts) == 150)
+  end
 end

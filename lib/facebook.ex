@@ -375,6 +375,7 @@ defmodule Facebook do
     end
   end
 
+  
   # Request access token and extract the access token from the access token
   # response
   defp getAccessToken(params) do
