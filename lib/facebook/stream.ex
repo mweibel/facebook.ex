@@ -61,9 +61,10 @@ defmodule Facebook.Stream do
     |> Enum.reduce_while(feed, fn i, acc ->
       if i < max_retries do
 	case getNextPagedData(current) do
+	  {:error, reason}  -> error_handler.(reason, i); {:cont, reason}
+	  {:json, %{"error" => reason}} -> error_handler.(reason, i); {:cont, reason}
 	  {:json, next_obj} -> {:halt, %{feed | current: next_obj}}
 	  nil               -> {:halt, %{feed | current: nil}}
-	  {:error, reason}  -> error_handler.(reason, i); {:cont, reason}
 	end
       else
 	{:halt, {acc, i}}
