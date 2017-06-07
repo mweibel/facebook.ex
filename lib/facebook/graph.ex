@@ -67,17 +67,15 @@ defmodule Facebook.Graph do
     end
 
     with {:ok, _status_code, _headers, client_ref} <- :hackney.request(method, url, headers, payload, options),
-	 {:ok, body} <- :hackney.body(client_ref) do
+	       {:ok, body} <- :hackney.body(client_ref) do
       Logger.debug fn -> "body: #{inspect body}" end
       case JSON.decode(body) do
-        {:ok, data} ->
-	  {:json, data}
-        _ ->
-	  {:body, body}
+        {:ok, data} -> {:json, data}
+        _           -> {:body, body}
       end
     else
       {:error, reason} ->
-	Logger.error fn -> "error: #{inspect reason}" end
+        Logger.error fn -> "error: #{inspect reason}" end
         reason
       error ->
         Logger.error fn -> "error: #{inspect error}"  end
