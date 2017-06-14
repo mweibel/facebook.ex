@@ -65,22 +65,20 @@ defmodule Facebook.Graph do
     Logger.debug fn ->
       "[#{method}] #{url} #{inspect headers} #{inspect payload}"
     end
-    case :hackney.request(method, url, headers, payload, options) do
-      {:ok, _status_code, _headers, client_ref} ->
-        {:ok, body} = :hackney.body(client_ref)
-        Logger.debug fn ->
-          "body: #{inspect body}"
-        end
-        case JSON.decode(body) do
-          {:ok, data} ->
-            {:json, data}
-          _ ->
-            {:body, body}
-        end
+
+    with {:ok, _status_code, _headers, client_ref} <- :hackney.request(method, url, headers, payload, options),
+	       {:ok, body} <- :hackney.body(client_ref) do
+      Logger.debug fn -> "body: #{inspect body}" end
+      case JSON.decode(body) do
+        {:ok, data} -> {:json, data}
+        _           -> {:body, body}
+      end
+    else
+      {:error, reason} ->
+        Logger.error fn -> "error: #{inspect reason}" end
+        reason
       error ->
-        Logger.error fn ->
-          "error: #{inspect error}"
-        end
+        Logger.error fn -> "error: #{inspect error}"  end
         error
     end
   end
