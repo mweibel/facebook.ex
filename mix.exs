@@ -22,7 +22,7 @@ defmodule Facebook.Mixfile do
       applications: [:json, :hackney, :logger],
       env: [
         env: :dev,
-        graph_url: "https://graph.facebook.com/v2.6",
+        graph_url: "https://graph.facebook.com/v2.9",
         appsecret: nil
       ]
     ]
