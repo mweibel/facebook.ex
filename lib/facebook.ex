@@ -76,6 +76,33 @@ defmodule Facebook do
   end
 
   @doc """
+  Publish to a feed. Author (user or page) is determined from the supplied token.
+
+  The `feed_id` is the id for the user or page feed to publish to.
+  Apps need both `manage_pages` and `publish_pages` to be able to publish as a Page.
+  The `publish_actions` permission is required to publish as an individual.
+
+  See Facebook's publishing documentation for more info:
+
+  * https://developers.facebook.com/docs/pages/publishing
+  * https://developers.facebook.com/docs/pages/publishing#personal_post
+  * https://developers.facebook.com/docs/facebook-login/permissions#reference-publish_pages
+
+  ## Examples
+      iex> # publish a message
+      iex> Facebook.publish(:feed, "<Feed Id>", [message: "<Message Body"], "<Acess Token>")
+
+      iex> # publish a link and message
+      iex> Facebook.publish(:feed, "<Feed Id>", [message: "<Message Body", link: "www.example.com"], "<Access Token>")
+
+  """
+  @spec publish(:feed, feed_id :: String.t, fields, access_token) :: response
+  def publish(:feed, feed_id, fields, access_token) do
+    params = fields ++ [access_token: access_token]
+    Facebook.Graph.post("/#{feed_id}/feed", params, [])
+  end
+
+  @doc """
   A Picture for a Facebook User
 
   ## Example

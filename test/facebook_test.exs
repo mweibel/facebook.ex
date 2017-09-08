@@ -46,6 +46,13 @@ defmodule FacebookTest do
     assert(String.length(pictureData["data"]["url"]) > 0)
   end
 
+  test "publish", context do
+    %{id: id, access_token: access_token} = context
+
+    {:json, response} = Facebook.publish(:feed, id, [message: "test message", link: "www.example.org"], access_token)
+    assert(String.length(response["id"]) > 0)
+  end
+
   test "myLikes", context do
     %{access_token: access_token} = context
 
