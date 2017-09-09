@@ -5,8 +5,10 @@ defmodule FacebookTest do
   @appSecret System.get_env("FBEX_APP_SECRET")
   # 19292868552 = facebook for developers page
   @pageId 19292868552
+  @photoFile System.get_env("FBEX_PHOTO_FILE")
   # 629965917187496 = page id the test user created
   @testPageId 629965917187496
+  @videoFile System.get_env("FBEX_VIDEO_FILE")
 
   setup_all do
     assert(@appId != nil)
@@ -50,6 +52,22 @@ defmodule FacebookTest do
     %{id: id, access_token: access_token} = context
 
     {:json, response} = Facebook.publish(:feed, id, [message: "test message", link: "www.example.org"], access_token)
+    assert(String.length(response["id"]) > 0)
+  end
+
+  test "publish photo", context do
+    %{id: id, access_token: access_token} = context
+    payload = {:multipart, [{:file, @photoFile}]}
+
+    {:json, response} = Facebook.publish(:photo, id, payload, [], access_token)
+    assert(String.length(response["id"]) > 0)
+  end
+
+  test "publish video", context do
+    %{id: id, access_token: access_token} = context
+    payload = {:multipart, [{:file, @videoFile}]}
+
+    {:json, response} = Facebook.publish(:video, id, payload, [], access_token)
     assert(String.length(response["id"]) > 0)
   end
 
