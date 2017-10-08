@@ -55,17 +55,17 @@ defmodule FacebookTest do
 
   test "publish photo", context do
     %{id: id, access_token: access_token} = context
-    payload = {:multipart, [{:file, "test/assets/sample_image.png"}]}
+    file_path = "test/assets/sample_image.png"
 
-    {:json, response} = Facebook.publish(:photo, id, payload, [], access_token)
+    {:json, response} = Facebook.publish(:photo, id, file_path, [], access_token)
     assert(String.length(response["id"]) > 0)
   end
 
   test "publish video", context do
     %{id: id, access_token: access_token} = context
-    payload = {:multipart, [{:file, "test/assets/sample_video.mpg"}]}
+    file_path = "test/assets/sample_video.mpg"
 
-    {:json, response} = Facebook.publish(:video, id, payload, [], access_token)
+    {:json, response} = Facebook.publish(:video, id, file_path, [], access_token)
     assert(String.length(response["id"]) > 0)
   end
 
