@@ -110,21 +110,29 @@ defmodule Facebook do
 
 
   ## Example
-      iex> Facebook.publish(:photo, "<Feed Id>", {:multipart, [{:file, photo_file}]}, [], "<Access Token>")
+      iex> Facebook.publish(:photo, "<Feed Id>", "<Image Path>", [], "<Access Token>")
+      {:json, %{"id" => "..."}}
 
-      iex> Facebook.publish(:video, "<Feed Id>", {:multipart, [{:file, video_file}]}, [], "<Access Token>")
+      iex> Facebook.publish(:video, "<Feed Id>", "<Video Path>", [], "<Access Token>")
+      {:json, %{"id" => "..."}}
 
   """
-  @spec publish(:photo, page_id :: String.t, payload :: Binary.t, fields, access_token) :: response
-  def publish(:photo, page_id, payload, fields, access_token) do
+  @spec publish(:photo, page_id :: String.t, file_path :: String.t, fields, access_token) :: response
+  def publish(:photo, page_id, file_path, fields, access_token) do
     params = fields ++ [access_token: access_token]
+    payload = media_payload(file_path)
     Facebook.Graph.post("/#{page_id}/photos", payload, params, [])
   end
 
-  @spec publish(:video, page_id :: String.t, payload :: Binary.t, fields, access_token) :: response
-  def publish(:video, page_id, payload, fields, access_token) do
+  @spec publish(:video, page_id :: String.t, file_path :: String.t, fields, access_token) :: response
+  def publish(:video, page_id, file_path, fields, access_token) do
     params = fields ++ [access_token: access_token]
+    payload = media_payload(file_path)
     Facebook.Graph.post(:video, "/#{page_id}/videos", payload, params, [])
+  end
+
+  defp media_payload(file_path) do
+    {:multipart, [{:file, file_path, {"form-data", [filename: Path.basename(file_path)]}, []}]}
   end
 
   @doc """
