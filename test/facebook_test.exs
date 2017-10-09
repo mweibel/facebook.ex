@@ -53,6 +53,22 @@ defmodule FacebookTest do
     assert(String.length(response["id"]) > 0)
   end
 
+  test "publish photo", context do
+    %{id: id, access_token: access_token} = context
+    file_path = "test/assets/sample_image.png"
+
+    {:json, response} = Facebook.publish(:photo, id, file_path, [], access_token)
+    assert(String.length(response["id"]) > 0)
+  end
+
+  test "publish video", context do
+    %{id: id, access_token: access_token} = context
+    file_path = "test/assets/sample_video.mpg"
+
+    {:json, response} = Facebook.publish(:video, id, file_path, [], access_token)
+    assert(String.length(response["id"]) > 0)
+  end
+
   test "myLikes", context do
     %{access_token: access_token} = context
 

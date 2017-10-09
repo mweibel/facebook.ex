@@ -90,7 +90,7 @@ defmodule Facebook do
 
   ## Examples
       iex> # publish a message
-      iex> Facebook.publish(:feed, "<Feed Id>", [message: "<Message Body"], "<Acess Token>")
+      iex> Facebook.publish(:feed, "<Feed Id>", [message: "<Message Body"], "<Access Token>")
 
       iex> # publish a link and message
       iex> Facebook.publish(:feed, "<Feed Id>", [message: "<Message Body", link: "www.example.com"], "<Access Token>")
@@ -100,6 +100,39 @@ defmodule Facebook do
   def publish(:feed, feed_id, fields, access_token) do
     params = fields ++ [access_token: access_token]
     Facebook.Graph.post("/#{feed_id}/feed", params, [])
+  end
+
+  @doc """
+  Publish media to a feed. Author (user or page) is determined from the supplied token.
+
+  The `feed_id` is the id for the user or page feed to publish to.
+  Same :feed publishing permissions apply.
+
+
+  ## Example
+      iex> Facebook.publish(:photo, "<Feed Id>", "<Image Path>", [], "<Access Token>")
+      {:json, %{"id" => "..."}}
+
+      iex> Facebook.publish(:video, "<Feed Id>", "<Video Path>", [], "<Access Token>")
+      {:json, %{"id" => "..."}}
+
+  """
+  @spec publish(:photo, page_id :: String.t, file_path :: String.t, fields, access_token) :: response
+  def publish(:photo, page_id, file_path, fields, access_token) do
+    params = fields ++ [access_token: access_token]
+    payload = media_payload(file_path)
+    Facebook.Graph.post("/#{page_id}/photos", payload, params, [])
+  end
+
+  @spec publish(:video, page_id :: String.t, file_path :: String.t, fields, access_token) :: response
+  def publish(:video, page_id, file_path, fields, access_token) do
+    params = fields ++ [access_token: access_token]
+    payload = media_payload(file_path)
+    Facebook.Graph.post(:video, "/#{page_id}/videos", payload, params, [])
+  end
+
+  defp media_payload(file_path) do
+    {:multipart, [{:file, file_path, {"form-data", [filename: Path.basename(file_path)]}, []}]}
   end
 
   @doc """

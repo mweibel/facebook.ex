@@ -58,6 +58,24 @@ defmodule Facebook.Graph do
   end
 
   @doc """
+  HTTP POST using path, body, params and options
+  """
+  @spec post(path, payload, params, options) :: response
+  def post(path, payload, params, options) do
+    url = :hackney_url.make_url(Config.graph_url, path, params)
+    request(:post, url, payload, options)
+  end
+
+  @doc """
+  HTTP POST for video api using path, body, params and options
+  """
+  @spec post(:video, path, payload, params, options) :: response
+  def post(:video, path, payload, params, options) do
+    url = :hackney_url.make_url(Config.graph_video_url, path, params)
+    request(:post, url, payload, options)
+  end
+
+  @doc """
   HTTP generic request (GET, POST, etc) using a full URL and options
   """
   @spec request(method, url, options) :: response
