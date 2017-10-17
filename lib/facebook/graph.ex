@@ -89,24 +89,34 @@ defmodule Facebook.Graph do
   @spec request(method, url, payload, options) :: response
   def request(method, url, payload, options) do
     headers = []
-    Logger.debug fn ->
-      "[#{method}] #{url} #{inspect headers} #{inspect payload}"
-    end
-
-    with {:ok, _status_code, _headers, client_ref} <- :hackney.request(method, url, headers, payload, options),
-	       {:ok, body} <- :hackney.body(client_ref) do
-      Logger.debug fn -> "body: #{inspect body}" end
-      case JSON.decode(body) do
-        {:ok, data} -> {:json, data}
-        _           -> {:body, body}
-      end
-    else
-      {:error, reason} ->
-        Logger.error fn -> "error: #{inspect reason}" end
-        reason
-      error ->
-        Logger.error fn -> "error: #{inspect error}"  end
-        error
-    end
+    :hackney.request(method, url, headers, payload, options)
+      |> get_response_body()
+      |> parse_response_body()
+      |> format_response_body()
   end
+
+  defp get_response_body({:ok, _status_code, _headers, client_ref}) do
+    :hackney.body(client_ref)
+  end
+  defp get_response_body({:error, reason}), do: {:error, reason}
+
+  defp parse_response_body({:ok, body}) do
+    JSON.decode(body)
+  end
+  defp parse_response_body({:error, reason}), do: {:error, reason}
+
+  defp format_response_body({:ok, %{"error" => error}}) do
+    {:error, error}
+  end
+  # defp format_response_body({:ok, %{"data" => data} = rest}) do
+  #   Apex.ap rest
+  #   {:ok, data}
+  # end
+  # defp format_response_body({:ok, %{"summary" => summary}}) do
+  #   {:ok, summary}
+  # end
+  defp format_response_body({:ok, resp}) do
+    {:ok, resp}
+  end
+  defp format_response_body({:error, reason}), do: {:error, reason}
 end

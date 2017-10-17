@@ -30,7 +30,7 @@ defmodule Facebook do
 
   @type fields :: list
   @type access_token :: String.t
-  @type response :: {:json, HashDict.t} | {:body, String.t}
+  @type response :: {:ok, HashDict.t} | {:body, String.t}
   @type using_appsecret :: boolean
   @type reaction :: :reaction
 
@@ -111,10 +111,10 @@ defmodule Facebook do
 
   ## Example
       iex> Facebook.publish(:photo, "<Feed Id>", "<Image Path>", [], "<Access Token>")
-      {:json, %{"id" => "..."}}
+      {:ok, %{"id" => "..."}}
 
       iex> Facebook.publish(:video, "<Feed Id>", "<Video Path>", [], "<Access Token>")
-      {:json, %{"id" => "..."}}
+      {:ok, %{"id" => "..."}}
 
   """
   @spec publish(:photo, page_id :: String.t, file_path :: String.t, fields, access_token) :: response
@@ -155,12 +155,12 @@ defmodule Facebook do
   Likes of the currently logged in user (specified by the access_token)
 
   ## Example
-      iex> Facebook.myLikes("<Your Token>")
+      iex> Facebook.my_likes("<Your Token>")
 
   See: https://developers.facebook.com/docs/graph-api/reference/user/likes
   """
-  @spec myLikes(access_token) :: response
-  def myLikes(access_token) do
+  @spec my_likes(access_token) :: response
+  def my_likes(access_token) do
     fields = [access_token: access_token]
       |> add_app_secret(access_token)
 
@@ -186,29 +186,28 @@ defmodule Facebook do
   Get the count of fans for the provided page_id
 
   ## Example
-      iex> Facebook.fanCount("CocaColaMx", "<Your Token>")
+      iex> Facebook.fan_count("CocaColaMx", "<Your Token>")
 
   See: https://developers.facebook.com/docs/graph-api/reference/page/
   """
-  @spec fanCount(page_id :: integer | String.t, access_token) :: integer
-  def fanCount(page_id, access_token) do
-    {:json, %{"fan_count" => fanCount}} = page(page_id, access_token, ["fan_count"])
-    fanCount
+  @spec fan_count(page_id :: integer | String.t, access_token) :: integer
+  def fan_count(page_id, access_token) do
+    page(page_id, access_token, ["fan_count"])
   end
 
   @doc """
-  *Deprecated:* Please use fanCount instead.
+  *Deprecated:* Please use fan_count instead.
 
   Get the count of fans for the provided page_id
 
   ## Example
-      iex> Facebook.pageLikes("CocaColaMx", "<Your Token>")
+      iex> Facebook.page_likes("CocaColaMx", "<Your Token>")
 
   See: https://developers.facebook.com/docs/graph-api/reference/page/
   """
-  @spec pageLikes(page_id :: integer | String.t, access_token) :: integer
-  def pageLikes(page_id, access_token) do
-    fanCount(page_id, access_token)
+  @spec page_likes(page_id :: integer | String.t, access_token) :: integer
+  def page_likes(page_id, access_token) do
+    fan_count(page_id, access_token)
   end
 
   @doc """
@@ -255,15 +254,15 @@ defmodule Facebook do
   100.*
 
   ## Examples
-      iex> Facebook.pageFeed(:posts, "CocaColaMx", "<Your Token>")
-      iex> Facebook.pageFeed(:tagged, "CocaColaMx", "<Your Token>", 55)
-      iex> Facebook.pageFeed(:promotable_posts, "CocaColaMx", "<Your Token>")
-      iex> Facebook.pageFeed(:feed, "CocaColaMx", "<Your Token>", 55, "id,name")
+      iex> Facebook.page_feed(:posts, "CocaColaMx", "<Your Token>")
+      iex> Facebook.page_feed(:tagged, "CocaColaMx", "<Your Token>", 55)
+      iex> Facebook.page_feed(:promotable_posts, "CocaColaMx", "<Your Token>")
+      iex> Facebook.page_feed(:feed, "CocaColaMx", "<Your Token>", 55, "id,name")
 
   See: https://developers.facebook.com/docs/graph-api/reference/page/feed
   """
-  @spec pageFeed(scope :: atom | String.t, page_id :: String.t, access_token, limit :: number, fields :: String.t) :: Map.t
-  def pageFeed(scope, page_id, access_token, limit \\ 25, fields \\ "") when limit <= 100 do
+  @spec page_feed(scope :: atom | String.t, page_id :: String.t, access_token, limit :: number, fields :: String.t) :: Map.t
+  def page_feed(scope, page_id, access_token, limit \\ 25, fields \\ "") when limit <= 100 do
     params = [access_token: access_token, limit: limit, fields: fields]
       |> add_app_secret(access_token)
 
@@ -277,23 +276,23 @@ defmodule Facebook do
 
   An *object* stands for: post, comment, link, status update, photo.
 
-  If you want to get the likes of a page, please see *fanCount*.
+  If you want to get the likes of a page, please see *fan_count*.
 
   Expected scopes:
     * :likes
     * :comments
 
   ## Example
-      iex> Facebook.objectCount(:likes, "1326382730725053_1326476257382367", "<Token>")
+      iex> Facebook.object_count(:likes, "1326382730725053_1326476257382367", "<Token>")
       2
-      iex> Facebook.objectCount(:comments, "1326382730725053_1326476257382367", "<Token>")
+      iex> Facebook.object_count(:comments, "1326382730725053_1326476257382367", "<Token>")
       2
 
   See: https://developers.facebook.com/docs/graph-api/reference/object/likes
   See: https://developers.facebook.com/docs/graph-api/reference/object/comments
   """
-  @spec objectCount(scope :: atom, object_id :: String.t, access_token) :: number
-  def objectCount(scope, object_id, access_token) when is_atom(scope) do
+  @spec object_count(scope :: atom, object_id :: String.t, access_token) :: number
+  def object_count(scope, object_id, access_token) when is_atom(scope) do
     params = [access_token: access_token, summary: true]
       |> add_app_secret(access_token)
 
@@ -302,8 +301,8 @@ defmodule Facebook do
       |> String.downcase
 
     Facebook.Graph.get(~s(/#{object_id}/#{scp}), params)
-      |> getSummary
-      |> summaryCount
+      |> get_summary
+      |> summary_count
   end
 
   @doc """
@@ -319,15 +318,15 @@ defmodule Facebook do
     * :none
 
   ## Examples
-      iex> Facebook.objectCount(:reaction, :wow, "769860109692136_1173416799336463", "<Token>")
+      iex> Facebook.object_count(:reaction, :wow, "769860109692136_1173416799336463", "<Token>")
       2
-      iex> Facebook.objectCount(:reaction, :haha, "769860109692136_1173416799336463", "<Token>")
+      iex> Facebook.object_count(:reaction, :haha, "769860109692136_1173416799336463", "<Token>")
       12
-      iex> Facebook.objectCount(:reaction, :thankful, "769860109692136_1173416799336463", "<Token>")
+      iex> Facebook.object_count(:reaction, :thankful, "769860109692136_1173416799336463", "<Token>")
       33
   """
-  @spec objectCount(reaction, react_type :: atom, object_id :: String.t, access_token) :: number
-  def objectCount(:reaction, react_type, object_id, access_token) when is_atom(react_type) do
+  @spec object_count(reaction, react_type :: atom, object_id :: String.t, access_token) :: number
+  def object_count(:reaction, react_type, object_id, access_token) when is_atom(react_type) do
     type = react_type
       |> Atom.to_string
       |> String.upcase
@@ -336,19 +335,19 @@ defmodule Facebook do
       |> add_app_secret(access_token)
 
     Facebook.Graph.get(~s(/#{object_id}/reactions), params)
-      |> getSummary
-      |> summaryCount
+      |> get_summary
+      |> summary_count
   end
 
   @doc """
   Get all the object reactions with single request.
 
   ## Examples
-      iex> Facebook.objectCountAll("769860109692136_1173416799336463", "<Token>")
+      iex> Facebook.object_count_all("769860109692136_1173416799336463", "<Token>")
       %{"angry" => 0, "haha" => 1, "like" => 0, "love" => 0, "sad" => 0, "wow" => 0}
   """
-  @spec objectCountAll(object_id :: String.t, access_token) :: map
-  def objectCountAll(object_id, access_token) do
+  @spec object_count_all(object_id :: String.t, access_token) :: map
+  def object_count_all(object_id, access_token) do
     graph_query = """
     reactions.type(LIKE).summary(total_count).limit(0).as(like),
     reactions.type(LOVE).summary(total_count).limit(0).as(love),
@@ -362,7 +361,7 @@ defmodule Facebook do
       |> add_app_secret(access_token)
 
     Facebook.Graph.get(~s(/#{object_id}), params)
-      |> summaryCountAll
+      |> summary_count_all
   end
 
   @doc """
@@ -384,14 +383,14 @@ defmodule Facebook do
       client_secret: client_secret,
       redirect_uri: redirect_uri,
       code: code ]
-      |> getAccessToken
+      |> get_access_token
   end
 
   @doc """
   Exchange a short lived access token for a long lived one
 
   ## Examples
-      iex> Facebook.longLivedAccessToken("client_id", "client_secret", "access_token")
+      iex> Facebook.long_lived_access_token("client_id", "client_secret", "access_token")
       %{
         "access_token" => "ACCESS_TOKEN",
         "expires_in" => 5183976,
@@ -400,13 +399,13 @@ defmodule Facebook do
 
   See: https://developers.facebook.com/docs/facebook-login/access-tokens/expiration-and-extension
   """
-  @spec longLivedAccessToken(String.t, String.t, String.t) :: String.t
-  def longLivedAccessToken(client_id, client_secret, access_token) do
+  @spec long_lived_access_token(String.t, String.t, String.t) :: String.t
+  def long_lived_access_token(client_id, client_secret, access_token) do
     [ grant_type: "fb_exchange_token",
       client_id: client_id,
       client_secret: client_secret,
       fb_exchange_token: access_token ]
-      |> getAccessToken
+      |> get_access_token
   end
 
   @doc """
@@ -418,7 +417,7 @@ defmodule Facebook do
     - https://developers.facebook.com/docs/graph-api/reference/v2.8/app/accounts/test-users
 
   ## Examples
-    iex> Facebook.testUsers("appId", "appId|appSecret")
+    iex> Facebook.test_users("appId", "appId|appSecret")
     [
       %{
         "access_token" => "ACCESS_TOKEN",
@@ -427,47 +426,48 @@ defmodule Facebook do
       }
     ]
   """
-  @spec testUsers(String.t, String.t) :: Map.t
-  def testUsers(app_id, access_token) do
-    case Facebook.Graph.get(~s(/#{app_id}/accounts/test-users), [access_token: access_token]) do
-      {:json, %{"error" => _} = error} -> error
-      {:json, %{"data" => data}} -> data
-    end
+  @spec test_users(String.t, String.t) :: Map.t
+  def test_users(app_id, access_token) do
+    Facebook.Graph.get(
+      ~s(/#{app_id}/accounts/test-users),
+      [access_token: access_token]
+    )
   end
 
-  
+
   # Request access token and extract the access token from the access token
   # response
-  defp getAccessToken(params) do
+  defp get_access_token(params) do
     case Facebook.Graph.get(~s(/oauth/access_token), params) do
-      {:json, %{"error" => error}} -> %{"error" => error}
-      {:json, %{"summary" => summary}} -> summary
-      {:json, info_map} -> info_map
+      {:ok, %{"error" => error}} -> %{"error" => error}
+      {:ok, %{"summary" => summary}} -> summary
+      {:ok, info_map} -> info_map
     end
   end
 
   # Provides the summary of a GET request when the 'summary' query parameter is
   # set to true.
-  defp getSummary(summary_response) do
+  defp get_summary(summary_response) do
     case summary_response do
-      {:json, %{"error" => error}} -> %{"error" => error}
-      {:json, %{"summary" => summary}} -> summary
+      {:error, error} -> {:error, error}
+      {:ok, %{"summary" => summary}} -> summary
     end
   end
 
   # Gets the 'total_count' attribute from a summary request.
-  defp summaryCount(%{"total_count" => count}), do: count
+  defp summary_count(%{"total_count" => count}), do: count
 
   # Returns an error if the summary request fails.
-  defp summaryCount(%{"error" => error}), do: %{"error" => error}
+  defp summary_count({:error, error}), do: {:error, error}
 
-  defp summaryCountAll({:json, data}), do: summaryCountAll(data)
+  defp summary_count_all({:ok, data}), do: summary_count_all(data)
 
   # Returns an error if the summary request fails.
-  defp summaryCountAll(%{"error" => error}), do: %{"error" => error}
+  defp summary_count_all({:error, error}), do: {:error, error}
 
   # Calculate the reactions summary
-  defp summaryCountAll(summary) do
+  defp summary_count_all(summary) do
+    Apex.ap summary
     Map.keys(summary)
       |> Enum.reject(fn(x) -> x === "id" end)
       |> Enum.map(fn(x) ->
