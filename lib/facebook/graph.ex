@@ -18,6 +18,7 @@ defmodule Facebook.Graph do
   @type path :: String.t
   @type response :: {:json, HashDict.t} | {:body, String.t}
   @type options :: list
+  @type headers :: list
   @type params :: list
   @type method :: :get | :post | :put | :head
   @type url :: String.t
@@ -76,6 +77,18 @@ defmodule Facebook.Graph do
   end
 
   @doc """
+  HTTP POST for the facebook messenger api
+  """
+  def post_message(payload, params) do
+    path = "/me/messages"
+    headers = ["Content-type": "application/json"]
+
+    url = :hackney_url.make_url(Config.graph_url, path, params)
+    request(:post, url, payload, [], headers)
+  end
+
+
+  @doc """
   HTTP generic request (GET, POST, etc) using a full URL and options
   """
   @spec request(method, url, options) :: response
@@ -86,9 +99,8 @@ defmodule Facebook.Graph do
   @doc """
   HTTP generic request (GET, POST, etc) using a full URL, payload and options
   """
-  @spec request(method, url, payload, options) :: response
-  def request(method, url, payload, options) do
-    headers = []
+  @spec request(method, url, payload, options, headers) :: response
+  def request(method, url, payload, options, headers \\ []) do
     Logger.debug fn ->
       "[#{method}] #{url} #{inspect headers} #{inspect payload}"
     end
