@@ -59,15 +59,6 @@ defmodule Facebook.Graph do
   end
 
   @doc """
-  HTTP POST using path, body, params and options
-  """
-  @spec post(path, payload, params, options) :: response
-  def post(path, payload, params, options) do
-    url = :hackney_url.make_url(Config.graph_url, path, params)
-    request(:post, url, payload, options)
-  end
-
-  @doc """
   HTTP POST for video api using path, body, params and options
   """
   @spec post(:video, path, payload, params, options) :: response
@@ -77,15 +68,33 @@ defmodule Facebook.Graph do
   end
 
   @doc """
-  HTTP POST for the facebook messenger api
+  HTTP POST for messenger api using path, body, params and options
   """
-  def post_message(payload, params) do
-    path = "/me/messages"
+  def post(:message, path, payload, params, options) do
     headers = ["Content-type": "application/json"]
-
     url = :hackney_url.make_url(Config.graph_url, path, params)
-    request(:post, url, payload, [], headers)
+    request(:post, url, payload, options, headers)
   end
+
+  @doc """
+  HTTP POST using path, body, params and options
+  """
+  @spec post(path, payload, params, options) :: response
+  def post(path, payload, params, options) do
+    url = :hackney_url.make_url(Config.graph_url, path, params)
+    request(:post, url, payload, options)
+  end
+
+  # @doc """
+  # HTTP POST for the facebook messenger api
+  # """
+  # def post_message(payload, params) do
+  #   path = "/me/messages"
+  #   headers = ["Content-type": "application/json"]
+
+  #   url = :hackney_url.make_url(Config.graph_url, path, params)
+  #   request(:post, url, payload, [], headers)
+  # end
 
 
   @doc """
