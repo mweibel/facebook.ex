@@ -131,6 +131,12 @@ defmodule Facebook do
     Facebook.Graph.post(:video, "/#{page_id}/videos", payload, params, [])
   end
 
+  @spec send_message(payload :: String.t, access_token) :: response
+  def send_message(payload, access_token) do
+    params = [access_token: access_token]
+    Facebook.Graph.post :message, "me/messages", payload, params, []
+  end
+
   defp media_payload(file_path) do
     {:multipart, [{:file, file_path, {"form-data", [filename: Path.basename(file_path)]}, []}]}
   end

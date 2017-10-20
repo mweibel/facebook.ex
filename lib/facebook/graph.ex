@@ -18,6 +18,7 @@ defmodule Facebook.Graph do
   @type path :: String.t
   @type response :: {:json, HashDict.t} | {:body, String.t}
   @type options :: list
+  @type headers :: list
   @type params :: list
   @type method :: :get | :post | :put | :head
   @type url :: String.t
@@ -58,20 +59,29 @@ defmodule Facebook.Graph do
   end
 
   @doc """
-  HTTP POST using path, body, params and options
-  """
-  @spec post(path, payload, params, options) :: response
-  def post(path, payload, params, options) do
-    url = :hackney_url.make_url(Config.graph_url, path, params)
-    request(:post, url, payload, options)
-  end
-
-  @doc """
   HTTP POST for video api using path, body, params and options
   """
   @spec post(:video, path, payload, params, options) :: response
   def post(:video, path, payload, params, options) do
     url = :hackney_url.make_url(Config.graph_video_url, path, params)
+    request(:post, url, payload, options)
+  end
+
+  @doc """
+  HTTP POST for messenger api using path, body, params and options
+  """
+  def post(:message, path, payload, params, options) do
+    headers = ["Content-type": "application/json"]
+    url = :hackney_url.make_url(Config.graph_url, path, params)
+    request(:post, url, payload, options, headers)
+  end
+
+  @doc """
+  HTTP POST using path, body, params and options
+  """
+  @spec post(path, payload, params, options) :: response
+  def post(path, payload, params, options) do
+    url = :hackney_url.make_url(Config.graph_url, path, params)
     request(:post, url, payload, options)
   end
 
@@ -86,9 +96,8 @@ defmodule Facebook.Graph do
   @doc """
   HTTP generic request (GET, POST, etc) using a full URL, payload and options
   """
-  @spec request(method, url, payload, options) :: response
-  def request(method, url, payload, options) do
-    headers = []
+  @spec request(method, url, payload, options, headers) :: response
+  def request(method, url, payload, options, headers \\ []) do
     Logger.debug fn ->
       "[#{method}] #{url} #{inspect headers} #{inspect payload}"
     end
