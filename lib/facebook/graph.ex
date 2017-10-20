@@ -85,18 +85,6 @@ defmodule Facebook.Graph do
     request(:post, url, payload, options)
   end
 
-  # @doc """
-  # HTTP POST for the facebook messenger api
-  # """
-  # def post_message(payload, params) do
-  #   path = "/me/messages"
-  #   headers = ["Content-type": "application/json"]
-
-  #   url = :hackney_url.make_url(Config.graph_url, path, params)
-  #   request(:post, url, payload, [], headers)
-  # end
-
-
   @doc """
   HTTP generic request (GET, POST, etc) using a full URL and options
   """
