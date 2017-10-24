@@ -1,107 +1,24 @@
-defmodule Facebook.GraphMock do
-  def error() do
-    JSON.encode(%{"error": %{
-      "message": "Invalid OAuth access token.",
-      "type": "OAuthException",
-      "code": 190,
-      "fbtrace_id": "GB4fbEEGxkW"
-    }})
-  end
-
-  def long_lived_access_token(:success) do
-    JSON.encode(%{
-      "access_token" => "access_token",
-      "expires_in" => 5184000,
-      "token_type" => "bearer"
-    })
-  end
-
-  def my_likes(:success) do
-    JSON.encode(%{
-      "data": []
-    })
-  end
-
-  def me(:success) do
-    JSON.encode(%{
-      "id": "116331862460015", "first_name": "Open"
-    })
-  end
-
-  def page(:success) do
-    JSON.encode(%{
-      "id": "19292868552", "name": "Facebook for Developers"
-    })
-  end
-
-  def page(:success, :with_fields) do
-    JSON.encode(%{
-      "id": "19292868552",
-      "about": "Build, grow, and monetize your app with Facebook."
-    })
-  end
-
-  def page(:success, :fan_count) do
-    JSON.encode(%{
-      "id": "19292868552", "fan_count": 5469088
-    })
-  end
-
-  def permissions(:success) do
-    JSON.encode(%{"data": [%{
-      "permission": "user_friends",
-      "status": "granted"
-    }]})
-  end
-
-  def picture(:success) do
-    JSON.encode(%{"data": %{
-      "is_silhouette": true,
-      "url": "https://scontent.xx.fbcdn.net/..."
-    }})
-  end
-
-  def publish(:success, :feed) do
-    JSON.encode(%{
-      "id": "116331862460015_120732275353308",
-    })
-  end
-
-  def publish(:success, :image) do
-    JSON.encode(%{
-      "id": "120752462017955",
-      "post_id": "116331862460015_120752105351324"
-    })
-  end
-
-  def publish(:success, :video) do
-    JSON.encode(%{
-      "id": "120762398683628",
-    })
-  end
-end
-
 defmodule FacebookTest do
   use ExUnit.Case, async: false
 
   import Mock
 
-  @appId System.get_env("FBEX_APP_ID")
-  @appSecret System.get_env("FBEX_APP_SECRET")
+  @app_id System.get_env("FBEX_APP_ID")
+  @app_secret System.get_env("FBEX_APP_SECRET")
   # 19292868552 = facebook for developers page
   @page_id 19292868552
   # 629965917187496 = page id the test user created
   @test_page_id 629965917187496
 
   setup do
-    assert(@appId != nil)
-    assert(@appSecret != nil)
+    assert(@app_id != nil)
+    assert(@app_secret != nil)
 
-    Facebook.setAppsecret(@appSecret)
+    Facebook.setAppsecret(@app_secret)
 
-    app_access_token = "#{@appId}|#{@appSecret}"
+    app_access_token = "#{@app_id}|#{@app_secret}"
 
-    {:ok, %{"data" => [user]}} = Facebook.test_users(@appId, app_access_token)
+    {:ok, %{"data" => [user]}} = Facebook.test_users(@app_id, app_access_token)
 
     assert(String.length(user["access_token"]) > 0)
     assert(String.length(user["id"]) > 0)
@@ -494,8 +411,8 @@ defmodule FacebookTest do
           "expires_in" => expires_in,
           "token_type" => token_type
         } = Facebook.long_lived_access_token(
-          @appId,
-          @appSecret,
+          @app_id,
+          @app_secret,
           access_token
         )
 
@@ -513,8 +430,8 @@ defmodule FacebookTest do
         body: fn(_) -> Facebook.GraphMock.error() end
       ] do
         assert {:error, _} = Facebook.long_lived_access_token(
-          @appId,
-          @appSecret,
+          @app_id,
+          @app_secret,
           invalid_access_token
         )
       end
@@ -530,5 +447,88 @@ defmodule FacebookTest do
     posts = stream |> Stream.take(150) |> Enum.to_list
 
     assert(length(posts) == 150)
+  end
+end
+
+defmodule Facebook.GraphMock do
+  def error() do
+    JSON.encode(%{"error": %{
+      "message": "Invalid OAuth access token.",
+      "type": "OAuthException",
+      "code": 190,
+      "fbtrace_id": "GB4fbEEGxkW"
+    }})
+  end
+
+  def long_lived_access_token(:success) do
+    JSON.encode(%{
+      "access_token" => "access_token",
+      "expires_in" => 5184000,
+      "token_type" => "bearer"
+    })
+  end
+
+  def my_likes(:success) do
+    JSON.encode(%{
+      "data": []
+    })
+  end
+
+  def me(:success) do
+    JSON.encode(%{
+      "id": "116331862460015", "first_name": "Open"
+    })
+  end
+
+  def page(:success) do
+    JSON.encode(%{
+      "id": "19292868552", "name": "Facebook for Developers"
+    })
+  end
+
+  def page(:success, :with_fields) do
+    JSON.encode(%{
+      "id": "19292868552",
+      "about": "Build, grow, and monetize your app with Facebook."
+    })
+  end
+
+  def page(:success, :fan_count) do
+    JSON.encode(%{
+      "id": "19292868552", "fan_count": 5469088
+    })
+  end
+
+  def permissions(:success) do
+    JSON.encode(%{"data": [%{
+      "permission": "user_friends",
+      "status": "granted"
+    }]})
+  end
+
+  def picture(:success) do
+    JSON.encode(%{"data": %{
+      "is_silhouette": true,
+      "url": "https://scontent.xx.fbcdn.net/..."
+    }})
+  end
+
+  def publish(:success, :feed) do
+    JSON.encode(%{
+      "id": "116331862460015_120732275353308",
+    })
+  end
+
+  def publish(:success, :image) do
+    JSON.encode(%{
+      "id": "120752462017955",
+      "post_id": "116331862460015_120752105351324"
+    })
+  end
+
+  def publish(:success, :video) do
+    JSON.encode(%{
+      "id": "120762398683628",
+    })
   end
 end

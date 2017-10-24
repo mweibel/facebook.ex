@@ -50,7 +50,8 @@ defmodule Facebook do
   Basic user infos of the logged in user (specified by the access_token).
 
   ## Example
-      iex> Facebook.me("id,first_name", "<Your Token>")
+      iex> Facebook.me("id,first_name", "<Access Token>")
+      {:ok, %{"first_name" => "...", "id" => "..."}}
 
   See: https://developers.facebook.com/docs/graph-api/reference/user/
   """
@@ -63,7 +64,8 @@ defmodule Facebook do
   Basic user infos of the logged in user (specified by the access_token).
 
   ## Example
-      iex> Facebook.me([fields: "id,first_name"], "<Your Token>")
+      iex> Facebook.me([fields: "id,first_name"], "<Access Token>")
+      {:ok, %{"first_name" => "...", "id" => "..."}}
 
   See: https://developers.facebook.com/docs/graph-api/reference/user/
   """
@@ -91,9 +93,11 @@ defmodule Facebook do
   ## Examples
       iex> # publish a message
       iex> Facebook.publish(:feed, "<Feed Id>", [message: "<Message Body"], "<Access Token>")
+      {:ok, %{"id" => "{page_id}_{post_id}"}}
 
       iex> # publish a link and message
       iex> Facebook.publish(:feed, "<Feed Id>", [message: "<Message Body", link: "www.example.com"], "<Access Token>")
+      {:ok, %{"id" => "{page_id}_{post_id}"}}
 
   """
   @spec publish(:feed, feed_id :: String.t, fields, access_token) :: response
@@ -111,11 +115,12 @@ defmodule Facebook do
 
   ## Example
       iex> Facebook.publish(:photo, "<Feed Id>", "<Image Path>", [], "<Access Token>")
-      {:ok, %{"id" => "..."}}
+      {:ok, %{"id" => photo_id, "post_id" => "{page_id}_{post_id}"}
 
       iex> Facebook.publish(:video, "<Feed Id>", "<Video Path>", [], "<Access Token>")
-      {:ok, %{"id" => "..."}}
+      {:ok, %{"id" => video_id}
 
+  See: https://developers.facebook.com/docs/pages/publishing#fotos_videos
   """
   @spec publish(:photo, page_id :: String.t, file_path :: String.t, fields, access_token) :: response
   def publish(:photo, page_id, file_path, fields, access_token) do
@@ -139,7 +144,7 @@ defmodule Facebook do
   A Picture for a Facebook User
 
   ## Example
-      iex> Facebook.picture("<Some Id>", "small", "<Your Token>")
+      iex> Facebook.picture("<Some Id>", "small", "<Access Token>")
       {:ok, %{"data": "..."}}
 
   See: https://developers.facebook.com/docs/graph-api/reference/user/picture/
@@ -156,7 +161,8 @@ defmodule Facebook do
   Likes of the currently logged in user (specified by the access_token)
 
   ## Example
-      iex> Facebook.my_likes("<Your Token>")
+      iex> Facebook.my_likes("<Access Token>")
+      {:ok, %{"data" => [...]}}
 
   See: https://developers.facebook.com/docs/graph-api/reference/user/likes
   """
@@ -172,7 +178,8 @@ defmodule Facebook do
   Retrieves a list of granted permissions
 
   ## Example
-      iex> Facebook.permissions("<Some Id>", "<Your Token>")
+      iex> Facebook.permissions("<Some Id>", "<Access Token>")
+      {:ok, %{"data" => [%{"permission" => "...", "status" => "..."}]}}
 
   See: https://developers.facebook.com/docs/graph-api/reference/user/permissions
   """
@@ -187,7 +194,7 @@ defmodule Facebook do
   Get the count of fans for the provided page_id
 
   ## Example
-      iex> Facebook.fan_count("CocaColaMx", "<Your Token>")
+      iex> Facebook.fan_count("CocaColaMx", "<Access Token>")
 
   See: https://developers.facebook.com/docs/graph-api/reference/page/
   """
@@ -202,7 +209,8 @@ defmodule Facebook do
   Get the count of fans for the provided page_id
 
   ## Example
-      iex> Facebook.page_likes("CocaColaMx", "<Your Token>")
+      iex> Facebook.page_likes("CocaColaMx", "<Access Token>")
+      {:ok, %{"fan_count" => fan_count, "id" => id}}
 
   See: https://developers.facebook.com/docs/graph-api/reference/page/
   """
@@ -215,7 +223,8 @@ defmodule Facebook do
   Basic page information for the provided page_id
 
   ## Example
-      iex> Facebook.page("CocaColaMx", "<Your Token>")
+      iex> Facebook.page("CocaColaMx", "<Access Token>")
+      {:ok, %{"id" => id, "name" => name}}
 
   See: https://developers.facebook.com/docs/graph-api/reference/page
   """
@@ -228,7 +237,8 @@ defmodule Facebook do
   Get page information for the specified fields for the provided page_id
 
   ## Example
-      iex> Facebook.page("CocaColaMx", "<Your Token>", "id")
+      iex> Facebook.page("CocaColaMx", "<Access Token>", "id")
+      {:ok, %{"id" => id}
 
   See: https://developers.facebook.com/docs/graph-api/reference/page
   """
@@ -255,10 +265,11 @@ defmodule Facebook do
   100.*
 
   ## Examples
-      iex> Facebook.page_feed(:posts, "CocaColaMx", "<Your Token>")
-      iex> Facebook.page_feed(:tagged, "CocaColaMx", "<Your Token>", 55)
-      iex> Facebook.page_feed(:promotable_posts, "CocaColaMx", "<Your Token>")
-      iex> Facebook.page_feed(:feed, "CocaColaMx", "<Your Token>", 55, "id,name")
+      iex> Facebook.page_feed(:posts, "CocaColaMx", "<Access Token>")
+      iex> Facebook.page_feed(:tagged, "CocaColaMx", "<Access Token>", 55)
+      iex> Facebook.page_feed(:promotable_posts, "CocaColaMx", "<Access Token>")
+      iex> Facebook.page_feed(:feed, "CocaColaMx", "<Access Token>", 55, "id,name")
+      {:ok, %{"data" => [...]}}
 
   See: https://developers.facebook.com/docs/graph-api/reference/page/feed
   """
@@ -285,9 +296,9 @@ defmodule Facebook do
 
   ## Example
       iex> Facebook.object_count(:likes, "1326382730725053_1326476257382367", "<Token>")
-      2
+      {:ok, 2}
       iex> Facebook.object_count(:comments, "1326382730725053_1326476257382367", "<Token>")
-      2
+      {:ok, 2}
 
   See: https://developers.facebook.com/docs/graph-api/reference/object/likes
   See: https://developers.facebook.com/docs/graph-api/reference/object/comments
@@ -320,11 +331,11 @@ defmodule Facebook do
 
   ## Examples
       iex> Facebook.object_count(:reaction, :wow, "769860109692136_1173416799336463", "<Token>")
-      2
+      {:ok, 100}
       iex> Facebook.object_count(:reaction, :haha, "769860109692136_1173416799336463", "<Token>")
-      12
+      {:ok, 100}
       iex> Facebook.object_count(:reaction, :thankful, "769860109692136_1173416799336463", "<Token>")
-      33
+      {:ok, 100}
   """
   @spec object_count(reaction, react_type :: atom, object_id :: String.t, access_token) :: number
   def object_count(:reaction, react_type, object_id, access_token) when is_atom(react_type) do
@@ -345,7 +356,7 @@ defmodule Facebook do
 
   ## Examples
       iex> Facebook.object_count_all("769860109692136_1173416799336463", "<Token>")
-      %{"angry" => 0, "haha" => 1, "like" => 0, "love" => 0, "sad" => 0, "wow" => 0}
+      {:ok, %{"angry" => 0, "haha" => 1, "like" => 0, "love" => 0, "sad" => 0, "wow" => 0}}
   """
   @spec object_count_all(object_id :: String.t, access_token) :: map
   def object_count_all(object_id, access_token) do
@@ -369,7 +380,7 @@ defmodule Facebook do
   Exchange an authorization code for an access token
 
   ## Examples
-      iex> Facebook.accessToken("client_id", "client_secret", "redirect_uri", "code")
+      iex> Facebook.access_token("client_id", "client_secret", "redirect_uri", "code")
       %{
         "access_token" => "ACCESS_TOKEN",
         "expires_in" => 5183976,
@@ -378,8 +389,8 @@ defmodule Facebook do
 
   See: https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow#confirm
   """
-  @spec accessToken(String.t, String.t, String.t, String.t) :: String.t
-  def accessToken(client_id, client_secret, redirect_uri, code) do
+  @spec access_token(String.t, String.t, String.t, String.t) :: String.t
+  def access_token(client_id, client_secret, redirect_uri, code) do
     [ client_id: client_id,
       client_secret: client_secret,
       redirect_uri: redirect_uri,
@@ -456,7 +467,7 @@ defmodule Facebook do
   end
 
   # Gets the 'total_count' attribute from a summary request.
-  defp summary_count(%{"total_count" => count}), do: count
+  defp summary_count(%{"total_count" => count}), do: {:ok, count}
 
   # Returns an error if the summary request fails.
   defp summary_count({:error, error}), do: {:error, error}
@@ -468,13 +479,13 @@ defmodule Facebook do
 
   # Calculate the reactions summary
   defp summary_count_all(summary) do
-    Apex.ap summary
     Map.keys(summary)
       |> Enum.reject(fn(x) -> x === "id" end)
       |> Enum.map(fn(x) ->
         [x, get_in(summary[x], ["summary", "total_count"])] end)
       |> Enum.reduce(%{}, fn([name, count], acc) ->
         Map.put(acc, name, count) end)
+      |> (& {:ok, &1}).()
   end
 
   # 'Encrypts' the token together with the app secret according to the guidelines of facebook.
