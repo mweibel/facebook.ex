@@ -140,6 +140,7 @@ defmodule Facebook do
 
   ## Example
       iex> Facebook.picture("<Some Id>", "small", "<Your Token>")
+      {:ok, %{"data": "..."}}
 
   See: https://developers.facebook.com/docs/graph-api/reference/user/picture/
   """
@@ -439,7 +440,7 @@ defmodule Facebook do
   # response
   defp get_access_token(params) do
     case Facebook.Graph.get(~s(/oauth/access_token), params) do
-      {:ok, %{"error" => error}} -> %{"error" => error}
+      {:error, error} -> {:error, error}
       {:ok, %{"summary" => summary}} -> summary
       {:ok, info_map} -> info_map
     end

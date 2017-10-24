@@ -54,7 +54,12 @@ defmodule Facebook.Mixfile do
       {:json, ">= 0.3.3"},
       {:hackney, "~> 1.6"},
       {:ex_doc, ">= 0.13.0", only: :dev},
+
+      {:credo,      "~> 0.8", only: [:dev, :test]},
+      # TODO: take out apex
       {:apex, "~>1.1.0"},
+
+      {:mock, "~> 0.2.0", only: :test},
       {:mix_test_watch, "~> 0.3", only: :dev, runtime: false}
     ]
   end
