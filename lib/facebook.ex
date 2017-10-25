@@ -30,7 +30,7 @@ defmodule Facebook do
 
   @type fields :: list
   @type access_token :: String.t
-  @type response :: {:ok, HashDict.t} | {:body, String.t}
+  @type response :: {:ok, Map.t} | {:error, Map.t}
   @type using_appsecret :: boolean
   @type reaction :: :reaction
 
@@ -38,11 +38,11 @@ defmodule Facebook do
   If you want to use an appsecret proof, pass it into set_appsecret:
 
   ## Example
-      iex> Facebook.setAppsecret("appsecret")
+      iex> Facebook.set_appsecret("appsecret")
 
   See: https://developers.facebook.com/docs/graph-api/securing-requests
   """
-  def setAppsecret(appsecret) do
+  def set_appsecret(appsecret) do
     Config.appsecret(appsecret)
   end
 
@@ -258,7 +258,7 @@ defmodule Facebook do
 
   See: https://developers.facebook.com/docs/graph-api/reference/page/feed
   """
-  @spec page_feed(scope :: atom | String.t, page_id :: String.t, access_token, limit :: number, fields :: String.t) :: Map.t
+  @spec page_feed(scope :: atom | String.t, page_id :: String.t, access_token, limit :: number, fields :: String.t) :: response
   def page_feed(scope, page_id, access_token, limit \\ 25, fields \\ "") when limit <= 100 do
     params = [access_token: access_token, limit: limit, fields: fields]
       |> add_app_secret(access_token)
@@ -286,7 +286,7 @@ defmodule Facebook do
   See: https://developers.facebook.com/docs/graph-api/reference/object/likes
   See: https://developers.facebook.com/docs/graph-api/reference/object/comments
   """
-  @spec object_count(scope :: atom, object_id :: String.t, access_token) :: number
+  @spec object_count(scope :: atom, object_id :: String.t, access_token) :: {:ok, number} | {:error, Map.t}
   def object_count(scope, object_id, access_token) when is_atom(scope) do
     params = [access_token: access_token, summary: true]
       |> add_app_secret(access_token)
@@ -320,7 +320,7 @@ defmodule Facebook do
       iex> Facebook.object_count(:reaction, :thankful, "769860109692136_1173416799336463", "<Access Token>")
       {:ok, 100}
   """
-  @spec object_count(reaction, react_type :: atom, object_id :: String.t, access_token) :: number
+  @spec object_count(reaction, react_type :: atom, object_id :: String.t, access_token) :: {:ok, number} | {:error, Map.t}
   def object_count(:reaction, react_type, object_id, access_token) when is_atom(react_type) do
     type = react_type
       |> Atom.to_string
@@ -341,7 +341,7 @@ defmodule Facebook do
       iex> Facebook.object_count_all("769860109692136_1173416799336463", "<Access Token>")
       {:ok, %{"angry" => 0, "haha" => 1, "like" => 0, "love" => 0, "sad" => 0, "wow" => 0}}
   """
-  @spec object_count_all(object_id :: String.t, access_token) :: map
+  @spec object_count_all(object_id :: String.t, access_token) :: response
   def object_count_all(object_id, access_token) do
     graph_query = """
     reactions.type(LIKE).summary(total_count).limit(0).as(like),
@@ -372,7 +372,7 @@ defmodule Facebook do
 
   See: https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow#confirm
   """
-  @spec access_token(String.t, String.t, String.t, String.t) :: String.t
+  @spec access_token(String.t, String.t, String.t, String.t) :: response
   def access_token(client_id, client_secret, redirect_uri, code) do
     [ client_id: client_id,
       client_secret: client_secret,
@@ -394,7 +394,7 @@ defmodule Facebook do
 
   See: https://developers.facebook.com/docs/facebook-login/access-tokens/expiration-and-extension
   """
-  @spec long_lived_access_token(String.t, String.t, String.t) :: String.t
+  @spec long_lived_access_token(String.t, String.t, String.t) :: response
   def long_lived_access_token(client_id, client_secret, access_token) do
     [ grant_type: "fb_exchange_token",
       client_id: client_id,
@@ -421,7 +421,7 @@ defmodule Facebook do
       }
     ]}
   """
-  @spec test_users(String.t, String.t) :: Map.t
+  @spec test_users(String.t, String.t) :: response
   def test_users(app_id, access_token) do
     Facebook.Graph.get(
       ~s(/#{app_id}/accounts/test-users),
