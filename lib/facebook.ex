@@ -195,28 +195,13 @@ defmodule Facebook do
 
   ## Example
       iex> Facebook.fan_count("CocaColaMx", "<Access Token>")
+      {:ok, %{"fan_count" => fan_count, "id" => id}}
 
   See: https://developers.facebook.com/docs/graph-api/reference/page/
   """
   @spec fan_count(page_id :: integer | String.t, access_token) :: integer
   def fan_count(page_id, access_token) do
     page(page_id, access_token, ["fan_count"])
-  end
-
-  @doc """
-  *Deprecated:* Please use fan_count instead.
-
-  Get the count of fans for the provided page_id
-
-  ## Example
-      iex> Facebook.page_likes("CocaColaMx", "<Access Token>")
-      {:ok, %{"fan_count" => fan_count, "id" => id}}
-
-  See: https://developers.facebook.com/docs/graph-api/reference/page/
-  """
-  @spec page_likes(page_id :: integer | String.t, access_token) :: integer
-  def page_likes(page_id, access_token) do
-    fan_count(page_id, access_token)
   end
 
   @doc """
@@ -278,9 +263,7 @@ defmodule Facebook do
     params = [access_token: access_token, limit: limit, fields: fields]
       |> add_app_secret(access_token)
 
-    {_, content} = Facebook.Graph.get(~s(/#{page_id}/#{scope}), params)
-
-    content
+    Facebook.Graph.get(~s(/#{page_id}/#{scope}), params)
   end
 
   @doc """
@@ -295,10 +278,10 @@ defmodule Facebook do
     * :comments
 
   ## Example
-      iex> Facebook.object_count(:likes, "1326382730725053_1326476257382367", "<Token>")
-      {:ok, 2}
-      iex> Facebook.object_count(:comments, "1326382730725053_1326476257382367", "<Token>")
-      {:ok, 2}
+      iex> Facebook.object_count(:likes, "1326382730725053_1326476257382367", "<Access Token>")
+      {:ok, 10}
+      iex> Facebook.object_count(:comments, "1326382730725053_1326476257382367", "<Access Token>")
+      {:ok, 5}
 
   See: https://developers.facebook.com/docs/graph-api/reference/object/likes
   See: https://developers.facebook.com/docs/graph-api/reference/object/comments
@@ -330,11 +313,11 @@ defmodule Facebook do
     * :none
 
   ## Examples
-      iex> Facebook.object_count(:reaction, :wow, "769860109692136_1173416799336463", "<Token>")
+      iex> Facebook.object_count(:reaction, :wow, "769860109692136_1173416799336463", "<Access Token>")
       {:ok, 100}
-      iex> Facebook.object_count(:reaction, :haha, "769860109692136_1173416799336463", "<Token>")
+      iex> Facebook.object_count(:reaction, :haha, "769860109692136_1173416799336463", "<Access Token>")
       {:ok, 100}
-      iex> Facebook.object_count(:reaction, :thankful, "769860109692136_1173416799336463", "<Token>")
+      iex> Facebook.object_count(:reaction, :thankful, "769860109692136_1173416799336463", "<Access Token>")
       {:ok, 100}
   """
   @spec object_count(reaction, react_type :: atom, object_id :: String.t, access_token) :: number
@@ -355,7 +338,7 @@ defmodule Facebook do
   Get all the object reactions with single request.
 
   ## Examples
-      iex> Facebook.object_count_all("769860109692136_1173416799336463", "<Token>")
+      iex> Facebook.object_count_all("769860109692136_1173416799336463", "<Access Token>")
       {:ok, %{"angry" => 0, "haha" => 1, "like" => 0, "love" => 0, "sad" => 0, "wow" => 0}}
   """
   @spec object_count_all(object_id :: String.t, access_token) :: map
@@ -381,11 +364,11 @@ defmodule Facebook do
 
   ## Examples
       iex> Facebook.access_token("client_id", "client_secret", "redirect_uri", "code")
-      %{
-        "access_token" => "ACCESS_TOKEN",
+      {:ok, %{
+        "access_token" => access_token,
         "expires_in" => 5183976,
         "token_type" => "bearer"
-      }
+      }}
 
   See: https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow#confirm
   """
@@ -403,11 +386,11 @@ defmodule Facebook do
 
   ## Examples
       iex> Facebook.long_lived_access_token("client_id", "client_secret", "access_token")
-      %{
-        "access_token" => "ACCESS_TOKEN",
+      {:ok, %{
+        "access_token" => access_token,
         "expires_in" => 5183976,
         "token_type" => "bearer"
-      }
+      }}
 
   See: https://developers.facebook.com/docs/facebook-login/access-tokens/expiration-and-extension
   """
@@ -430,13 +413,13 @@ defmodule Facebook do
 
   ## Examples
     iex> Facebook.test_users("appId", "appId|appSecret")
-    [
+    {:ok, %{"data" => [
       %{
         "access_token" => "ACCESS_TOKEN",
         "id" => "USER_ID",
         "login_url" => "https://developers.facebook.com/checkpoint/test-user-login/USER_ID/"
       }
-    ]
+    ]}
   """
   @spec test_users(String.t, String.t) :: Map.t
   def test_users(app_id, access_token) do
@@ -450,11 +433,7 @@ defmodule Facebook do
   # Request access token and extract the access token from the access token
   # response
   defp get_access_token(params) do
-    case Facebook.Graph.get(~s(/oauth/access_token), params) do
-      {:error, error} -> {:error, error}
-      {:ok, %{"summary" => summary}} -> summary
-      {:ok, info_map} -> info_map
-    end
+    Facebook.Graph.get(~s(/oauth/access_token), params)
   end
 
   # Provides the summary of a GET request when the 'summary' query parameter is

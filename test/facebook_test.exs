@@ -3,31 +3,18 @@ defmodule FacebookTest do
 
   import Mock
 
-  @app_id System.get_env("FBEX_APP_ID")
-  @app_secret System.get_env("FBEX_APP_SECRET")
+  @app_id "123"
+  @app_secret "456"
   # 19292868552 = facebook for developers page
   @page_id 19292868552
   # 629965917187496 = page id the test user created
   @test_page_id 629965917187496
 
   setup do
-    assert(@app_id != nil)
-    assert(@app_secret != nil)
-
-    Facebook.setAppsecret(@app_secret)
-
-    app_access_token = "#{@app_id}|#{@app_secret}"
-
-    {:ok, %{"data" => [user]}} = Facebook.test_users(@app_id, app_access_token)
-
-    assert(String.length(user["access_token"]) > 0)
-    assert(String.length(user["id"]) > 0)
-    assert(String.length(user["login_url"]) > 0)
-
     [
-      app_access_token: app_access_token,
-      id: user["id"],
-      access_token: user["access_token"],
+      app_access_token: "#{@app_id}|#{@app_secret}",
+      id: "116331862460015",
+      access_token: "123",
       invalid_access_token: "123"
     ]
   end
@@ -282,33 +269,6 @@ defmodule FacebookTest do
     end
   end
 
-  describe "page_likes" do
-    test "success", %{app_access_token: app_access_token} do
-      with_mock :hackney, [
-        request: fn(_method, _url, _headers, _payload, _options) ->
-          {:ok, nil, nil, nil}
-        end,
-        body: fn(_) -> Facebook.GraphMock.page(:success, :fan_count) end
-      ] do
-        assert {:ok, %{"fan_count" => _}} = Facebook.page_likes(
-          @page_id,
-          app_access_token
-        )
-      end
-    end
-
-    test "error", %{invalid_access_token: invalid_access_token} do
-      with_mock :hackney, [
-        request: fn(_method, _url, _headers, _payload, _options) ->
-          {:ok, nil, nil, nil}
-        end,
-        body: fn(_) -> Facebook.GraphMock.error() end
-      ] do
-        assert {:error, _} = Facebook.page_likes(@page_id, invalid_access_token)
-      end
-    end
-  end
-
   describe "page" do
     test "success", %{app_access_token: app_access_token} do
       with_mock :hackney, [
@@ -373,29 +333,99 @@ defmodule FacebookTest do
     end
   end
 
-  test "page feed", %{access_token: access_token} do
-    data = Facebook.page_feed(:feed, @test_page_id, access_token)
-    assert(data != nil)
+  describe "page feed" do
+    test "success", %{app_access_token: app_access_token} do
+      with_mock :hackney, [
+        request: fn(_method, _url, _headers, _payload, _options) ->
+          {:ok, nil, nil, nil}
+        end,
+        body: fn(_) -> Facebook.GraphMock.page(:success, :feed) end
+      ] do
+        assert {:ok, %{"data" => [data | _]}} = Facebook.page_feed(
+          :feed,
+          @page_id,
+          app_access_token,
+          1
+        )
+
+        assert %{
+          "id" => _,
+          "created_time" => _,
+          "message" => _,
+          "story" => _
+        } = data
+      end
+    end
+
+    test "error", %{invalid_access_token: invalid_access_token} do
+      with_mock :hackney, [
+        request: fn(_method, _url, _headers, _payload, _options) ->
+          {:ok, nil, nil, nil}
+        end,
+        body: fn(_) -> Facebook.GraphMock.error() end
+      ] do
+        assert {:error, _} = Facebook.page_feed(
+          :feed,
+          @page_id,
+          invalid_access_token,
+          1
+        )
+      end
+    end
   end
 
-  test "object count", %{access_token: access_token} do
-    count = Facebook.object_count(:likes, "#{@test_page_id}_629967087187379", access_token)
-    assert(count >= 0)
+  describe "object count" do
+    test "success", %{access_token: access_token} do
+      with_mock :hackney, [
+        request: fn(_method, _url, _headers, _payload, _options) ->
+          {:ok, nil, nil, nil}
+        end,
+        body: fn(_) -> Facebook.GraphMock.object_count(:success, :likes) end
+      ] do
+        assert {:ok, 10} = Facebook.object_count(
+          :likes,
+          "1326382730725053_1326476257382367",
+          access_token
+        )
+      end
+    end
   end
 
-  test "object reaction count", %{access_token: access_token} do
-    count = Facebook.object_count(:reaction, :wow, "#{@test_page_id}_629967087187379", access_token)
-    assert(count >= 0)
+  describe "object reaction count" do
+    test "success", %{access_token: access_token} do
+      with_mock :hackney, [
+        request: fn(_method, _url, _headers, _payload, _options) ->
+          {:ok, nil, nil, nil}
+        end,
+        body: fn(_) -> Facebook.GraphMock.object_count(:success, :likes) end
+      ] do
+        assert {:ok, 10} = Facebook.object_count(
+          :reaction,
+          :wow,
+          "#{@test_page_id}_629967087187379",
+          access_token
+        )
+      end
+    end
   end
 
-  test "object count all", %{access_token: access_token} do
-    counts = Facebook.object_count_all("#{@test_page_id}_629967087187379", access_token)
-    assert(counts["angry"] >= 0)
-    assert(counts["haha"] >= 0)
-    assert(counts["like"] >= 0)
-    assert(counts["love"] >= 0)
-    assert(counts["sad"] >= 0)
-    assert(counts["wow"] >= 0)
+  describe "object count all" do
+    test "success", %{access_token: access_token} do
+      with_mock :hackney, [
+        request: fn(_method, _url, _headers, _payload, _options) ->
+          {:ok, nil, nil, nil}
+        end,
+        body: fn(_) -> Facebook.GraphMock.object_count_all(:success) end
+      ] do
+        assert {:ok, %{"haha" => haha, "love" => love}} = Facebook.object_count_all(
+          "#{@test_page_id}_629967087187379",
+          access_token
+        )
+
+        assert haha == 135
+        assert love == 10
+      end
+    end
   end
 
   describe "long lived access token" do
@@ -406,11 +436,11 @@ defmodule FacebookTest do
         end,
         body: fn(_) -> Facebook.GraphMock.long_lived_access_token(:success) end
       ] do
-        assert %{
+        assert {:ok, %{
           "access_token" => access_token,
           "expires_in" => expires_in,
           "token_type" => token_type
-        } = Facebook.long_lived_access_token(
+        }} = Facebook.long_lived_access_token(
           @app_id,
           @app_secret,
           access_token
@@ -438,15 +468,27 @@ defmodule FacebookTest do
     end
   end
 
-  test "new stream", %{access_token: access_token} do
-    stream =
-      Facebook.page_feed(:feed, @test_page_id, access_token, 25)
-      |> Facebook.Stream.new
+  describe "new stream" do
+    test "success", %{app_access_token: app_access_token} do
+      with_mock :hackney, [
+        request: fn(_method, _url, _headers, _payload, _options) ->
+          {:ok, nil, nil, nil}
+        end,
+        body: fn(_) -> Facebook.GraphMock.page(:success, :feed) end
+      ] do
+        posts = Facebook.page_feed(
+          :feed,
+          @page_id,
+          app_access_token,
+          1
+        )
+          |> Facebook.Stream.new
+          |> Stream.take(1)
+          |> Enum.to_list
 
-    # get 150 posts
-    posts = stream |> Stream.take(150) |> Enum.to_list
-
-    assert(length(posts) == 150)
+        assert(length(posts) == 1)
+      end
+    end
   end
 end
 
@@ -480,10 +522,32 @@ defmodule Facebook.GraphMock do
     })
   end
 
+  def object_count(:success, :likes) do
+    JSON.encode(%{"summary" => %{
+      "total_count" => 10
+    }})
+  end
+
+  def object_count_all(:success) do
+    JSON.encode(%{
+      "haha" => %{"summary" => %{"total_count" => 135}},
+      "love" => %{"summary" => %{"total_count" => 10}}
+    })
+  end
+
   def page(:success) do
     JSON.encode(%{
       "id": "19292868552", "name": "Facebook for Developers"
     })
+  end
+
+  def page(:success, :feed) do
+    JSON.encode(%{"data": [%{
+      "created_time" => "2017-01-01T01:05:49+0000",
+      "id" => "915520981811232_1894726877223966",
+      "message" => "https://www.facebook.com/notes/...",
+      "story" => ""
+    }]})
   end
 
   def page(:success, :with_fields) do

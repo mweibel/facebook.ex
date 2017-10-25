@@ -7,3 +7,9 @@ mix.lock
 .exenv-version
 doc
 .DS_Store
+
+# asdf
+.tool-versions
+
+# FB Tokens
+.env
