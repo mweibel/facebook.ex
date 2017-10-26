@@ -1,182 +1,494 @@
-defmodule FacebookTest do
-  use ExUnit.Case
+defmodule Facebook.FacebookTest do
+  use ExUnit.Case, async: false
 
-  @appId System.get_env("FBEX_APP_ID")
-  @appSecret System.get_env("FBEX_APP_SECRET")
+  import Facebook.GraphMock
+  import Mock
+
+  @app_id "123"
+  @app_secret "456"
   # 19292868552 = facebook for developers page
-  @pageId 19292868552
+  @page_id 19292868552
   # 629965917187496 = page id the test user created
-  @testPageId 629965917187496
+  @test_page_id 629965917187496
 
-  setup_all do
-    assert(@appId != nil)
-    assert(@appSecret != nil)
-
-    Facebook.setAppsecret(@appSecret)
-
-    appAccessToken = "#{@appId}|#{@appSecret}"
-
-    [user | _] = Facebook.testUsers(@appId, appAccessToken)
-
-    assert(String.length(user["access_token"]) > 0)
-    assert(String.length(user["id"]) > 0)
-    assert(String.length(user["login_url"]) > 0)
-
+  setup do
     [
-      app_access_token: appAccessToken,
-      id: user["id"],
-      access_token: user["access_token"]
+      app_access_token: "#{@app_id}|#{@app_secret}",
+      id: "116331862460015",
+      access_token: "123",
+      invalid_access_token: "123"
     ]
   end
 
-  test "me", context do
-    %{id: id, access_token: access_token} = context
+  describe "me" do
+    test "success", %{id: id, access_token: access_token} do
+      with_mock :hackney, [
+        request: fn(_method, _url, _headers, _payload, _options) ->
+          {:ok, nil, nil, nil}
+        end,
+        body: fn(_) -> Facebook.GraphMock.me(:success) end
+      ] do
+        assert {:ok, user} = Facebook.me("id,first_name", access_token)
+        assert(user["id"] == id)
+        assert(String.length(user["first_name"]) > 0)
+      end
+    end
 
-    {:json, userData} = Facebook.me("id,first_name", access_token)
-
-    assert(userData["id"] == id)
-    assert(String.length(userData["first_name"]) > 0)
+    test "error", %{invalid_access_token: invalid_access_token} do
+      with_mock :hackney, [
+        request: fn(_method, _url, _headers, _payload, _options) ->
+          {:ok, nil, nil, nil}
+        end,
+        body: fn(_) -> Facebook.GraphMock.error() end
+      ] do
+        assert {:error, %{"code" => _,"message" => _,}} = Facebook.me(
+          "id,first_name",
+          invalid_access_token
+        )
+      end
+    end
   end
 
-  test "picture", context do
-    %{id: id, access_token: access_token} = context
+  describe "picture" do
+    test "success", %{id: id, access_token: access_token} do
+      with_mock :hackney, [
+        request: fn(_method, _url, _headers, _payload, _options) ->
+          {:ok, nil, nil, nil}
+        end,
+        body: fn(_) -> Facebook.GraphMock.picture(:success) end
+      ] do
+        {:ok, %{"data" => picture_data}} = Facebook.picture(
+          id,
+          "small",
+          access_token
+        )
 
-    {:json, pictureData} = Facebook.picture(id, "small", access_token)
+        assert(String.length(picture_data["url"]) > 0)
+      end
+    end
 
-    assert(String.length(pictureData["data"]["url"]) > 0)
+    test "error", %{id: id, invalid_access_token: invalid_access_token} do
+      with_mock :hackney, [
+        request: fn(_method, _url, _headers, _payload, _options) ->
+          {:ok, nil, nil, nil}
+        end,
+        body: fn(_) -> Facebook.GraphMock.error() end
+      ] do
+        assert {:error, _} = Facebook.picture(id, "small", invalid_access_token)
+      end
+    end
   end
 
-  test "publish", context do
-    %{id: id, access_token: access_token} = context
+  describe "publish" do
+    test "feed - success", %{id: id, access_token: access_token} do
+      with_mock :hackney, [
+        request: fn(_method, _url, _headers, _payload, _options) ->
+          {:ok, nil, nil, nil}
+        end,
+        body: fn(_) -> Facebook.GraphMock.publish(:success, :feed) end
+      ] do
+        {:ok, response} = Facebook.publish(
+          :feed,
+          id,
+          [message: "test message",
+          link: "www.example.org"],
+          access_token
+        )
+        assert(String.length(response["id"]) > 0)
+      end
+    end
 
-    {:json, response} = Facebook.publish(:feed, id, [message: "test message", link: "www.example.org"], access_token)
-    assert(String.length(response["id"]) > 0)
+    test "feed - error", %{id: id, invalid_access_token: invalid_access_token} do
+      with_mock :hackney, [
+        request: fn(_method, _url, _headers, _payload, _options) ->
+          {:ok, nil, nil, nil}
+        end,
+        body: fn(_) -> Facebook.GraphMock.error() end
+      ] do
+        assert {:error, _} = Facebook.publish(
+          :feed,
+          id,
+          [message: "test message",
+          link: "www.example.org"],
+          invalid_access_token
+        )
+      end
+    end
+
+    test "photo - success", %{id: id, access_token: access_token} do
+      with_mock :hackney, [
+        request: fn(_method, _url, _headers, _payload, _options) ->
+          {:ok, nil, nil, nil}
+        end,
+        body: fn(_) -> Facebook.GraphMock.publish(:success, :image) end
+      ] do
+        file_path = "test/assets/sample_image.png"
+        assert {:ok, %{"id" => _, "post_id" => _}} = Facebook.publish(
+          :photo,
+          id,
+          file_path,
+          [],
+          access_token
+        )
+      end
+    end
+
+    test "photo - error", %{id: id, invalid_access_token: invalid_access_token} do
+      with_mock :hackney, [
+        request: fn(_method, _url, _headers, _payload, _options) ->
+          {:ok, nil, nil, nil}
+        end,
+        body: fn(_) -> Facebook.GraphMock.error() end
+      ] do
+        file_path = "test/assets/sample_image.png"
+        assert {:error, _} = Facebook.publish(
+          :photo,
+          id,
+          file_path,
+          [],
+          invalid_access_token
+        )
+      end
+    end
+
+    test "video - success", %{id: id, access_token: access_token} do
+      with_mock :hackney, [
+        request: fn(_method, _url, _headers, _payload, _options) ->
+          {:ok, nil, nil, nil}
+        end,
+        body: fn(_) -> Facebook.GraphMock.publish(:success, :image) end
+      ] do
+        file_path = "test/assets/sample_video.mpg"
+        assert {:ok, response} = Facebook.publish(
+          :video,
+          id,
+          file_path,
+          [],
+          access_token
+        )
+        assert(String.length(response["id"]) > 0)
+      end
+    end
+
+    test "video - error", %{id: id, invalid_access_token: invalid_access_token} do
+      with_mock :hackney, [
+        request: fn(_method, _url, _headers, _payload, _options) ->
+          {:ok, nil, nil, nil}
+        end,
+        body: fn(_) -> Facebook.GraphMock.error() end
+      ] do
+        file_path = "test/assets/sample_image.png"
+        assert {:error, _} = Facebook.publish(
+          :photo,
+          id,
+          file_path,
+          [],
+          invalid_access_token
+        )
+      end
+    end
   end
 
-  test "publish photo", context do
-    %{id: id, access_token: access_token} = context
-    file_path = "test/assets/sample_image.png"
+  describe "my_likes" do
+    test "success", %{access_token: access_token} do
+      with_mock :hackney, [
+        request: fn(_method, _url, _headers, _payload, _options) ->
+          {:ok, nil, nil, nil}
+        end,
+        body: fn(_) -> Facebook.GraphMock.my_likes(:success) end
+      ] do
+        {:ok, likes_data} = Facebook.my_likes(access_token)
 
-    {:json, response} = Facebook.publish(:photo, id, file_path, [], access_token)
-    assert(String.length(response["id"]) > 0)
+        assert(likes_data != nil)
+      end
+    end
+
+    test "error", %{invalid_access_token: invalid_access_token} do
+      with_mock :hackney, [
+        request: fn(_method, _url, _headers, _payload, _options) ->
+          {:ok, nil, nil, nil}
+        end,
+        body: fn(_) -> Facebook.GraphMock.error() end
+      ] do
+        assert {:error, _} = Facebook.my_likes(invalid_access_token)
+      end
+    end
   end
 
-  test "publish video", context do
-    %{id: id, access_token: access_token} = context
-    file_path = "test/assets/sample_video.mpg"
+  describe "permissions" do
+    test "success", %{id: id, access_token: access_token} do
+      with_mock :hackney, [
+        request: fn(_method, _url, _headers, _payload, _options) ->
+          {:ok, nil, nil, nil}
+        end,
+        body: fn(_) -> Facebook.GraphMock.permissions(:success) end
+      ] do
+        assert {:ok, %{"data" => data}} = Facebook.permissions(id, access_token)
 
-    {:json, response} = Facebook.publish(:video, id, file_path, [], access_token)
-    assert(String.length(response["id"]) > 0)
+        [permission | _] = data
+        assert(permission["permission"] != nil)
+        assert(permission["status"] != nil)
+      end
+    end
+
+    test "error", %{id: id, invalid_access_token: invalid_access_token} do
+      with_mock :hackney, [
+        request: fn(_method, _url, _headers, _payload, _options) ->
+          {:ok, nil, nil, nil}
+        end,
+        body: fn(_) -> Facebook.GraphMock.error() end
+      ] do
+        assert {:error, _} = Facebook.permissions(id, invalid_access_token)
+      end
+    end
   end
 
-  test "myLikes", context do
-    %{access_token: access_token} = context
+  describe "fan_count" do
+    test "success", %{app_access_token: app_access_token} do
+      with_mock :hackney, [
+        request: fn(_method, _url, _headers, _payload, _options) ->
+          {:ok, nil, nil, nil}
+        end,
+        body: fn(_) -> Facebook.GraphMock.page(:success, :fan_count) end
+      ] do
+        assert {:ok, %{"fan_count" => _}} = Facebook.fan_count(
+          @page_id,
+          app_access_token
+        )
+      end
+    end
 
-    {:json, likesData} = Facebook.myLikes(access_token)
-
-    assert(likesData["data"] != nil)
+    test "error", %{invalid_access_token: invalid_access_token} do
+      with_mock :hackney, [
+        request: fn(_method, _url, _headers, _payload, _options) ->
+          {:ok, nil, nil, nil}
+        end,
+        body: fn(_) -> Facebook.GraphMock.error() end
+      ] do
+        assert {:error, _} = Facebook.fan_count(@page_id, invalid_access_token)
+      end
+    end
   end
 
-  test "permissions", context do
-    %{id: id, access_token: access_token} = context
+  describe "page" do
+    test "success", %{app_access_token: app_access_token} do
+      with_mock :hackney, [
+        request: fn(_method, _url, _headers, _payload, _options) ->
+          {:ok, nil, nil, nil}
+        end,
+        body: fn(_) -> Facebook.GraphMock.page(:success) end
+      ] do
+        assert {:ok, %{
+          "name" => name,
+          "id" => id
+        }} = Facebook.page(@page_id, app_access_token)
 
-    {:json, perms} = Facebook.permissions(id, access_token)
+        assert(String.length(name) > 0)
+        assert(id == Integer.to_string(@page_id, 10))
+      end
+    end
 
-    assert(perms["data"] != nil)
-
-    [ permission | _ ] = perms["data"]
-    assert(permission["permission"] != nil)
-    assert(permission["status"] != nil)
+    test "error", %{invalid_access_token: invalid_access_token} do
+      with_mock :hackney, [
+        request: fn(_method, _url, _headers, _payload, _options) ->
+          {:ok, nil, nil, nil}
+        end,
+        body: fn(_) -> Facebook.GraphMock.error() end
+      ] do
+        assert {:error, _} = Facebook.page(@page_id, invalid_access_token)
+      end
+    end
   end
 
-  test "fanCount", context do
-    %{app_access_token: app_access_token} = context
+  describe "page with fields" do
+    test "success", %{app_access_token: app_access_token} do
+      with_mock :hackney, [
+        request: fn(_method, _url, _headers, _payload, _options) ->
+          {:ok, nil, nil, nil}
+        end,
+        body: fn(_) -> Facebook.GraphMock.page(:success, :with_fields) end
+      ] do
+        assert {:ok, %{
+          "id" => id,
+          "about" => about
+        }} = Facebook.page(@page_id, app_access_token, ["about"])
 
-    count = Facebook.fanCount(@pageId, app_access_token)
-    assert(count > 0)
+        assert(String.length(about) > 0)
+        assert(id == Integer.to_string(@page_id, 10))
+      end
+    end
+
+    test "error", %{invalid_access_token: invalid_access_token} do
+      with_mock :hackney, [
+        request: fn(_method, _url, _headers, _payload, _options) ->
+          {:ok, nil, nil, nil}
+        end,
+        body: fn(_) -> Facebook.GraphMock.error() end
+      ] do
+        assert {:error, _} = Facebook.page(
+          @page_id,
+          invalid_access_token,
+          ["about"]
+        )
+      end
+    end
   end
 
-  test "pageLikes", context do
-    %{app_access_token: app_access_token} = context
+  describe "page feed" do
+    test "success", %{app_access_token: app_access_token} do
+      with_mock :hackney, [
+        request: fn(_method, _url, _headers, _payload, _options) ->
+          {:ok, nil, nil, nil}
+        end,
+        body: fn(_) -> Facebook.GraphMock.page(:success, :feed) end
+      ] do
+        assert {:ok, %{"data" => [data | _]}} = Facebook.page_feed(
+          :feed,
+          @page_id,
+          app_access_token,
+          1
+        )
 
-    count = Facebook.pageLikes(@pageId, app_access_token)
-    assert(count > 0)
+        assert %{
+          "id" => _,
+          "created_time" => _,
+          "message" => _,
+          "story" => _
+        } = data
+      end
+    end
+
+    test "error", %{invalid_access_token: invalid_access_token} do
+      with_mock :hackney, [
+        request: fn(_method, _url, _headers, _payload, _options) ->
+          {:ok, nil, nil, nil}
+        end,
+        body: fn(_) -> Facebook.GraphMock.error() end
+      ] do
+        assert {:error, _} = Facebook.page_feed(
+          :feed,
+          @page_id,
+          invalid_access_token,
+          1
+        )
+      end
+    end
   end
 
-  test "page", context do
-    %{app_access_token: app_access_token} = context
-
-    {:json, data} = Facebook.page(@pageId, app_access_token)
-    assert(data != nil)
-
-    %{"name" => name, "id" => id} = data
-    assert(String.length(name) > 0)
-    assert(id == Integer.to_string(@pageId, 10))
+  describe "object count" do
+    test "success", %{access_token: access_token} do
+      with_mock :hackney, [
+        request: fn(_method, _url, _headers, _payload, _options) ->
+          {:ok, nil, nil, nil}
+        end,
+        body: fn(_) -> Facebook.GraphMock.object_count(:success, :likes) end
+      ] do
+        assert {:ok, 10} = Facebook.object_count(
+          :likes,
+          "1326382730725053_1326476257382367",
+          access_token
+        )
+      end
+    end
   end
 
-  test "page with fields", context do
-    %{app_access_token: app_access_token} = context
-
-    {:json, data} = Facebook.page(@pageId, app_access_token, ["about"])
-    assert(data != nil)
-
-    %{"id" => id, "about" => about} = data
-    assert(String.length(about) > 0)
-    assert(id == Integer.to_string(@pageId, 10))
+  describe "object reaction count" do
+    test "success", %{access_token: access_token} do
+      with_mock :hackney, [
+        request: fn(_method, _url, _headers, _payload, _options) ->
+          {:ok, nil, nil, nil}
+        end,
+        body: fn(_) -> Facebook.GraphMock.object_count(:success, :likes) end
+      ] do
+        assert {:ok, 10} = Facebook.object_count(
+          :reaction,
+          :wow,
+          "#{@test_page_id}_629967087187379",
+          access_token
+        )
+      end
+    end
   end
 
-  test "page feed", context do
-    %{access_token: access_token} = context
+  describe "object count all" do
+    test "success", %{access_token: access_token} do
+      with_mock :hackney, [
+        request: fn(_method, _url, _headers, _payload, _options) ->
+          {:ok, nil, nil, nil}
+        end,
+        body: fn(_) -> Facebook.GraphMock.object_count_all(:success) end
+      ] do
+        assert {:ok, %{"haha" => haha, "love" => love}} = Facebook.object_count_all(
+          "#{@test_page_id}_629967087187379",
+          access_token
+        )
 
-    data = Facebook.pageFeed(:feed, @testPageId, access_token)
-    assert(data != nil)
+        assert haha == 135
+        assert love == 10
+      end
+    end
   end
 
-  test "object count", context do
-    %{access_token: access_token} = context
+  describe "long lived access token" do
+    test "success", %{access_token: access_token} do
+      with_mock :hackney, [
+        request: fn(_method, _url, _headers, _payload, _options) ->
+          {:ok, nil, nil, nil}
+        end,
+        body: fn(_) -> Facebook.GraphMock.long_lived_access_token(:success) end
+      ] do
+        assert {:ok, %{
+          "access_token" => access_token,
+          "expires_in" => expires_in,
+          "token_type" => token_type
+        }} = Facebook.long_lived_access_token(
+          @app_id,
+          @app_secret,
+          access_token
+        )
 
-    count = Facebook.objectCount(:likes, "#{@testPageId}_629967087187379", access_token)
-    assert(count >= 0)
+        assert(String.length(access_token) > 0)
+        assert(token_type == "bearer")
+        assert(expires_in > 0)
+      end
+    end
+
+    test "error", %{invalid_access_token: invalid_access_token} do
+      with_mock :hackney, [
+        request: fn(_method, _url, _headers, _payload, _options) ->
+          {:ok, nil, nil, nil}
+        end,
+        body: fn(_) -> Facebook.GraphMock.error() end
+      ] do
+        assert {:error, _} = Facebook.long_lived_access_token(
+          @app_id,
+          @app_secret,
+          invalid_access_token
+        )
+      end
+    end
   end
 
-  test "object reaction count", context do
-    %{access_token: access_token} = context
+  describe "new stream" do
+    test "success", %{app_access_token: app_access_token} do
+      with_mock :hackney, [
+        request: fn(_method, _url, _headers, _payload, _options) ->
+          {:ok, nil, nil, nil}
+        end,
+        body: fn(_) -> Facebook.GraphMock.page(:success, :feed) end
+      ] do
+        posts = Facebook.page_feed(
+          :feed,
+          @page_id,
+          app_access_token,
+          1
+        )
+          |> Facebook.Stream.new
+          |> Stream.take(1)
+          |> Enum.to_list
 
-    count = Facebook.objectCount(:reaction, :wow, "#{@testPageId}_629967087187379", access_token)
-    assert(count >= 0)
-  end
-
-  test "object count all", context do
-    %{access_token: access_token} = context
-
-    counts = Facebook.objectCountAll("#{@testPageId}_629967087187379", access_token)
-    assert(counts["angry"] >= 0)
-    assert(counts["haha"] >= 0)
-    assert(counts["like"] >= 0)
-    assert(counts["love"] >= 0)
-    assert(counts["sad"] >= 0)
-    assert(counts["wow"] >= 0)
-  end
-
-  test "long lived access token", context do
-    %{access_token: access_token} = context
-    data = Facebook.longLivedAccessToken(@appId, @appSecret, access_token)
-
-    assert(String.length(data["access_token"]) > 0)
-    assert(data["token_type"] == "bearer")
-    assert(data["expires"] > 0)
-  end
-
-  test "new stream", context do
-    %{access_token: access_token} = context
-
-    stream =
-      Facebook.pageFeed(:feed, @testPageId, access_token, 25)
-      |> Facebook.Stream.new
-
-    # get 150 posts
-    posts = stream |> Stream.take(150) |> Enum.to_list
-
-    assert(length(posts) == 150)
+        assert(length(posts) == 1)
+      end
+    end
   end
 end
