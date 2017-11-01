@@ -1,4 +1,7 @@
 defmodule Facebook.Config do
+  @moduledoc """
+  Config helpers
+  """
 
   # URL to the Facebook Graph including the version.
   def graph_url do

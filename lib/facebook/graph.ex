@@ -88,13 +88,20 @@ defmodule Facebook.Graph do
   """
   @spec request(method, url, payload, options) :: response
   def request(method, url, payload, options) do
-    send_request(method, url, [], payload, options)
+    method
+      |> send_request(url, [], payload, options)
       |> parse_response_body()
       |> format_response_body()
   end
 
   def send_request(method, url, headers, payload, options) do
-    {:ok, _, _, client_ref} = :hackney.request(method, url, headers, payload, options)
+    {:ok, _, _, client_ref} = :hackney.request(
+      method,
+      url,
+      headers,
+      payload,
+      options
+    )
     :hackney.body(client_ref)
   end
 

@@ -9,6 +9,7 @@ defmodule Facebook do
   """
 
   alias Facebook.Config
+  alias Facebook.Graph
 
   @doc "Start hook"
   def start(_type, _args) do
@@ -22,7 +23,7 @@ defmodule Facebook do
 
   def init(_) do
     children = [
-      worker(Facebook.Graph, [])
+      worker(Graph, [])
     ]
 
     supervise(children, strategy: :one_for_one)
@@ -74,7 +75,7 @@ defmodule Facebook do
     fields = fields
       |> add_app_secret(access_token)
 
-    Facebook.Graph.get("/me", fields ++ [access_token: access_token])
+    Graph.get("/me", fields ++ [access_token: access_token])
   end
 
   @doc """
@@ -103,7 +104,7 @@ defmodule Facebook do
   @spec publish(:feed, feed_id :: String.t, fields, access_token) :: response
   def publish(:feed, feed_id, fields, access_token) do
     params = fields ++ [access_token: access_token]
-    Facebook.Graph.post("/#{feed_id}/feed", params, [])
+    Graph.post("/#{feed_id}/feed", params, [])
   end
 
   @doc """
@@ -111,7 +112,6 @@ defmodule Facebook do
 
   The `feed_id` is the id for the user or page feed to publish to.
   Same :feed publishing permissions apply.
-
 
   ## Example
       iex> Facebook.publish(:photo, "<Feed Id>", "<Image Path>", [], "<Access Token>")
@@ -122,22 +122,41 @@ defmodule Facebook do
 
   See: https://developers.facebook.com/docs/pages/publishing#fotos_videos
   """
-  @spec publish(:photo, page_id :: String.t, file_path :: String.t, fields, access_token) :: response
+  @spec publish(
+    :photo,
+    page_id :: String.t,
+    file_path :: String.t,
+    fields,
+    access_token
+  ) :: response
   def publish(:photo, page_id, file_path, fields, access_token) do
     params = fields ++ [access_token: access_token]
     payload = media_payload(file_path)
-    Facebook.Graph.post("/#{page_id}/photos", payload, params, [])
+    Graph.post("/#{page_id}/photos", payload, params, [])
   end
 
-  @spec publish(:video, page_id :: String.t, file_path :: String.t, fields, access_token) :: response
+  @spec publish(
+    :video,
+    page_id :: String.t,
+    file_path :: String.t,
+    fields, access_token
+  ) :: response
   def publish(:video, page_id, file_path, fields, access_token) do
     params = fields ++ [access_token: access_token]
     payload = media_payload(file_path)
-    Facebook.Graph.post(:video, "/#{page_id}/videos", payload, params, [])
+    Graph.post(:video, "/#{page_id}/videos", payload, params, [])
   end
 
   defp media_payload(file_path) do
-    {:multipart, [{:file, file_path, {"form-data", [filename: Path.basename(file_path)]}, []}]}
+    {
+      :multipart,
+      [{
+        :file,
+        file_path,
+        {"form-data", [filename: Path.basename(file_path)]},
+        []
+      }]
+    }
   end
 
   @doc """
@@ -154,7 +173,7 @@ defmodule Facebook do
     fields = [type: type, redirect: false, access_token: access_token]
       |> add_app_secret(access_token)
 
-    Facebook.Graph.get("/#{user_id}/picture", fields)
+    Graph.get("/#{user_id}/picture", fields)
   end
 
   @doc """
@@ -171,7 +190,7 @@ defmodule Facebook do
     fields = [access_token: access_token]
       |> add_app_secret(access_token)
 
-    Facebook.Graph.get("/me/likes", fields)
+    Graph.get("/me/likes", fields)
   end
 
   @doc """
@@ -187,7 +206,7 @@ defmodule Facebook do
   def permissions(user_id, access_token) do
     fields = [access_token: access_token]
       |> add_app_secret(access_token)
-    Facebook.Graph.get(~s(/#{user_id}/permissions), fields)
+    Graph.get(~s(/#{user_id}/permissions), fields)
   end
 
   @doc """
@@ -231,7 +250,7 @@ defmodule Facebook do
   def page(page_id, access_token, fields) do
     params = [fields: fields, access_token: access_token]
       |> add_app_secret(access_token)
-    Facebook.Graph.get(~s(/#{page_id}), params)
+    Graph.get(~s(/#{page_id}), params)
   end
 
   @doc """
@@ -258,12 +277,17 @@ defmodule Facebook do
 
   See: https://developers.facebook.com/docs/graph-api/reference/page/feed
   """
-  @spec page_feed(scope :: atom | String.t, page_id :: String.t, access_token, limit :: number, fields :: String.t) :: response
+  @spec page_feed(
+    scope :: atom | String.t,
+    page_id :: String.t,
+    access_token,
+    limit :: number, fields :: String.t
+  ) :: response
   def page_feed(scope, page_id, access_token, limit \\ 25, fields \\ "") when limit <= 100 do
     params = [access_token: access_token, limit: limit, fields: fields]
       |> add_app_secret(access_token)
 
-    Facebook.Graph.get(~s(/#{page_id}/#{scope}), params)
+    Graph.get(~s(/#{page_id}/#{scope}), params)
   end
 
   @doc """
@@ -286,7 +310,11 @@ defmodule Facebook do
   See: https://developers.facebook.com/docs/graph-api/reference/object/likes
   See: https://developers.facebook.com/docs/graph-api/reference/object/comments
   """
-  @spec object_count(scope :: atom, object_id :: String.t, access_token) :: {:ok, number} | {:error, Map.t}
+  @spec object_count(
+    scope :: atom,
+    object_id :: String.t,
+    access_token
+  ) :: {:ok, number} | {:error, Map.t}
   def object_count(scope, object_id, access_token) when is_atom(scope) do
     params = [access_token: access_token, summary: true]
       |> add_app_secret(access_token)
@@ -295,7 +323,8 @@ defmodule Facebook do
       |> Atom.to_string
       |> String.downcase
 
-    Facebook.Graph.get(~s(/#{object_id}/#{scp}), params)
+    ~s(/#{object_id}/#{scp})
+      |> Graph.get(params)
       |> get_summary
       |> summary_count
   end
@@ -313,14 +342,33 @@ defmodule Facebook do
     * :none
 
   ## Examples
-      iex> Facebook.object_count(:reaction, :wow, "769860109692136_1173416799336463", "<Access Token>")
+      iex> Facebook.object_count(
+        :reaction,
+        :wow,
+        "769860109692136_1173416799336463",
+        "<Access Token>"
+      )
       {:ok, 100}
-      iex> Facebook.object_count(:reaction, :haha, "769860109692136_1173416799336463", "<Access Token>")
+      iex> Facebook.object_count(
+        :reaction,
+        :haha,
+        "769860109692136_1173416799336463",
+        "<Access Token>"
+      )
       {:ok, 100}
-      iex> Facebook.object_count(:reaction, :thankful, "769860109692136_1173416799336463", "<Access Token>")
+      iex> Facebook.object_count(
+        :reaction,
+        :thankful,
+        "769860109692136_1173416799336463",
+        "<Access Token>"
+      )
       {:ok, 100}
   """
-  @spec object_count(reaction, react_type :: atom, object_id :: String.t, access_token) :: {:ok, number} | {:error, Map.t}
+  @spec object_count(
+    reaction,
+    react_type :: atom,
+    object_id :: String.t, access_token
+  ) :: {:ok, number} | {:error, Map.t}
   def object_count(:reaction, react_type, object_id, access_token) when is_atom(react_type) do
     type = react_type
       |> Atom.to_string
@@ -329,7 +377,8 @@ defmodule Facebook do
     params = [access_token: access_token, type: type, summary: "total_count"]
       |> add_app_secret(access_token)
 
-    Facebook.Graph.get(~s(/#{object_id}/reactions), params)
+    ~s(/#{object_id}/reactions)
+      |> Graph.get(params)
       |> get_summary
       |> summary_count
   end
@@ -355,7 +404,8 @@ defmodule Facebook do
     params = [access_token: access_token, fields: graph_query]
       |> add_app_secret(access_token)
 
-    Facebook.Graph.get(~s(/#{object_id}), params)
+    ~s(/#{object_id})
+      |> Graph.get(params)
       |> summary_count_all
   end
 
@@ -374,10 +424,12 @@ defmodule Facebook do
   """
   @spec access_token(String.t, String.t, String.t, String.t) :: response
   def access_token(client_id, client_secret, redirect_uri, code) do
-    [ client_id: client_id,
+    [
+      client_id: client_id,
       client_secret: client_secret,
       redirect_uri: redirect_uri,
-      code: code ]
+      code: code
+    ]
       |> get_access_token
   end
 
@@ -396,10 +448,12 @@ defmodule Facebook do
   """
   @spec long_lived_access_token(String.t, String.t, String.t) :: response
   def long_lived_access_token(client_id, client_secret, access_token) do
-    [ grant_type: "fb_exchange_token",
+    [
+      grant_type: "fb_exchange_token",
       client_id: client_id,
       client_secret: client_secret,
-      fb_exchange_token: access_token ]
+      fb_exchange_token: access_token
+    ]
       |> get_access_token
   end
 
@@ -423,17 +477,16 @@ defmodule Facebook do
   """
   @spec test_users(String.t, String.t) :: response
   def test_users(app_id, access_token) do
-    Facebook.Graph.get(
+    Graph.get(
       ~s(/#{app_id}/accounts/test-users),
       [access_token: access_token]
     )
   end
 
-
   # Request access token and extract the access token from the access token
   # response
   defp get_access_token(params) do
-    Facebook.Graph.get(~s(/oauth/access_token), params)
+    Graph.get(~s(/oauth/access_token), params)
   end
 
   # Provides the summary of a GET request when the 'summary' query parameter is
@@ -458,7 +511,8 @@ defmodule Facebook do
 
   # Calculate the reactions summary
   defp summary_count_all(summary) do
-    Map.keys(summary)
+    summary
+      |> Map.keys()
       |> Enum.reject(fn(x) -> x === "id" end)
       |> Enum.map(fn(x) ->
         [x, get_in(summary[x], ["summary", "total_count"])] end)
@@ -467,19 +521,21 @@ defmodule Facebook do
       |> (& {:ok, &1}).()
   end
 
-  # 'Encrypts' the token together with the app secret according to the guidelines of facebook.
+  # 'Encrypts' the token together with the app secret according to the
+  # guidelines of facebook.
   defp encrypt(token) do
-    :crypto.hmac(:sha256, Config.appsecret, token)
-    |> Base.encode16(case: :lower)
+    :sha256
+      |> :crypto.hmac(Config.appsecret, token)
+      |> Base.encode16(case: :lower)
   end
 
   # Add the appsecret_proof to the GraphAPI request params if the app secret is
   # defined
   defp add_app_secret(params, access_token) do
-    if !is_nil(Config.appsecret) do
-      params ++ [appsecret_proof: encrypt(access_token)]
-    else
+    if is_nil(Config.appsecret) do
       params
+    else
+      params ++ [appsecret_proof: encrypt(access_token)]
     end
   end
 end
