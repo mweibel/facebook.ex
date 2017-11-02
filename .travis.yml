@@ -7,3 +7,4 @@ sudo: false
 otp_release:
   - 18.1
   - 19.0
+script: MIX_ENV=test mix quality
