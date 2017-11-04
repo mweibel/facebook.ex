@@ -1,4 +1,4 @@
-defmodule Facebook.FacebookTest do
+defmodule FacebookTest do
   use ExUnit.Case, async: false
 
   import Mock

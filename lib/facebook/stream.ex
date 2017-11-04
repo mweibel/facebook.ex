@@ -30,21 +30,31 @@ defmodule Facebook.Stream do
   iex> stream |> Stream.filter(fn(name) -> name == "Coca Cola" end) |> Stream.take(100) |> Enum.to_list
   """
   @spec new(Map.t, ((error, retry) -> any), pos_integer) :: Enumerable.t
-  def new({:ok, paged_response},
+  def new(
+    {:ok, paged_response},
     error_handler \\ fn(_error, _retry) -> Process.sleep(1_000) end,
-    max_retries \\ 3) do
+    max_retries \\ 3
+  ) do
     Stream.resource(
-      fn -> %__MODULE__{next: paged_response, current: :empty, max_retries: max_retries} end,
-      fn(feed) -> case next_page(feed, error_handler) do
-		    %__MODULE__{current: nil   }   -> {:halt, nil} # no more data
-		    %__MODULE__{current: response} -> {get_data(response), %{feed | current: response}} # normal pagination
-		    {error, retries} -> # max retries reached
-		      error_handler.(error, retries)
-		      {:halt, error}
-		  end
+      fn ->
+        %__MODULE__{
+          next: paged_response,
+          current: :empty,
+          max_retries: max_retries
+        }
       end,
-      fn (_) -> :ok
-      end
+      fn(feed) ->
+        case next_page(feed, error_handler) do
+          %__MODULE__{current: nil} ->
+            {:halt, nil} # no more data
+          %__MODULE__{current: response} -> # normal pagination
+            {get_data(response), %{feed | current: response}}
+          {error, retries} -> # max retries reached
+            error_handler.(error, retries)
+            {:halt, error}
+        end
+      end,
+      fn (_) -> :ok end
     )
   end
 
@@ -54,22 +64,29 @@ defmodule Facebook.Stream do
     %{feed | current: next, next: :empty}
   end
 
-  defp next_page(%__MODULE__{current: current, max_retries: max_retries} = feed,
-    error_handler) do
-    Stream.cycle([1])
-    |> Stream.scan(0, &(&1+&2))
-    |> Enum.reduce_while(feed, fn i, acc ->
-      if i < max_retries do
-	case get_next_paged_data(current) do
-	  {:error, reason}  -> error_handler.(reason, i); {:cont, reason}
-	  {:ok, %{"error" => reason}} -> error_handler.(reason, i); {:cont, reason}
-	  {:ok, next_obj} -> {:halt, %{feed | current: next_obj}}
-	  nil               -> {:halt, %{feed | current: nil}}
-	end
-      else
-	{:halt, {acc, i}}
-      end
-    end)
+  defp next_page(
+    %__MODULE__{current: current, max_retries: max_retries} = feed,
+    error_handler
+  ) do
+    [1]
+      |> Stream.cycle()
+      |> Stream.scan(0, &(&1 + &2))
+      |> Enum.reduce_while(feed, fn i, acc ->
+        if i < max_retries do
+          case get_next_paged_data(current) do
+            {:error, reason} ->
+              error_handler.(reason, i)
+              {:cont, reason}
+            {:ok, %{"error" => reason}} ->
+              error_handler.(reason, i)
+              {:cont, reason}
+            {:ok, next_obj} -> {:halt, %{feed | current: next_obj}}
+            nil -> {:halt, %{feed | current: nil}}
+          end
+        else
+          {:halt, {acc, i}}
+        end
+      end)
   end
 
   # Gets next data page
