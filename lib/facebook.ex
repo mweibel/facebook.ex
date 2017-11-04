@@ -10,6 +10,7 @@ defmodule Facebook do
 
   alias Facebook.Config
   alias Facebook.Graph
+  alias Facebook.GraphApi
 
   @doc "Start hook"
   def start(_type, _args) do
@@ -79,10 +80,12 @@ defmodule Facebook do
   """
   @spec me(fields, access_token) :: resp
   def me(fields, access_token) do
-    fields = fields
-      |> add_app_secret(access_token)
+    params = fields
+             |> add_app_secret(access_token)
+             |> add_access_token(access_token)
 
-    Graph.get("/me", fields ++ [access_token: access_token])
+    GraphApi.get("/me", [], params: params)
+    |> GraphApi.format_response
   end
 
   @doc """
@@ -520,5 +523,10 @@ defmodule Facebook do
     else
       params ++ [appsecret_proof: encrypt(access_token)]
     end
+  end
+
+  ## Add access_token to params
+  defp add_access_token(fields, token) do
+    fields ++ [access_token: token]
   end
 end
