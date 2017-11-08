@@ -10,7 +10,9 @@ defmodule Facebook do
 
   alias Facebook.Config
   alias Facebook.Graph
-  alias Facebook.GraphApi
+  alias Facebook.GraphAPI
+  alias Facebook.GraphVideoAPI
+  alias Facebook.ResponseFormatter
 
   @doc "Start hook"
   def start(_type, _args) do
@@ -41,8 +43,10 @@ defmodule Facebook do
   @type limit :: number
   @type fields :: list
   @type resp :: {:ok, Map.t} | {:error, Map.t}
+  @type file_path :: String.t
   @type num_resp :: {:ok, number} | {:error, Map.t}
 
+  @type params :: list
   @doc """
   If you want to use an appsecret proof, pass it into set_appsecret:
 
@@ -81,11 +85,12 @@ defmodule Facebook do
   @spec me(fields, access_token) :: resp
   def me(fields, access_token) do
     params = fields
-             |> add_app_secret(access_token)
-             |> add_access_token(access_token)
+               |> add_app_secret(access_token)
+               |> add_access_token(access_token)
 
-    GraphApi.get("/me", [], params: params)
-    |> GraphApi.format_response
+    ~s(/me)
+      |> GraphAPI.get([], params: params)
+      |> ResponseFormatter.format_response
   end
 
   @doc """
@@ -132,18 +137,28 @@ defmodule Facebook do
 
   See: https://developers.facebook.com/docs/pages/publishing#fotos_videos
   """
-  @spec publish(:photo, page_id, file_path, fields, access_token) :: resp
-  def publish(:photo, page_id, file_path, fields, access_token) do
-    params = fields ++ [access_token: access_token]
+  @spec publish(:photo, page_id, file_path, params, access_token) :: resp
+  def publish(:photo, page_id, file_path, params, access_token) do
+    params = params
+               |> add_access_token(access_token)
     payload = media_payload(file_path)
-    Graph.post("/#{page_id}/photos", payload, params, [])
+
+    ~s(/#{page_id}/photos)
+      |> GraphAPI.post(payload, [], params: params)
+      |> ResponseFormatter.format_response
   end
 
-  @spec publish(:video, page_id, file_path, fields, access_token) :: resp
-  def publish(:video, page_id, file_path, fields, access_token) do
-    params = fields ++ [access_token: access_token]
+  @spec publish(:video, page_id, file_path, params, access_token, options :: list) :: resp
+  # credo:disable-for-next-line Credo.Check.Refactor.FunctionArity
+  def publish(:video, page_id, file_path, params, access_token, options \\ []) do
+    params = params
+               |> add_access_token(access_token)
+    options = options ++ [params: params]
     payload = media_payload(file_path)
-    Graph.post(:video, "/#{page_id}/videos", payload, params, [])
+
+    ~s(/#{page_id}/videos)
+      |> GraphVideoAPI.post(payload, [], options)
+      |> ResponseFormatter.format_response
   end
 
   defp media_payload(file_path) do
@@ -167,12 +182,15 @@ defmodule Facebook do
 
   See: https://developers.facebook.com/docs/graph-api/reference/user/picture/
   """
-  @spec picture(user_id :: String.t, type :: String.t, access_token) :: resp
-  def picture(user_id, type, access_token) do
-    fields = [type: type, redirect: false, access_token: access_token]
-      |> add_app_secret(access_token)
+  @spec picture(page_id, type :: String.t, access_token) :: resp
+  def picture(page_id, type, access_token) do
+    params = [type: type, redirect: false]
+               |> add_access_token(access_token)
+               |> add_app_secret(access_token)
 
-    Graph.get("/#{user_id}/picture", fields)
+    ~s(/#{page_id}/picture)
+      |> GraphAPI.get([], params: params)
+      |> ResponseFormatter.format_response
   end
 
   @doc """
@@ -186,10 +204,13 @@ defmodule Facebook do
   """
   @spec my_likes(access_token) :: resp
   def my_likes(access_token) do
-    fields = [access_token: access_token]
-      |> add_app_secret(access_token)
+    params = []
+               |> add_app_secret(access_token)
+               |> add_access_token(access_token)
 
-    Graph.get("/me/likes", fields)
+    ~s(/me/likes)
+      |> GraphAPI.get([], params: params)
+      |> ResponseFormatter.format_response
   end
 
   @doc """
@@ -247,9 +268,13 @@ defmodule Facebook do
   """
   @spec page(page_id :: integer | String.t, access_token, fields) :: resp
   def page(page_id, access_token, fields) do
-    params = [fields: fields, access_token: access_token]
-      |> add_app_secret(access_token)
-    Graph.get(~s(/#{page_id}), params)
+    params = [fields: fields]
+               |> add_app_secret(access_token)
+               |> add_access_token(access_token)
+
+    ~s(/#{page_id})
+      |> GraphAPI.get([], params: params)
+      |> ResponseFormatter.format_response
   end
 
   @doc """
@@ -275,13 +300,18 @@ defmodule Facebook do
       {:ok, %{"data" => [...]}}
 
   See: https://developers.facebook.com/docs/graph-api/reference/page/feed
-  """
-  @spec page_feed(scope, page_id, access_token, limit, fields) :: resp
-  def page_feed(scope, page_id, access_token, limit \\ 25, fields \\ "") when limit <= 100 do
-    params = [access_token: access_token, limit: limit, fields: fields]
-      |> add_app_secret(access_token)
 
-    Graph.get(~s(/#{page_id}/#{scope}), params)
+  """
+  # credo:disable-for-lines:2 Credo.Check.Readability.MaxLineLength
+  @spec page_feed(scope, page_id, access_token, limit, fields :: String.t) :: resp
+  def page_feed(scope, page_id, access_token, limit \\ 25, fields \\ "") when limit <= 100 do
+    params = [limit: limit, fields: fields]
+               |> add_app_secret(access_token)
+               |> add_access_token(access_token)
+
+    ~s(/#{page_id}/#{scope})
+      |> GraphAPI.get([], params: params)
+      |> ResponseFormatter.format_response
   end
 
   @doc """
@@ -306,15 +336,17 @@ defmodule Facebook do
   """
   @spec object_count(scope, object_id, access_token) :: num_resp
   def object_count(scope, object_id, access_token) when is_atom(scope) do
-    params = [access_token: access_token, summary: true]
-      |> add_app_secret(access_token)
+    params = [summary: true]
+               |> add_app_secret(access_token)
+               |> add_access_token(access_token)
 
     scp = scope
-      |> Atom.to_string
-      |> String.downcase
+            |> Atom.to_string
+            |> String.downcase
 
     ~s(/#{object_id}/#{scp})
-      |> Graph.get(params)
+      |> GraphAPI.get([], params: params)
+      |> ResponseFormatter.format_response
       |> get_summary
       |> summary_count
   end
@@ -339,32 +371,19 @@ defmodule Facebook do
         "<Access Token>"
       )
       {:ok, 100}
-      iex> Facebook.object_count(
-        :reaction,
-        :haha,
-        "769860109692136_1173416799336463",
-        "<Access Token>"
-      )
-      {:ok, 100}
-      iex> Facebook.object_count(
-        :reaction,
-        :thankful,
-        "769860109692136_1173416799336463",
-        "<Access Token>"
-      )
-      {:ok, 100}
   """
   @spec object_count(reaction, react_type, object_id, access_token) :: num_resp
   def object_count(:reaction, react_type, object_id, access_token) when is_atom(react_type) do
     type = react_type
-      |> Atom.to_string
-      |> String.upcase
+             |> Atom.to_string
+             |> String.upcase
 
-    params = [access_token: access_token, type: type, summary: "total_count"]
-      |> add_app_secret(access_token)
+    params = [type: type, summary: "total_count"]
+               |> add_app_secret(access_token)
+               |> add_access_token(access_token)
 
     ~s(/#{object_id}/reactions)
-      |> Graph.get(params)
+      |> GraphAPI.get([], params: params)
       |> get_summary
       |> summary_count
   end
@@ -387,11 +406,12 @@ defmodule Facebook do
     reactions.type(ANGRY).summary(total_count).limit(0).as(angry)
     """
 
-    params = [access_token: access_token, fields: graph_query]
-      |> add_app_secret(access_token)
+    params = [fields: graph_query]
+               |> add_app_secret(access_token)
+               |> add_access_token(access_token)
 
     ~s(/#{object_id})
-      |> Graph.get(params)
+      |> GraphAPI.get([], params)
       |> summary_count_all
   end
 
@@ -461,18 +481,21 @@ defmodule Facebook do
       }
     ]}
   """
-  @spec test_users(String.t, String.t) :: resp
-  def test_users(app_id, access_token) do
-    Graph.get(
-      ~s(/#{app_id}/accounts/test-users),
-      [access_token: access_token]
-    )
+  @spec test_users(client_id, access_token) :: resp
+  def test_users(client_id, access_token) do
+    params = []
+               |> add_access_token(access_token)
+    ~s(/#{client_id}/accounts/test-users)
+      |> GraphAPI.get([], params: params)
+      |> ResponseFormatter.format_response
   end
 
   # Request access token and extract the access token from the access token
   # response
   defp get_access_token(params) do
-    Graph.get(~s(/oauth/access_token), params)
+    ~s(/oauth/access_token)
+      |> GraphAPI.get([], params: params)
+      |> ResponseFormatter.format_response
   end
 
   # Provides the summary of a GET request when the 'summary' query parameter is
