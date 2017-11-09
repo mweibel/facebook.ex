@@ -101,4 +101,10 @@ defmodule Facebook.GraphMock do
       "id": "120762398683628",
     })
   end
+
+  def request do
+    fn(_method, _url, _headers, _payload, _options) ->
+      {:ok, nil, nil, nil}
+    end
+  end
 end
