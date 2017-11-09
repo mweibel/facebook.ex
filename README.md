@@ -23,7 +23,7 @@ $ mix deps.get
 ## Usage
 
 1. Register an application on [developer.facebook.com](https://developer.facebook.com)
-2. Get the `App ID` from the settings page of your registered application
+2. Get an `access_token` from [Facebook's Access Token Tool](https://developers.facebook.com/tools/accesstoken/)
 
 Then you can get started with code.
 
