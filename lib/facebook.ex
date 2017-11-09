@@ -32,21 +32,83 @@ defmodule Facebook do
     supervise(children, strategy: :one_for_one)
   end
 
-  @type using_appsecret :: boolean
-  @type react_type :: atom
-  @type scope :: atom | String.t
-  @type reaction :: :reaction
-  @type object_id :: String.t
-  @type page_id :: String.t
-  @type file_path :: String.t
+  @typedoc """
+  A token which is used to authenticate requests to Facebook's Graph API.
+
+  A user access token may be generated with
+  [Facebook Login](https://developers.facebook.com/docs/facebook-login/).
+  Access tokens for testing purposes may be retrieved from Facebook's
+  [Access Token Tool](https://developers.facebook.com/tools/accesstoken/)
+  or using the
+  [Graph Api Explorer](https://developers.facebook.com/tools/explorer/).
+  """
   @type access_token :: String.t
-  @type limit :: number
+
+  @typedoc """
+  Also referred to as an App ID, this may be found on your app dashboard.
+  """
+  @type client_id :: String.t
+
+  @typedoc """
+  Also referred to as an App Secret, this may be found on your app dashboard.
+  """
+  @type client_secret :: String.t
+
+  @typedoc """
+  Query values used for supplying or requesting edge attributes.
+  """
   @type fields :: list
-  @type resp :: {:ok, Map.t} | {:error, Map.t}
+
+  @typedoc """
+  Relative path to media file.
+  """
   @type file_path :: String.t
+
+  @type limit :: number
   @type num_resp :: {:ok, number} | {:error, Map.t}
 
+  @typedoc """
+  An id composed of a page and post ids separated with an underscore.
+  """
+  @type object_id :: String.t
+  @type page_id :: String.t | integer
+
+  @typedoc """
+  Additional attributes for media file uploads
+  """
   @type params :: list
+
+  @typedoc """
+  Can be:
+    * `:angry`
+    * `:haha`
+    * `:love`
+    * `:none`
+    * `:sad`
+    * `:thankful`
+    * `:wow`
+  """
+  @type react_type :: atom
+  @type reaction :: :reaction
+  @type resp :: {:ok, Map.t} | {:error, Map.t}
+
+  @typedoc """
+  A type of feed or object.
+
+  Feed scopes:
+    * `:feed`
+    * `:posts`
+    * `:promotabled_posts` (Admin permission needed)
+    * `:tagged`
+
+  Object scopes:
+    * `:likes`
+    * `:comments`
+  """
+  @type scope :: atom | String.t
+
+  @type using_appsecret :: boolean
+
   @doc """
   If you want to use an appsecret proof, pass it into set_appsecret:
 
@@ -60,10 +122,13 @@ defmodule Facebook do
   end
 
   @doc """
-  Basic user infos of the logged in user (specified by the access_token).
+  Basic user infos of the logged in user specified by the `t:access_token/0`
 
-  ## Example
+  ## Examples
       iex> Facebook.me("id,first_name", "<Access Token>")
+      {:ok, %{"first_name" => "...", "id" => "..."}}
+
+      iex> Facebook.me([fields: "id,first_name"], "<Access Token>")
       {:ok, %{"first_name" => "...", "id" => "..."}}
 
   See: https://developers.facebook.com/docs/graph-api/reference/user/
@@ -73,15 +138,6 @@ defmodule Facebook do
     me([fields: fields], access_token)
   end
 
-  @doc """
-  Basic user infos of the logged in user (specified by the access_token).
-
-  ## Example
-      iex> Facebook.me([fields: "id,first_name"], "<Access Token>")
-      {:ok, %{"first_name" => "...", "id" => "..."}}
-
-  See: https://developers.facebook.com/docs/graph-api/reference/user/
-  """
   @spec me(fields, access_token) :: resp
   def me(fields, access_token) do
     params = fields
@@ -96,8 +152,8 @@ defmodule Facebook do
   @doc """
   Publish to a feed. Author (user or page) is determined from the supplied token.
 
-  The `feed_id` is the id for the user or page feed to publish to.
-  Apps need both `manage_pages` and `publish_pages` to be able to publish as a Page.
+  The `t:page_id/0` is the id for the user or page feed to publish to.
+  Apps need both `manage_pages` and `publish_pages` permissions to be able to publish as a Page.
   The `publish_actions` permission is required to publish as an individual.
 
   See Facebook's publishing documentation for more info:
@@ -116,17 +172,21 @@ defmodule Facebook do
       {:ok, %{"id" => "{page_id}_{post_id}"}}
 
   """
-  @spec publish(:feed, feed_id :: String.t, fields, access_token) :: resp
-  def publish(:feed, feed_id, fields, access_token) do
-    params = fields ++ [access_token: access_token]
-    Graph.post("/#{feed_id}/feed", params, [])
+  @spec publish(:feed, page_id, params, access_token) :: resp
+  def publish(:feed, page_id, params, access_token) do
+    params = params
+               |> add_access_token(access_token)
+
+    ~s(/#{page_id}/feed)
+      |> GraphAPI.post("", [], params: params)
+      |> ResponseFormatter.format_response
   end
 
   @doc """
   Publish media to a feed. Author (user or page) is determined from the supplied token.
 
-  The `feed_id` is the id for the user or page feed to publish to.
-  Same :feed publishing permissions apply.
+  The `t:page_id/0` is the id for the user or page feed to publish to.
+  Same `:feed` publishing permissions apply.
 
   ## Example
       iex> Facebook.publish(:photo, "<Feed Id>", "<Image Path>", [], "<Access Token>")
@@ -176,6 +236,13 @@ defmodule Facebook do
   @doc """
   A Picture for a Facebook User
 
+  `type` may be:
+    * `"small"`
+    * `"normal"`
+    * `"album"`
+    * `"large"`
+    * `"square"`
+
   ## Example
       iex> Facebook.picture("<Some Id>", "small", "<Access Token>")
       {:ok, %{"data": "..."}}
@@ -194,7 +261,7 @@ defmodule Facebook do
   end
 
   @doc """
-  Likes of the currently logged in user (specified by the access_token)
+  Likes of the currently logged in user specified by the `t:access_token/0`
 
   ## Example
       iex> Facebook.my_likes("<Access Token>")
@@ -222,15 +289,19 @@ defmodule Facebook do
 
   See: https://developers.facebook.com/docs/graph-api/reference/user/permissions
   """
-  @spec permissions(user_id :: integer | String.t, access_token) :: resp
-  def permissions(user_id, access_token) do
-    fields = [access_token: access_token]
-      |> add_app_secret(access_token)
-    Graph.get(~s(/#{user_id}/permissions), fields)
+  @spec permissions(page_id, access_token) :: resp
+  def permissions(page_id, access_token) do
+    params = []
+               |> add_app_secret(access_token)
+               |> add_access_token(access_token)
+
+    ~s(/#{page_id}/permissions)
+      |> GraphAPI.get([], params: params)
+      |> ResponseFormatter.format_response
   end
 
   @doc """
-  Get the count of fans for the provided page_id
+  Get the count of fans for the provided `t:page_id/0`
 
   ## Example
       iex> Facebook.fan_count("CocaColaMx", "<Access Token>")
@@ -238,13 +309,13 @@ defmodule Facebook do
 
   See: https://developers.facebook.com/docs/graph-api/reference/page/
   """
-  @spec fan_count(page_id :: integer | String.t, access_token) :: integer
+  @spec fan_count(page_id, access_token) :: integer
   def fan_count(page_id, access_token) do
     page(page_id, access_token, ["fan_count"])
   end
 
   @doc """
-  Basic page information for the provided page_id
+  Basic page information for the provided `t:page_id/0`
 
   ## Example
       iex> Facebook.page("CocaColaMx", "<Access Token>")
@@ -252,13 +323,13 @@ defmodule Facebook do
 
   See: https://developers.facebook.com/docs/graph-api/reference/page
   """
-  @spec page(page_id :: integer | String.t, access_token) :: resp
+  @spec page(page_id, access_token) :: resp
   def page(page_id, access_token) do
     page(page_id, access_token, [])
   end
 
   @doc """
-  Get page information for the specified fields for the provided page_id
+  Get page information for the specified fields for the provided `t:page_id/0`
 
   ## Example
       iex> Facebook.page("CocaColaMx", "<Access Token>", "id")
@@ -266,9 +337,9 @@ defmodule Facebook do
 
   See: https://developers.facebook.com/docs/graph-api/reference/page
   """
-  @spec page(page_id :: integer | String.t, access_token, fields) :: resp
+  @spec page(page_id, access_token, fields) :: resp
   def page(page_id, access_token, fields) do
-    params = [fields: fields]
+    params = [fields: Enum.join(fields, ",")]
                |> add_app_secret(access_token)
                |> add_access_token(access_token)
 
@@ -281,13 +352,13 @@ defmodule Facebook do
   Gets the feed of posts (including status updates) and links published by this
   page, or by others on this page.
 
-  This function can retrieve the four types:
-    * feed
-    * posts
-    * promotable posts (*Admin permission needed*)
-    * tagged posts
+  This function can retrieve four `t:scope/0` types:
+    * `:feed`
+    * `:posts`
+    * `:promotable_posts` (*Admin permission needed*)
+    * `:tagged`
 
-  A scope must be provided. It is a string, which represents the type of feed.
+  A `t:scope/0` must be provided. It is an atom, which represents the type of feed.
 
   *A limit of posts may be given. The maximum number that must be provided is
   100.*
@@ -319,11 +390,11 @@ defmodule Facebook do
 
   An *object* stands for: post, comment, link, status update, photo.
 
-  If you want to get the likes of a page, please see *fan_count*.
+  If you want to get the likes of a page, please see `fan_count/2`.
 
   Expected scopes:
-    * :likes
-    * :comments
+    * `:likes`
+    * `:comments`
 
   ## Example
       iex> Facebook.object_count(:likes, "1326382730725053_1326476257382367", "<Access Token>")
@@ -331,8 +402,9 @@ defmodule Facebook do
       iex> Facebook.object_count(:comments, "1326382730725053_1326476257382367", "<Access Token>")
       {:ok, 5}
 
-  See: https://developers.facebook.com/docs/graph-api/reference/object/likes
-  See: https://developers.facebook.com/docs/graph-api/reference/object/comments
+  See:
+    * https://developers.facebook.com/docs/graph-api/reference/object/likes
+    * https://developers.facebook.com/docs/graph-api/reference/object/comments
   """
   @spec object_count(scope, object_id, access_token) :: num_resp
   def object_count(scope, object_id, access_token) when is_atom(scope) do
@@ -354,14 +426,14 @@ defmodule Facebook do
   @doc """
   Gets the number of reactions that an object has.
 
-  Expected type of reactions:
-    * :haha
-    * :wow
-    * :thankful
-    * :sad
-    * :angry
-    * :love
-    * :none
+  Expected `t:react_type/0`:
+    * `:haha`
+    * `:wow`
+    * `:thankful`
+    * `:sad`
+    * `:angry`
+    * `:love`
+    * `:none`
 
   ## Examples
       iex> Facebook.object_count(
@@ -384,6 +456,7 @@ defmodule Facebook do
 
     ~s(/#{object_id}/reactions)
       |> GraphAPI.get([], params: params)
+      |> ResponseFormatter.format_response
       |> get_summary
       |> summary_count
   end
@@ -395,7 +468,7 @@ defmodule Facebook do
       iex> Facebook.object_count_all("769860109692136_1173416799336463", "<Access Token>")
       {:ok, %{"angry" => 0, "haha" => 1, "like" => 0, "love" => 0, "sad" => 0, "wow" => 0}}
   """
-  @spec object_count_all(object_id :: String.t, access_token) :: resp
+  @spec object_count_all(object_id, access_token) :: resp
   def object_count_all(object_id, access_token) do
     graph_query = """
     reactions.type(LIKE).summary(total_count).limit(0).as(like),
@@ -411,12 +484,18 @@ defmodule Facebook do
                |> add_access_token(access_token)
 
     ~s(/#{object_id})
-      |> GraphAPI.get([], params)
+      |> GraphAPI.get([], params: params)
+      |> ResponseFormatter.format_response
       |> summary_count_all
   end
 
   @doc """
-  Exchange an authorization code for an access token
+  Exchange an authorization code for an access token.
+
+  If you are implementing user authentication, the `code` is generated from a Facebook
+  endpoint which is outside of the Graph API. Please see the
+  [Manually Build a Login Flow](https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow#confirm)
+  documentation for more details.
 
   ## Examples
       iex> Facebook.access_token("client_id", "client_secret", "redirect_uri", "code")
@@ -428,7 +507,7 @@ defmodule Facebook do
 
   See: https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow#confirm
   """
-  @spec access_token(String.t, String.t, String.t, String.t) :: resp
+  @spec access_token(client_id, client_secret, String.t, String.t) :: resp
   def access_token(client_id, client_secret, redirect_uri, code) do
     [
       client_id: client_id,
@@ -452,7 +531,7 @@ defmodule Facebook do
 
   See: https://developers.facebook.com/docs/facebook-login/access-tokens/expiration-and-extension
   """
-  @spec long_lived_access_token(String.t, String.t, String.t) :: resp
+  @spec long_lived_access_token(client_id, client_secret, access_token) :: resp
   def long_lived_access_token(client_id, client_secret, access_token) do
     [
       grant_type: "fb_exchange_token",
@@ -472,14 +551,14 @@ defmodule Facebook do
     - https://developers.facebook.com/docs/graph-api/reference/v2.8/app/accounts/test-users
 
   ## Examples
-    iex> Facebook.test_users("appId", "appId|appSecret")
-    {:ok, %{"data" => [
-      %{
-        "access_token" => "ACCESS_TOKEN",
-        "id" => "USER_ID",
-        "login_url" => "https://developers.facebook.com/checkpoint/test-user-login/USER_ID/"
-      }
-    ]}
+      iex> Facebook.test_users("appId", "appId|appSecret")
+      {:ok, %{"data" => [
+        %{
+          "access_token" => "ACCESS_TOKEN",
+          "id" => "USER_ID",
+          "login_url" => "https://developers.facebook.com/checkpoint/test-user-login/USER_ID/"
+        }
+      ]}
   """
   @spec test_users(client_id, access_token) :: resp
   def test_users(client_id, access_token) do
