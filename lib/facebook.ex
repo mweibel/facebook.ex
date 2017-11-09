@@ -208,7 +208,14 @@ defmodule Facebook do
       |> ResponseFormatter.format_response
   end
 
-  @spec publish(:video, page_id, file_path, params, access_token, options :: list) :: resp
+  @spec publish(
+    :video,
+    page_id,
+    file_path,
+    params,
+    access_token,
+    options :: list
+  ) :: resp
   # credo:disable-for-next-line Credo.Check.Refactor.FunctionArity
   def publish(:video, page_id, file_path, params, access_token, options \\ []) do
     params = params
