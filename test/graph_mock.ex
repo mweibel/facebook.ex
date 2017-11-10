@@ -102,9 +102,17 @@ defmodule Facebook.GraphMock do
     })
   end
 
-  def request do
+  def mock_options(body_function) do
+    [
+      request: request(),
+      body: body_function,
+    ]
+  end
+
+  defp request do
     fn(_method, _url, _headers, _payload, _options) ->
       {:ok, nil, nil, nil}
     end
   end
+
 end
