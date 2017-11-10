@@ -9,7 +9,6 @@ defmodule Facebook do
   """
 
   alias Facebook.Config
-  alias Facebook.Graph
   alias Facebook.GraphAPI
   alias Facebook.GraphVideoAPI
   alias Facebook.ResponseFormatter
@@ -25,9 +24,7 @@ defmodule Facebook do
   end
 
   def init(_) do
-    children = [
-      worker(Graph, [])
-    ]
+    children = []
 
     supervise(children, strategy: :one_for_one)
   end

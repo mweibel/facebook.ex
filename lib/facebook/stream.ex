@@ -1,5 +1,6 @@
 defmodule Facebook.Stream do
-  alias Facebook.Graph
+  alias Facebook.GraphAPI
+  alias Facebook.ResponseFormatter
 
   @moduledoc """
   Provides stream functionalities for the Facebook Graph API paginated responses
@@ -91,11 +92,13 @@ defmodule Facebook.Stream do
 
   # Gets next data page
   defp get_next_paged_data(%{"paging" => %{"next" => next_url}}) do
-    Graph.request(:get, next_url, [])
+    GraphAPI.get(next_url)
+      |> ResponseFormatter.format_response
   end
 
   defp get_next_paged_data(%{"paging" => %{"cursors" => %{"next" => next_url}}}) do
-    Graph.request(:get, next_url, [])
+    GraphAPI.get(next_url)
+      |> ResponseFormatter.format_response
   end
 
   defp get_next_paged_data(_), do: nil
