@@ -47,4 +47,4 @@ iex(2)> Facebook.object_count(:likes, "262588213843476_801732539929038", "ACCESS
 We encourage contribution from anyone! If you've got an improvement to the documentation or feature you've implemented, please open a [pull request](https://github.com/mweibel/facebook.ex/pulls).
 This project uses [credo](https://github.com/rrrene/credo) for code analysis. Running `mix credo` will give you a nice output which will tell you if any of the changes you've made aren't consistent with the rest of our codebase.
 
-The Facebook Graph API is fairly large and as such we're not using every facet of it, so if you're not seeing an edge that is handled, please report an [issue](https://github.com/mweibel/facebook.ex/issues).
+The Facebook Graph API is fairly large and as such we're not using every facet of it, so if you're not seeing an edge that is handled, please report an [issue](https://github.com/mweibel/facebook.ex/issues) or open a [pull request](https://github.com/mweibel/facebook.ex/pulls) to add it.
