@@ -5,12 +5,20 @@ defmodule FacebookTest do
 
   alias Facebook.GraphMock
 
+  # Developer Notes:
+  #
+  # The following tests mock :hackney, don't be alarmed!
+  # HTTPoison, the HTTP library that `Facebook.GraphAPI` is based off, is just
+  # a wrapper for hackney. A request is delegated to hackney and the response
+  # body is then processed by HTTPoison. `Facebook.GraphMock.mock_options/1`
+  # provides a helper function to generate the request and body needed for
+  # HTTPoison to do it's thing.
+  #
+
   @app_id "123"
   @app_secret "456"
-  # 19292868552 = facebook for developers page
-  @page_id 19292868552
-  # 629965917187496 = page id the test user created
-  @test_page_id 629965917187496
+  @page_id 19292868552          # This is the facebook for developers page id
+  @test_page_id 629965917187496 # `page_id` the test user created
 
   setup do
     [
