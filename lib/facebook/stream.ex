@@ -92,12 +92,14 @@ defmodule Facebook.Stream do
 
   # Gets next data page
   defp get_next_paged_data(%{"paging" => %{"next" => next_url}}) do
-    GraphAPI.get(next_url)
+    next_url
+      |> GraphAPI.get
       |> ResponseFormatter.format_response
   end
 
   defp get_next_paged_data(%{"paging" => %{"cursors" => %{"next" => next_url}}}) do
-    GraphAPI.get(next_url)
+    next_url
+      |> GraphAPI.get
       |> ResponseFormatter.format_response
   end
 
