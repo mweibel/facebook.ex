@@ -1,5 +1,6 @@
 defmodule Facebook.Stream do
-  alias Facebook.Graph
+  alias Facebook.GraphAPI
+  alias Facebook.ResponseFormatter
 
   @moduledoc """
   Provides stream functionalities for the Facebook Graph API paginated responses
@@ -21,13 +22,13 @@ defmodule Facebook.Stream do
   The default error handler sleeps 1 second between retries.
 
   ## Examples
-  iex> stream = Facebook.page_feed(:feed, "CocaColaMx", "<Your Token>", "id,name") |> Facebook.Stream.new
-  iex> stream |> Stream.filter(fn(name) -> name == "Coca Cola" end) |> Stream.take(100) |> Enum.to_list
+      iex> stream = Facebook.page_feed(:feed, "CocaColaMx", "<Your Token>", "id,name") |> Facebook.Stream.new
+      iex> stream |> Stream.filter(fn(name) -> name == "Coca Cola" end) |> Stream.take(100) |> Enum.to_list
 
-  # Custom error handler with linear backoff
-  iex> feed = Facebook.page_feed(:feed, "CocaColaMx", "<Your Token>", 25, "id,name")
-  iex> stream = Facebook.Stream.new(feed, fn(error, retry) -> Process.sleep(retry*500) end)
-  iex> stream |> Stream.filter(fn(name) -> name == "Coca Cola" end) |> Stream.take(100) |> Enum.to_list
+  ## Custom error handler with linear backoff
+      iex> feed = Facebook.page_feed(:feed, "CocaColaMx", "<Your Token>", 25, "id,name")
+      iex> stream = Facebook.Stream.new(feed, fn(error, retry) -> Process.sleep(retry*500) end)
+      iex> stream |> Stream.filter(fn(name) -> name == "Coca Cola" end) |> Stream.take(100) |> Enum.to_list
   """
   @spec new(Map.t, ((error, retry) -> any), pos_integer) :: Enumerable.t
   def new(
@@ -91,11 +92,15 @@ defmodule Facebook.Stream do
 
   # Gets next data page
   defp get_next_paged_data(%{"paging" => %{"next" => next_url}}) do
-    Graph.request(:get, next_url, [])
+    next_url
+      |> GraphAPI.get
+      |> ResponseFormatter.format_response
   end
 
   defp get_next_paged_data(%{"paging" => %{"cursors" => %{"next" => next_url}}}) do
-    Graph.request(:get, next_url, [])
+    next_url
+      |> GraphAPI.get
+      |> ResponseFormatter.format_response
   end
 
   defp get_next_paged_data(_), do: nil

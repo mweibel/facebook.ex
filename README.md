@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/mweibel/facebook.ex.svg?branch=master)](https://travis-ci.org/mweibel/facebook.ex)
 
-Facebook Graph API Wrapper written in Elixir.
+Facebook Graph API Wrapper written in Elixir. ([documentation](http://hexdocs.pm/facebook/))
 
 ## Installation
 
@@ -23,7 +23,7 @@ $ mix deps.get
 ## Usage
 
 1. Register an application on [developer.facebook.com](https://developer.facebook.com)
-2. Get the access token from the settings page of your registered application
+2. Get an `access_token` from [Facebook's Access Token Tool](https://developers.facebook.com/tools/accesstoken/)
 
 Then you can get started with code.
 
@@ -37,23 +37,14 @@ Then try some API calls:
 
 ```
 iex(1)> Facebook.me("first_name", "ACCESSTOKEN")
+{:ok, %{"first_name" => "Michael"}} # <--- that's the return value
 
-14:31:18.720 [info]  [get] https://graph.facebook.com/v2.6/me?fields=first_name&access_token=ACCESSTOKEN [] ""
-
-14:31:19.128 [info]  body: "{\"first_name\":\"Michael\"}"
-
-{:json, %{"first_name" => "Michael"}} # <--- that's the return value
-
-iex(2)> Facebook.objectCount(:likes, "262588213843476_801732539929038", "ACCESSTOKEN")
-
-14:34:16.435 [info]  [get] https://graph.facebook.com/v2.6/262588213843476_801732539929038/likes?access_token=ACCESSTOKEN&summary=true [] ""
-
-14:34:16.629 [info]  body: "{\"data\":[..somedata..],\"summary\":{\"total_count\":48,\"can_like\":true,\"has_liked\":false}}"
-
-48 # <--- that's the return value
+iex(2)> Facebook.object_count(:likes, "262588213843476_801732539929038", "ACCESSTOKEN")
+{:ok, 48} # <--- that's the return value
 ```
 
-## API Documentation
+## Contributing
+We encourage contribution from anyone! If you've got an improvement to the documentation or feature you've implemented, please open a [pull request](https://github.com/mweibel/facebook.ex/pulls).
+This project uses [credo](https://github.com/rrrene/credo) for code analysis. Running `mix credo` will give you a nice output which will tell you if any of the changes you've made aren't consistent with the rest of our codebase.
 
-See [API Documentation for facebook.ex](http://hexdocs.pm/facebook/).
-
+The Facebook Graph API is fairly large and as such we're not using every facet of it, so if you're not seeing an edge that is handled, please report an [issue](https://github.com/mweibel/facebook.ex/issues) or open a [pull request](https://github.com/mweibel/facebook.ex/pulls) to add it.
