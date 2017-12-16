@@ -573,6 +573,49 @@ defmodule Facebook do
       |> ResponseFormatter.format_response
   end
 
+  @doc """
+  Returns metadata about a given access token.
+
+  This includes data such as the user for which the token was issued,
+  whether the token is still valid, when it expires, and what permissions the
+  app has for the given user.
+
+  This may be used to programatically debug issues with large sets of access tokens.
+
+  An app access token or an app developer's user access token for the
+  app associated with the input_token is required to acces.
+
+  See:
+   - https://developers.facebook.com/docs/graph-api/reference/v2.11/debug_token
+   - https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow#checktoken
+
+  ## Examples
+      iex> Facebook.debug_token("INPUT_TOKEN", "ACCESS_TOKEN")
+      {:ok, %{"data" => [
+        %{
+          "app_id": "APP_ID",
+          "type": "USER",
+          "application": "APP_NAME",
+          "expires_at": 1352419328,
+          "is_valid": true,
+          "issued_at": 1347235328,
+          "scopes": [
+              "email",
+              "publish_actions"
+          ],
+          "user_id": "USER_ID"
+        }
+      ]}
+  """
+  @spec debug_token(access_token, access_token) :: resp
+  def debug_token(input_token, access_token) do
+    params = add_access_token([input_token: input_token], access_token)
+
+    ~s(/debug_token)
+    |> GraphAPI.get([], params: params)
+    |> ResponseFormatter.format_response()
+  end
+
   # Request access token and extract the access token from the access token
   # response
   defp get_access_token(params) do
