@@ -23,8 +23,8 @@ defmodule Facebook.Mixfile do
       applications: [:httpoison, :json, :logger],
       env: [
         env: :dev,
-        graph_url: "https://graph.facebook.com/v2.9",
-        graph_video_url: "https://graph-video.facebook.com/v2.9",
+        graph_url: "https://graph.facebook.com",
+        graph_video_url: "https://graph-video.facebook.com",
         appsecret: nil
       ]
     ]

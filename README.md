@@ -22,13 +22,14 @@ $ mix deps.get
 
 ## Configuration
 
+You can configure facebook.ex in your mix `config.exs` (or, if you're using the Phoenix Framework, in your `dev/test/prod.exs`, respectively) with the following keys, which state the library defaults:
 ```
 config :facebook,
-  appsecret: "<your app secret>",
+  appsecret: nil,
   graph_url: "https://graph.facebook.com",
   graph_video_url: "https://graph-video.facebook.com"
 ```
-For graph_url and video_graph_url, you may also specify versioned urls (recommended) to pin your calls to a specific API version, like so:
+For graph_url and video_graph_url, Facebook automatically uses the oldest active Graph API version available if you don't specify a version in the url. You may use versioned urls to pin your calls to a specific API versions (recommended), e.g. like so:
 ```
   graph_url: "https://graph.facebook.com/v2.11",
   graph_video_url: "https://graph-video.facebook.com/v2.8"
