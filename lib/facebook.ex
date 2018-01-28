@@ -567,11 +567,16 @@ defmodule Facebook do
   See:
     * https://developers.facebook.com/docs/graph-api/reference/payment/refunds
   """
+  # credo:disable-for-lines:1 Credo.Check.Readability.MaxLineLength
   @spec refunds(object_id, access_token, currency, amount, refunds_reason) :: resp
   def refunds(payment_id, access_token, currency, amount, reason) do
     params = []
                |> add_access_token(access_token)
-    body = URI.encode_query(%{currency: currency, amount: amount, reason: reason})
+    body = URI.encode_query(%{
+      currency: currency,
+      amount: amount,
+      reason: reason
+    })
 
     ~s(/#{payment_id}/refunds)
       |> GraphAPI.post(body, params: params)
