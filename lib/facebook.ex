@@ -114,6 +114,19 @@ defmodule Facebook do
   """
   @type dispute_reason :: atom | String.t
 
+  @typedoc """
+  A reason for refunding a payment.
+
+  Reasons:
+    * `:MALICIOUS_FRAUD`
+    * `:FRIENDLY_FRAUD`
+    * `:CUSTOMER_SERVICE`
+  """
+  @type refunds_reason :: atom | String.t
+
+  @type currency :: String.t
+  @type amount :: Number.t
+
   @type using_app_secret :: boolean
 
   @doc """
@@ -541,6 +554,26 @@ defmodule Facebook do
     ~s(/#{payment_id}/dispute)
     |> GraphAPI.post("reason=#{reason}", params: params)
     |> ResponseFormatter.format_response
+
+  @doc """
+  Refund a payment.
+
+  ## Examples
+      iex> Facebook.refunds("769860109692136", "<App Access Token>", "EUR", 10.99, :CUSTOMER_SERVICE)
+      {:ok, %{"success" => true}}
+
+  See:
+    * https://developers.facebook.com/docs/graph-api/reference/payment/refunds
+  """
+  @spec refunds(object_id, access_token, currency, amount, refunds_reason) :: resp
+  def refunds(payment_id, access_token, currency, amount, reason) do
+    params = []
+               |> add_access_token(access_token)
+    body = URI.encode_query(%{currency: currency, amount: amount, reason: reason})
+
+    ~s(/#{payment_id}/refunds)
+      |> GraphAPI.post(body, params: params)
+      |> ResponseFormatter.format_response
   end
 
   @doc """

@@ -405,6 +405,21 @@ defmodule FacebookTest do
     end
   end
 
+  describe "refunds" do
+    test "success", %{app_access_token: app_access_token} do
+      with_mock :hackney, GraphMock.mock_options(
+        fn(_) -> GraphMock.refunds(:success) end
+                ) do
+        assert {:ok, %{"success" => true}} = Facebook.refunds(
+          @payment_id,
+          app_access_token,
+          "EUR",
+          10.99,
+          :CUSTOMER_SERVICE
+        )
+      end
+    end
+  end
 
   describe "long lived access token" do
     test "success", %{access_token: access_token} do

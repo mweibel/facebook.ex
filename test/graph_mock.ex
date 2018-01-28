@@ -134,6 +134,12 @@ defmodule Facebook.GraphMock do
     })
   end
 
+  def refunds(:success) do
+    JSON.encode(%{
+      "success": true
+    })
+  end
+
   def mock_options(body_function) do
     [
       request: request(),
