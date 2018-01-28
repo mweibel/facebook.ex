@@ -41,5 +41,14 @@ defmodule Facebook.Config do
         Application.put_env :facebook, :app_secret, app_secret
     end
   end
+
+  # App id, a.k.a. client id
+  def app_id do
+    Application.fetch_env! :facebook, :app_id
+  end
+
+  # App access token
+  def app_access_token do
+    "#{app_id()}|#{app_secret()}"
   end
 end
