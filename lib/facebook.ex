@@ -550,10 +550,12 @@ defmodule Facebook do
   def dispute(payment_id, access_token, reason) do
     params = []
                |> add_access_token(access_token)
+    body = URI.encode_query(%{reason: reason})
 
     ~s(/#{payment_id}/dispute)
-    |> GraphAPI.post("reason=#{reason}", params: params)
-    |> ResponseFormatter.format_response
+      |> GraphAPI.post(body, params: params)
+      |> ResponseFormatter.format_response
+  end
 
   @doc """
   Refund a payment.

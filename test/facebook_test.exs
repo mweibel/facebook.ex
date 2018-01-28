@@ -391,7 +391,7 @@ defmodule FacebookTest do
     end
   end
 
-  describe "payment dispute" do
+  describe "dispute" do
     test "success", %{app_access_token: app_access_token} do
       with_mock :hackney, GraphMock.mock_options(
         fn(_) -> GraphMock.dispute(:success) end
