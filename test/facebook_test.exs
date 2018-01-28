@@ -421,6 +421,22 @@ defmodule FacebookTest do
     end
   end
 
+  describe "signing" do
+    Facebook.set_app_secret(@app_secret)
+
+    test "payload" do
+      payload = JSON.encode!(%{id: @payment_id})
+      assert "EdOhTfnZaIM3-Ht7X_4vgEQnIRq9fpzRgONlMvwRGKI=.eyJpZCI6IjExNjM5NzMwMzg2NTk2In0=" = Facebook.sign(payload)
+    end
+
+    test "decode" do
+      signed_request = "EdOhTfnZaIM3-Ht7X_4vgEQnIRq9fpzRgONlMvwRGKI=.eyJpZCI6IjExNjM5NzMwMzg2NTk2In0="
+      assert {:ok, %{
+        "id" => @payment_id
+      }} = Facebook.decode_signed_request(signed_request)
+    end
+  end
+
   describe "long lived access token" do
     test "success", %{access_token: access_token} do
       with_mock :hackney, GraphMock.mock_options(

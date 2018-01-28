@@ -127,6 +127,12 @@ defmodule Facebook do
   @type currency :: String.t
   @type amount :: Number.t
 
+  @typedoc """
+  A base64-encoded JSON string, concatenated to a signature with a single dot.
+  E.g.: "<base64-encoded hmac/sha256 signature>.<base64-encoded JSON payload>"
+  """
+  @type signed_request :: String.t
+
   @type using_app_secret :: boolean
 
   @doc """
@@ -706,6 +712,32 @@ defmodule Facebook do
     |> ResponseFormatter.format_response()
   end
 
+  @doc """
+  Decodes a signed request from a client SDK (in-app payments), verifies the
+  signature and -if valid- returns its contents.
+  """
+  @spec decode_signed_request(signed_request) :: resp
+  def decode_signed_request(signed_request) when is_binary(signed_request) do
+    with [signature_str | [payload_str | _]] when
+           is_binary(signature_str) and is_binary(payload_str)
+           <- String.split(signed_request, "."),
+         {:ok, signature} <- Base.url_decode64(signature_str),
+         _signature_verification = ^signature <- signature(payload_str),
+         {:ok, payload} <- Base.url_decode64(payload_str),
+         {:ok, payload} <- JSON.decode(payload)
+    do
+      {:ok, payload}
+    else
+      _ -> {:error, %{}}
+    end
+  end
+
+  # Builds a signature just like Facebook does for its signed_requests.
+  def sign(payload) do
+    payload_str = Base.url_encode64(payload)
+    "#{signature_base64(payload_str)}.#{payload_str}"
+  end
+
   # Request access token and extract the access token from the access token
   # response
   defp get_access_token(params) do
@@ -746,12 +778,20 @@ defmodule Facebook do
       |> (& {:ok, &1}).()
   end
 
-  # 'Encrypts' the token together with the app secret according to the
-  # guidelines of facebook.
-  defp encrypt(token) do
-    :sha256
-      |> :crypto.hmac(Config.app_secret, token)
-      |> Base.encode16(case: :lower)
+  # Hashes the token together with the app secret according to the
+  # guidelines of facebook to build an unencoded/raw signature.
+  defp signature(str) do
+    :sha256 |> :crypto.hmac(Config.app_secret, str)
+  end
+
+  # Uses signature/1 to build a urlsafe base64-encoded signature
+  defp signature_base64(str) do
+    str |> signature() |> Base.url_encode64()
+  end
+
+  # Uses signature/1 to build a lowercase base16-encoded signature
+  defp signature_base16(str) do
+    str |> signature() |> Base.encode16(case: :lower)
   end
 
   # Add the appsecret_proof to the GraphAPI request params if the app secret is
@@ -760,7 +800,7 @@ defmodule Facebook do
     if is_nil(Config.app_secret) do
       params
     else
-      params ++ [appsecret_proof: encrypt(access_token)]
+      params ++ [appsecret_proof: signature_base16(access_token)]
     end
   end
 
