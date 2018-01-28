@@ -19,6 +19,7 @@ defmodule FacebookTest do
   @app_secret "456"
   @page_id 19292868552          # This is the facebook for developers page id
   @test_page_id 629965917187496 # `page_id` the test user created
+  @payment_id "11639730386596"
 
   setup do
     [
@@ -359,6 +360,20 @@ defmodule FacebookTest do
 
         assert haha == 135
         assert love == 10
+      end
+    end
+  end
+
+  describe "payment with fields" do
+    test "success", %{app_access_token: app_access_token} do
+      with_mock :hackney, GraphMock.mock_options(
+        fn(_) -> GraphMock.payment(:success, :with_fields) end
+      ) do
+        assert {:ok, %{"request_id" => "A76449","id" => "#{@payment_id}", "actions" => [ %{} ]}} = Facebook.payment(
+          @payment_id,
+          app_access_token,
+          "id,request_id,actions,payout_foreign_exchange_rate"
+        )
       end
     end
   end

@@ -102,6 +102,25 @@ defmodule Facebook.GraphMock do
     })
   end
 
+  def payment(:success, :with_fields) do
+    JSON.encode(%{
+      "request_id": "A76449",
+      "id": "11639730386596",
+      "actions": [
+        %{
+          "type": "charge",
+          "status": "completed",
+          "currency": "EUR",
+          "amount": "11.99",
+          "time_created": "2018-01-28T00:33:19+0000",
+          "time_updated": "2018-01-28T00:33:20+0000",
+          "tax_amount": "2.08"
+        }
+      ],
+      "payout_foreign_exchange_rate": 1.2308349
+    })
+  end
+
   def mock_options(body_function) do
     [
       request: request(),

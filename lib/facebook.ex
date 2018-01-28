@@ -494,6 +494,23 @@ defmodule Facebook do
   end
 
   @doc """
+  Gets payment info about a single payment.
+
+  ## Examples
+      iex> Facebook.payment("769860109692136", "<App Access Token>", "id,request_id,actions")
+      {:ok, %{"request_id" => "abc2387238", "id" => "116397053038597", "actions" => [ %{ "type" => "charge", ... } ] } }
+  """
+  @spec payment(object_id, access_token, fields) :: resp
+  def payment(payment_id, access_token, fields \\ "") do
+    params = [fields: fields]
+               |> add_access_token(access_token)
+
+    ~s(/#{payment_id})
+      |> GraphAPI.get([], params: params)
+      |> ResponseFormatter.format_response
+  end
+
+  @doc """
   Exchange an authorization code for an access token.
 
   If you are implementing user authentication, the `code` is generated from a Facebook
