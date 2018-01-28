@@ -104,6 +104,16 @@ defmodule Facebook do
   """
   @type scope :: atom | String.t
 
+  @typedoc """
+  A reason for settling a payment dispute.
+
+  Reasons:
+    * `:GRANTED_REPLACEMENT_ITEM`
+    * `:DENIED_REFUND`
+    * `:BANNED_USER`
+  """
+  @type dispute_reason :: atom | String.t
+
   @type using_app_secret :: boolean
 
   @doc """
@@ -511,6 +521,26 @@ defmodule Facebook do
     ~s(/#{payment_id})
       |> GraphAPI.get([], params: params)
       |> ResponseFormatter.format_response
+  end
+
+  @doc """
+  Settle a payment dispute.
+
+  ## Examples
+      iex> Facebook.dispute("769860109692136", "<App Access Token>", :DENIED_REFUND)
+      {:ok, %{"success" => true}}
+
+  See:
+    * https://developers.facebook.com/docs/graph-api/reference/payment/dispute
+  """
+  @spec dispute(object_id, access_token, dispute_reason) :: resp
+  def dispute(payment_id, access_token, reason) do
+    params = []
+               |> add_access_token(access_token)
+
+    ~s(/#{payment_id}/dispute)
+    |> GraphAPI.post("reason=#{reason}", params: params)
+    |> ResponseFormatter.format_response
   end
 
   @doc """

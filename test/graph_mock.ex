@@ -128,6 +128,12 @@ defmodule Facebook.GraphMock do
     })
   end
 
+  def dispute(:success) do
+    JSON.encode(%{
+      "success": true
+    })
+  end
+
   def mock_options(body_function) do
     [
       request: request(),
