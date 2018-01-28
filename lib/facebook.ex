@@ -104,18 +104,18 @@ defmodule Facebook do
   """
   @type scope :: atom | String.t
 
-  @type using_appsecret :: boolean
+  @type using_app_secret :: boolean
 
   @doc """
-  If you want to use an appsecret proof, pass it into set_appsecret:
+  If you want to use an appsecret proof, pass it into set_app_secret:
 
   ## Example
-      iex> Facebook.set_appsecret("appsecret")
+      iex> Facebook.set_app_secret("app_secret")
 
   See: https://developers.facebook.com/docs/graph-api/securing-requests
   """
-  def set_appsecret(appsecret) do
-    Config.appsecret(appsecret)
+  def set_app_secret(app_secret) do
+    Config.app_secret(app_secret)
   end
 
   @doc """
@@ -660,14 +660,14 @@ defmodule Facebook do
   # guidelines of facebook.
   defp encrypt(token) do
     :sha256
-      |> :crypto.hmac(Config.appsecret, token)
+      |> :crypto.hmac(Config.app_secret, token)
       |> Base.encode16(case: :lower)
   end
 
   # Add the appsecret_proof to the GraphAPI request params if the app secret is
   # defined
   defp add_app_secret(params, access_token) do
-    if is_nil(Config.appsecret) do
+    if is_nil(Config.app_secret) do
       params
     else
       params ++ [appsecret_proof: encrypt(access_token)]

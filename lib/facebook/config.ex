@@ -12,12 +12,34 @@ defmodule Facebook.Config do
     Application.fetch_env! :facebook, :graph_video_url
   end
 
-  # App secret
+  # App secret a.k.a. client secret
   def appsecret do
-    Application.fetch_env! :facebook, :appsecret
+    IO.warn("'appsecret' method is deprecated. Please use 'app_secret'", Macro.Env.stacktrace(__ENV__))
+    app_secret()
+  end
+  def app_secret do
+    with :error <- Application.fetch_env(:facebook, :appsecret)
+    do
+      Application.fetch_env!(:facebook, :app_secret)
+    else
+      {:ok, secret} ->
+        IO.warn("'appsecret' configuration value is deprecated. Please use 'app_secret'", Macro.Env.stacktrace(__ENV__))
+        secret
+    end
   end
 
   def appsecret(appsecret) do
-    Application.put_env :facebook, :appsecret, appsecret
+    IO.warn("'appsecret' method value is deprecated. Please use 'app_secret'", Macro.Env.stacktrace(__ENV__))
+    app_secret(appsecret)
+  end
+  def app_secret(app_secret) do
+    case Application.fetch_env(:facebook, :appsecret) do
+      {:ok, _} ->
+        IO.warn("'appsecret' configuration value is deprecated. Please use 'app_secret'", Macro.Env.stacktrace(__ENV__))
+        Application.put_env :facebook, :appsecret, app_secret
+      _ ->
+        Application.put_env :facebook, :app_secret, app_secret
+    end
+  end
   end
 end
