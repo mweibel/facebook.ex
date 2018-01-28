@@ -499,6 +499,9 @@ defmodule Facebook do
   ## Examples
       iex> Facebook.payment("769860109692136", "<App Access Token>", "id,request_id,actions")
       {:ok, %{"request_id" => "abc2387238", "id" => "116397053038597", "actions" => [ %{ "type" => "charge", ... } ] } }
+
+  See:
+    * https://developers.facebook.com/docs/graph-api/reference/payment
   """
   @spec payment(object_id, access_token, fields) :: resp
   def payment(payment_id, access_token, fields \\ "") do
