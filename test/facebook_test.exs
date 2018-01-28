@@ -364,6 +364,19 @@ defmodule FacebookTest do
     end
   end
 
+  describe "payment" do
+    test "success", %{app_access_token: app_access_token} do
+      with_mock :hackney, GraphMock.mock_options(
+        fn(_) -> GraphMock.payment(:success, :no_fields) end
+      ) do
+        assert {:ok, %{"id" => "#{@payment_id}", "created_time" => "2018-01-28T00:33:19+0000"}} = Facebook.payment(
+          @payment_id,
+          app_access_token
+        )
+      end
+    end
+  end
+
   describe "payment with fields" do
     test "success", %{app_access_token: app_access_token} do
       with_mock :hackney, GraphMock.mock_options(

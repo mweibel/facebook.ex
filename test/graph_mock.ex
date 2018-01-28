@@ -102,6 +102,13 @@ defmodule Facebook.GraphMock do
     })
   end
 
+  def payment(:success, :no_fields) do
+    JSON.encode(%{
+      "id": "11639730386596",
+      "created_time": "2018-01-28T00:33:19+0000",
+    })
+  end
+
   def payment(:success, :with_fields) do
     JSON.encode(%{
       "request_id": "A76449",
