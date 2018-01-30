@@ -546,14 +546,14 @@ defmodule Facebook do
   Settle a payment dispute.
 
   ## Examples
-      iex> Facebook.dispute("769860109692136", "<App Access Token>", :DENIED_REFUND)
+      iex> Facebook.payment_dispute("769860109692136", "<App Access Token>", :DENIED_REFUND)
       {:ok, %{"success" => true}}
 
   See:
     * https://developers.facebook.com/docs/graph-api/reference/payment/dispute
   """
-  @spec dispute(object_id, access_token, dispute_reason) :: resp
-  def dispute(payment_id, access_token, reason) do
+  @spec payment_dispute(object_id, access_token, dispute_reason) :: resp
+  def payment_dispute(payment_id, access_token, reason) do
     params = []
                |> add_access_token(access_token)
     body = URI.encode_query(%{reason: reason})
@@ -567,15 +567,15 @@ defmodule Facebook do
   Refund a payment.
 
   ## Examples
-      iex> Facebook.refunds("769860109692136", "<App Access Token>", "EUR", 10.99, :CUSTOMER_SERVICE)
+      iex> Facebook.payment_refunds("769860109692136", "<App Access Token>", "EUR", 10.99, :CUSTOMER_SERVICE)
       {:ok, %{"success" => true}}
 
   See:
     * https://developers.facebook.com/docs/graph-api/reference/payment/refunds
   """
   # credo:disable-for-lines:1 Credo.Check.Readability.MaxLineLength
-  @spec refunds(object_id, access_token, currency, amount, refunds_reason) :: resp
-  def refunds(payment_id, access_token, currency, amount, reason) do
+  @spec payment_refunds(object_id, access_token, currency, amount, refunds_reason) :: resp
+  def payment_refunds(payment_id, access_token, currency, amount, reason) do
     params = []
                |> add_access_token(access_token)
     body = URI.encode_query(%{
@@ -714,12 +714,11 @@ defmodule Facebook do
 
   @doc """
   Decodes a signed request from a client SDK (in-app payments), verifies the
-  signature and -if valid- returns its contents.
+  signature and (if it is valid) returns its decoded contents.
   """
   @spec decode_signed_request(signed_request) :: resp
   def decode_signed_request(signed_request) when is_binary(signed_request) do
-    with [signature_str | [payload_str | _]] when
-           is_binary(signature_str) and is_binary(payload_str)
+    with [signature_str | [payload_str | _]]
            <- String.split(signed_request, "."),
          {:ok, signature} <- Base.url_decode64(signature_str),
          _signature_verification = ^signature <- signature(payload_str),

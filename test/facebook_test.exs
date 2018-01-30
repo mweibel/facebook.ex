@@ -391,12 +391,12 @@ defmodule FacebookTest do
     end
   end
 
-  describe "dispute" do
+  describe "payment dispute" do
     test "success", %{app_access_token: app_access_token} do
       with_mock :hackney, GraphMock.mock_options(
         fn(_) -> GraphMock.dispute(:success) end
       ) do
-        assert {:ok, %{"success" => true}} = Facebook.dispute(
+        assert {:ok, %{"success" => true}} = Facebook.payment_dispute(
           @payment_id,
           app_access_token,
           :REFUND_DENIED
@@ -405,12 +405,12 @@ defmodule FacebookTest do
     end
   end
 
-  describe "refunds" do
+  describe "payment refunds" do
     test "success", %{app_access_token: app_access_token} do
       with_mock :hackney, GraphMock.mock_options(
         fn(_) -> GraphMock.refunds(:success) end
                 ) do
-        assert {:ok, %{"success" => true}} = Facebook.refunds(
+        assert {:ok, %{"success" => true}} = Facebook.payment_refunds(
           @payment_id,
           app_access_token,
           "EUR",
