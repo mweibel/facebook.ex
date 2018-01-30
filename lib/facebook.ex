@@ -147,6 +147,26 @@ defmodule Facebook do
   end
 
   @doc """
+  Accounts for the logged in user specified by the `t:access_token/0`
+
+  ## Examples
+      iex> Facebook.my_accounts("<Access Token>")
+      {:ok, %{"data" => [...]}}
+
+  See: https://developers.facebook.com/docs/graph-api/reference/user/accounts
+  """
+  @spec my_accounts(access_token) :: resp
+  def my_accounts(access_token) do
+    params = []
+               |> add_app_secret(access_token)
+               |> add_access_token(access_token)
+
+    ~s(/me/accounts)
+      |> GraphAPI.get([], params: params)
+      |> ResponseFormatter.format_response
+  end
+
+  @doc """
   Publish to a feed. Author (user or page) is determined from the supplied token.
 
   The `t:page_id/0` is the id for the user or page feed to publish to.

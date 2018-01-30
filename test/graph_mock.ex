@@ -28,6 +28,16 @@ defmodule Facebook.GraphMock do
     })
   end
 
+  def my_accounts(:success) do
+    JSON.encode(%{"data": [%{
+      "access_token" => "access_token",
+      "category" => "Software",
+      "id" => "page_id",
+      "name" => "Page Name",
+      "perms" => ["ADMINISTER", "EDIT_PROFILE", "CREATE_CONTENT"]
+    }]})
+  end
+
   def object_count(:success, :likes) do
     JSON.encode(%{"summary" => %{
       "total_count" => 10
