@@ -52,6 +52,31 @@ defmodule FacebookTest do
     end
   end
 
+  describe "my_accounts" do
+    test "success", %{access_token: access_token} do
+      with_mock :hackney, GraphMock.mock_options(
+        fn(_) -> GraphMock.my_accounts(:success) end
+      ) do
+        assert {:ok, %{"data" => [data | _]}} = Facebook.my_accounts(access_token)
+        assert %{
+          "access_token" => _,
+          "id" => _,
+          "category" => _,
+          "name" => _,
+          "perms" => _
+        } = data
+      end
+    end
+
+    test "error", %{invalid_access_token: invalid_access_token} do
+      with_mock :hackney, GraphMock.mock_options(
+        fn(_) -> GraphMock.error() end
+      ) do
+        assert {:error, %{"code" => _,"message" => _,}} = Facebook.my_accounts(invalid_access_token)
+      end
+    end
+  end
+
   describe "picture" do
     test "success", %{id: id, access_token: access_token} do
       with_mock :hackney, GraphMock.mock_options(
