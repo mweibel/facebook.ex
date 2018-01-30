@@ -285,8 +285,8 @@ defmodule Facebook do
   @spec picture(page_id, type :: String.t, access_token) :: resp
   def picture(page_id, type, access_token) do
     params = [type: type, redirect: false]
-               |> add_access_token(access_token)
                |> add_app_secret(access_token)
+               |> add_access_token(access_token)
 
     ~s(/#{page_id}/picture)
       |> GraphAPI.get([], params: params)
@@ -780,7 +780,7 @@ defmodule Facebook do
   # Hashes the token together with the app secret according to the
   # guidelines of facebook to build an unencoded/raw signature.
   defp signature(str) do
-    :sha256 |> :crypto.hmac(Config.app_secret, str)
+    :crypto.hmac(:sha256, Config.app_secret(), str)
   end
 
   # Uses signature/1 to build a urlsafe base64-encoded signature
@@ -796,7 +796,7 @@ defmodule Facebook do
   # Add the appsecret_proof to the GraphAPI request params if the app secret is
   # defined
   defp add_app_secret(params, access_token) do
-    if is_nil(Config.app_secret) do
+    if is_nil(Config.app_secret()) do
       params
     else
       params ++ [appsecret_proof: signature_base16(access_token)]

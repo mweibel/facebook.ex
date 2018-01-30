@@ -49,6 +49,6 @@ defmodule Facebook.Config do
 
   # App access token
   def app_access_token do
-    "#{app_id()}|#{app_secret()}"
+    Application.fetch_env! :facebook, :app_access_token
   end
 end

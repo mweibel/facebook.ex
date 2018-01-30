@@ -26,7 +26,8 @@ defmodule Facebook.Mixfile do
         graph_url: "https://graph.facebook.com/v2.9",
         graph_video_url: "https://graph-video.facebook.com/v2.9",
         app_secret: nil,
-        app_id: nil
+        app_id: nil,
+        app_access_token: nil
       ]
     ]
   end
