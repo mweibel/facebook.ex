@@ -19,6 +19,7 @@ defmodule FacebookTest do
   @app_secret "456"
   @page_id 19292868552          # This is the facebook for developers page id
   @test_page_id 629965917187496 # `page_id` the test user created
+  @payment_id "11639730386596"
 
   setup do
     [
@@ -385,6 +386,79 @@ defmodule FacebookTest do
         assert haha == 135
         assert love == 10
       end
+    end
+  end
+
+  describe "payment" do
+    test "success", %{app_access_token: app_access_token} do
+      with_mock :hackney, GraphMock.mock_options(
+        fn(_) -> GraphMock.payment(:success, :no_fields) end
+      ) do
+        assert {:ok, %{"id" => "#{@payment_id}", "created_time" => "2018-01-28T00:33:19+0000"}} = Facebook.payment(
+          @payment_id,
+          app_access_token
+        )
+      end
+    end
+  end
+
+  describe "payment with fields" do
+    test "success", %{app_access_token: app_access_token} do
+      with_mock :hackney, GraphMock.mock_options(
+        fn(_) -> GraphMock.payment(:success, :with_fields) end
+      ) do
+        assert {:ok, %{"request_id" => "A76449","id" => "#{@payment_id}", "actions" => [ %{} ]}} = Facebook.payment(
+          @payment_id,
+          app_access_token,
+          "id,request_id,actions,payout_foreign_exchange_rate"
+        )
+      end
+    end
+  end
+
+  describe "payment dispute" do
+    test "success", %{app_access_token: app_access_token} do
+      with_mock :hackney, GraphMock.mock_options(
+        fn(_) -> GraphMock.dispute(:success) end
+      ) do
+        assert {:ok, %{"success" => true}} = Facebook.payment_dispute(
+          @payment_id,
+          app_access_token,
+          :REFUND_DENIED
+        )
+      end
+    end
+  end
+
+  describe "payment refunds" do
+    test "success", %{app_access_token: app_access_token} do
+      with_mock :hackney, GraphMock.mock_options(
+        fn(_) -> GraphMock.refunds(:success) end
+                ) do
+        assert {:ok, %{"success" => true}} = Facebook.payment_refunds(
+          @payment_id,
+          app_access_token,
+          "EUR",
+          10.99,
+          :CUSTOMER_SERVICE
+        )
+      end
+    end
+  end
+
+  describe "signing" do
+    Facebook.set_app_secret(@app_secret)
+
+    test "payload" do
+      payload = JSON.encode!(%{id: @payment_id})
+      assert "EdOhTfnZaIM3-Ht7X_4vgEQnIRq9fpzRgONlMvwRGKI=.eyJpZCI6IjExNjM5NzMwMzg2NTk2In0=" = Facebook.sign(payload)
+    end
+
+    test "decode" do
+      signed_request = "EdOhTfnZaIM3-Ht7X_4vgEQnIRq9fpzRgONlMvwRGKI=.eyJpZCI6IjExNjM5NzMwMzg2NTk2In0="
+      assert {:ok, %{
+        "id" => @payment_id
+      }} = Facebook.decode_signed_request(signed_request)
     end
   end
 
