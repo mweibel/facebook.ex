@@ -104,18 +104,47 @@ defmodule Facebook do
   """
   @type scope :: atom | String.t
 
-  @type using_appsecret :: boolean
+  @typedoc """
+  A reason for settling a payment dispute.
+
+  Reasons:
+    * `:GRANTED_REPLACEMENT_ITEM`
+    * `:DENIED_REFUND`
+    * `:BANNED_USER`
+  """
+  @type dispute_reason :: atom | String.t
+
+  @typedoc """
+  A reason for refunding a payment.
+
+  Reasons:
+    * `:MALICIOUS_FRAUD`
+    * `:FRIENDLY_FRAUD`
+    * `:CUSTOMER_SERVICE`
+  """
+  @type refunds_reason :: atom | String.t
+
+  @type currency :: String.t
+  @type amount :: Number.t
+
+  @typedoc """
+  A base64-encoded JSON string, concatenated to a signature with a single dot.
+  E.g.: "<base64-encoded hmac/sha256 signature>.<base64-encoded JSON payload>"
+  """
+  @type signed_request :: String.t
+
+  @type using_app_secret :: boolean
 
   @doc """
-  If you want to use an appsecret proof, pass it into set_appsecret:
+  If you want to use an appsecret proof, pass it into set_app_secret:
 
   ## Example
-      iex> Facebook.set_appsecret("appsecret")
+      iex> Facebook.set_app_secret("app_secret")
 
   See: https://developers.facebook.com/docs/graph-api/securing-requests
   """
-  def set_appsecret(appsecret) do
-    Config.appsecret(appsecret)
+  def set_app_secret(app_secret) do
+    Config.app_secret(app_secret)
   end
 
   @doc """
@@ -276,8 +305,8 @@ defmodule Facebook do
   @spec picture(page_id, type :: String.t, access_token) :: resp
   def picture(page_id, type, access_token) do
     params = [type: type, redirect: false]
-               |> add_access_token(access_token)
                |> add_app_secret(access_token)
+               |> add_access_token(access_token)
 
     ~s(/#{page_id}/picture)
       |> GraphAPI.get([], params: params)
@@ -514,6 +543,73 @@ defmodule Facebook do
   end
 
   @doc """
+  Gets payment info about a single payment.
+
+  ## Examples
+      iex> Facebook.payment("769860109692136", "<App Access Token>", "id,request_id,actions")
+      {:ok, %{"request_id" => "abc2387238", "id" => "116397053038597", "actions" => [ %{ "type" => "charge", ... } ] } }
+
+  See:
+    * https://developers.facebook.com/docs/graph-api/reference/payment
+  """
+  @spec payment(object_id, access_token, fields) :: resp
+  def payment(payment_id, access_token, fields \\ "") do
+    params = [fields: fields]
+               |> add_access_token(access_token)
+
+    ~s(/#{payment_id})
+      |> GraphAPI.get([], params: params)
+      |> ResponseFormatter.format_response
+  end
+
+  @doc """
+  Settle a payment dispute.
+
+  ## Examples
+      iex> Facebook.payment_dispute("769860109692136", "<App Access Token>", :DENIED_REFUND)
+      {:ok, %{"success" => true}}
+
+  See:
+    * https://developers.facebook.com/docs/graph-api/reference/payment/dispute
+  """
+  @spec payment_dispute(object_id, access_token, dispute_reason) :: resp
+  def payment_dispute(payment_id, access_token, reason) do
+    params = []
+               |> add_access_token(access_token)
+    body = URI.encode_query(%{reason: reason})
+
+    ~s(/#{payment_id}/dispute)
+      |> GraphAPI.post(body, params: params)
+      |> ResponseFormatter.format_response
+  end
+
+  @doc """
+  Refund a payment.
+
+  ## Examples
+      iex> Facebook.payment_refunds("769860109692136", "<App Access Token>", "EUR", 10.99, :CUSTOMER_SERVICE)
+      {:ok, %{"success" => true}}
+
+  See:
+    * https://developers.facebook.com/docs/graph-api/reference/payment/refunds
+  """
+  # credo:disable-for-lines:1 Credo.Check.Readability.MaxLineLength
+  @spec payment_refunds(object_id, access_token, currency, amount, refunds_reason) :: resp
+  def payment_refunds(payment_id, access_token, currency, amount, reason) do
+    params = []
+               |> add_access_token(access_token)
+    body = URI.encode_query(%{
+      currency: currency,
+      amount: amount,
+      reason: reason
+    })
+
+    ~s(/#{payment_id}/refunds)
+      |> GraphAPI.post(body, params: params)
+      |> ResponseFormatter.format_response
+  end
+
+  @doc """
   Exchange an authorization code for an access token.
 
   If you are implementing user authentication, the `code` is generated from a Facebook
@@ -636,6 +732,31 @@ defmodule Facebook do
     |> ResponseFormatter.format_response()
   end
 
+  @doc """
+  Decodes a signed request from a client SDK (in-app payments), verifies the
+  signature and (if it is valid) returns its decoded contents.
+  """
+  @spec decode_signed_request(signed_request) :: resp
+  def decode_signed_request(signed_request) do
+    with [signature_str | [payload_str | _]]
+           <- String.split(signed_request, "."),
+         {:ok, signature} <- Base.url_decode64(signature_str),
+         _signature_verification = ^signature <- signature(payload_str),
+         {:ok, payload} <- Base.url_decode64(payload_str),
+         {:ok, payload} <- JSON.decode(payload)
+    do
+      {:ok, payload}
+    else
+      _ -> {:error, %{}}
+    end
+  end
+
+  # Builds a signature just like Facebook does for its signed_requests.
+  def sign(payload) do
+    payload_str = Base.url_encode64(payload)
+    "#{signature_base64(payload_str)}.#{payload_str}"
+  end
+
   # Request access token and extract the access token from the access token
   # response
   defp get_access_token(params) do
@@ -676,21 +797,29 @@ defmodule Facebook do
       |> (& {:ok, &1}).()
   end
 
-  # 'Encrypts' the token together with the app secret according to the
-  # guidelines of facebook.
-  defp encrypt(token) do
-    :sha256
-      |> :crypto.hmac(Config.appsecret, token)
-      |> Base.encode16(case: :lower)
+  # Hashes the token together with the app secret according to the
+  # guidelines of facebook to build an unencoded/raw signature.
+  defp signature(str) do
+    :crypto.hmac(:sha256, Config.app_secret(), str)
+  end
+
+  # Uses signature/1 to build a urlsafe base64-encoded signature
+  defp signature_base64(str) do
+    str |> signature() |> Base.url_encode64()
+  end
+
+  # Uses signature/1 to build a lowercase base16-encoded signature
+  defp signature_base16(str) do
+    str |> signature() |> Base.encode16(case: :lower)
   end
 
   # Add the appsecret_proof to the GraphAPI request params if the app secret is
   # defined
   defp add_app_secret(params, access_token) do
-    if is_nil(Config.appsecret) do
+    if is_nil(Config.app_secret()) do
       params
     else
-      params ++ [appsecret_proof: encrypt(access_token)]
+      params ++ [appsecret_proof: signature_base16(access_token)]
     end
   end
 
