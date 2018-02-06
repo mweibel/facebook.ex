@@ -25,7 +25,9 @@ defmodule Facebook.Mixfile do
         env: :dev,
         graph_url: "https://graph.facebook.com",
         graph_video_url: "https://graph-video.facebook.com",
-        appsecret: nil
+        app_secret: nil,
+        app_id: nil,
+        app_access_token: nil
       ]
     ]
   end
