@@ -10,7 +10,7 @@ Add facebook.ex as a dependency in your `mix.exs` file.
 
 ```elixir
 defp deps do
-  [{:facebook, "~> 0.17.0"}]
+  [{:facebook, "~> 0.18.0"}]
 end
 ```
 
@@ -22,10 +22,12 @@ $ mix deps.get
 
 ## Configuration
 
-You can configure facebook.ex in your mix `config.exs` (or, if you're using the Phoenix Framework, in your `dev/test/prod.exs`, respectively) with the following keys, which state the library defaults:
+You can configure facebook.ex in your mix `config.exs` (or, if you're using the Phoenix Framework, in your `config/dev.exs|test.exs|prod.exs`, respectively) with the following keys, which state the library defaults:
 ```
 config :facebook,
-  appsecret: nil,
+  app_id: nil,
+  app_secret: nil,
+  app_access_token: nil,
   graph_url: "https://graph.facebook.com",
   graph_video_url: "https://graph-video.facebook.com"
 ```
@@ -36,7 +38,8 @@ For graph_url and video_graph_url, Facebook automatically uses the oldest active
 ```
 Note that you *must not* end the urls with a slash or the requests will fail (Facebook will report an error about unknown url components)!
 
-Supplying an appsecret is optional. If you supply it, an [appsecret_proof](https://developers.facebook.com/docs/graph-api/securing-requests) will be submitted along with the Graph API requests. The appsecret can be changed (or set) at runtime using `Facebook.set_appsecret("<app secret>")`.
+`app_id`, `app_secret` and `app_access_token` do not need to be supplied if you are using no Graph API calls that require them (e.g. payment calls).
+If you supply the `app_secret`, an [appsecret_proof](https://developers.facebook.com/docs/graph-api/securing-requests) will be submitted along with the Graph API requests. The app_secret can be changed (or set) at runtime using `Facebook.set_app_secret("<app secret>")`.
 
 ## Usage
 
