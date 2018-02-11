@@ -30,7 +30,7 @@ defmodule Facebook.Config do
   end
 
   def appsecret(appsecret) do
-    IO.warn("'appsecret' method value is deprecated. Please use 'app_secret'", Macro.Env.stacktrace(__ENV__))
+    IO.warn("'appsecret/1' method is deprecated. Please use 'app_secret'", Macro.Env.stacktrace(__ENV__))
     app_secret(appsecret)
   end
   def app_secret(app_secret) do
