@@ -563,7 +563,7 @@ defmodule Facebook do
       |> ResponseFormatter.format_response
   end
   @spec payment(object_id, access_token, fields) :: resp
-  def payment(_payment_id, _access_token, _fields \\ ""), do: raise "this method is deprecated, please configure app_access_token and use payment/2"
+  def payment(_payment_id, _access_token, _fields), do: raise "this method is deprecated, please configure app_access_token and use payment/2"
 
   @doc """
   Settle a payment dispute. Needs the app access token from the configuration.
