@@ -52,4 +52,8 @@ defmodule Facebook.Config do
   def app_access_token do
     Application.fetch_env! :facebook, :app_access_token
   end
+
+  def app_access_token(app_access_token) do
+    Application.put_env :facebook, :app_access_token, app_access_token
+  end
 end
