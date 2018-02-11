@@ -136,7 +136,8 @@ defmodule Facebook do
   @type using_app_secret :: boolean
 
   @doc """
-  If you want to use an appsecret proof, pass it into set_app_secret:
+  Sets the app secret at runtime to make the calls send an appsecret proof with every request to the Graph API.
+  Note: the app secret may also be set in the configuration.
 
   ## Example
       iex> Facebook.set_app_secret("app_secret")
@@ -699,7 +700,7 @@ defmodule Facebook do
   This may be used to programatically debug issues with large sets of access tokens.
 
   An app access token or an app developer's user access token for the
-  app associated with the input_token is required to acces.
+  app associated with the input_token is required to access.
 
   See:
    - https://developers.facebook.com/docs/graph-api/reference/v2.11/debug_token
