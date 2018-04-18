@@ -419,7 +419,7 @@ defmodule FacebookTest do
       with_mock :hackney, GraphMock.mock_options(
         fn(_) -> GraphMock.payment(:success, :no_fields) end
       ) do
-        assert {:ok, %{"id" => "#{@payment_id}", "created_time" => "2018-01-28T00:33:19+0000"}} = Facebook.payment(
+        assert {:ok, %{"id" => @payment_id, "created_time" => "2018-01-28T00:33:19+0000"}} = Facebook.payment(
           @payment_id,
           app_access_token
         )
@@ -432,7 +432,7 @@ defmodule FacebookTest do
       with_mock :hackney, GraphMock.mock_options(
         fn(_) -> GraphMock.payment(:success, :with_fields) end
       ) do
-        assert {:ok, %{"request_id" => "A76449","id" => "#{@payment_id}", "actions" => [ %{} ]}} = Facebook.payment(
+        assert {:ok, %{"request_id" => "A76449","id" => @payment_id, "actions" => [ %{} ]}} = Facebook.payment(
           @payment_id,
           app_access_token,
           "id,request_id,actions,payout_foreign_exchange_rate"
