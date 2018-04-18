@@ -78,6 +78,31 @@ defmodule FacebookTest do
     end
   end
 
+  describe "custom_picture" do
+    test "success", %{id: id, access_token: access_token} do
+      with_mock :hackney, GraphMock.mock_options(
+        fn(_) -> GraphMock.picture(:success) end
+      ) do
+        {:ok, %{"data" => picture_data}} = Facebook.custom_picture(
+          id,
+          320,
+          320,
+          access_token
+        )
+
+        assert(String.length(picture_data["url"]) > 0)
+      end
+    end
+
+    test "error", %{id: id, invalid_access_token: invalid_access_token} do
+      with_mock :hackney, GraphMock.mock_options(
+        fn(_) -> GraphMock.error() end
+      ) do
+        assert {:error, _} = Facebook.custom_picture(id, 320, 320, invalid_access_token)
+      end
+    end
+  end
+
   describe "picture" do
     test "success", %{id: id, access_token: access_token} do
       with_mock :hackney, GraphMock.mock_options(
@@ -394,7 +419,7 @@ defmodule FacebookTest do
       with_mock :hackney, GraphMock.mock_options(
         fn(_) -> GraphMock.payment(:success, :no_fields) end
       ) do
-        assert {:ok, %{"id" => "#{@payment_id}", "created_time" => "2018-01-28T00:33:19+0000"}} = Facebook.payment(
+        assert {:ok, %{"id" => @payment_id, "created_time" => "2018-01-28T00:33:19+0000"}} = Facebook.payment(
           @payment_id,
           app_access_token
         )
@@ -407,7 +432,7 @@ defmodule FacebookTest do
       with_mock :hackney, GraphMock.mock_options(
         fn(_) -> GraphMock.payment(:success, :with_fields) end
       ) do
-        assert {:ok, %{"request_id" => "A76449","id" => "#{@payment_id}", "actions" => [ %{} ]}} = Facebook.payment(
+        assert {:ok, %{"request_id" => "A76449","id" => @payment_id, "actions" => [ %{} ]}} = Facebook.payment(
           @payment_id,
           app_access_token,
           "id,request_id,actions,payout_foreign_exchange_rate"
