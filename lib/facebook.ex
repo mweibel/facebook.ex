@@ -227,6 +227,23 @@ defmodule Facebook do
       |> GraphAPI.post("", [], params: params)
       |> ResponseFormatter.format_response
   end
+  @doc """
+  Publish to a generic Facebook Graph edge.
+
+  ## Examples
+      iex> # create a Facebook Campaign
+      iex> Facebook.publish(:campaigns, "act_1234546", [objective: "LINK_CLICKS", name: "a campaign"], "<Access Token>")
+      {:ok, %{"id" => "{campaign_id}"}}
+  """
+  @spec publish(edge :: String.t, parent_id :: String.t, params, access_token) :: resp
+  def publish(edge, parent_id, params, access_token) do
+    params = params
+               |> add_access_token(access_token)
+
+    ~s(/#{parent_id}/#{edge})
+      |> GraphAPI.post("", [], params: params)
+      |> ResponseFormatter.format_response
+  end
 
   @doc """
   Publish media to a feed. Author (user or page) is determined from the supplied token.
