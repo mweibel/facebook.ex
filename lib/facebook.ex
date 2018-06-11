@@ -196,6 +196,7 @@ defmodule Facebook do
   end
 
   @doc """
+  Publish to a graph edge using the supplied token.
   Publish to a feed. Author (user or page) is determined from the supplied token.
 
   The `t:page_id/0` is the id for the user or page feed to publish to.
@@ -217,27 +218,14 @@ defmodule Facebook do
       iex> Facebook.publish(:feed, "<Feed Id>", [message: "<Message Body", link: "www.example.com"], "<Access Token>")
       {:ok, %{"id" => "{page_id}_{post_id}"}}
 
-  """
-  @spec publish(:feed, page_id, params, access_token) :: resp
-  def publish(:feed, page_id, params, access_token) do
-    params = params
-               |> add_access_token(access_token)
-
-    ~s(/#{page_id}/feed)
-      |> GraphAPI.post("", [], params: params)
-      |> ResponseFormatter.format_response
-  end
-  @doc """
-  Publish to a generic Facebook Graph edge.
-
-  ## Examples
       iex> # create a Facebook Campaign
       iex> Facebook.publish(:campaigns, "act_1234546", [objective: "LINK_CLICKS", name: "a campaign"], "<Access Token>")
       {:ok, %{"id" => "{campaign_id}"}}
   """
-  @spec publish(edge :: String.t, parent_id :: String.t, params, access_token) :: resp
+  @spec publish(edge :: atom(), parent_id :: String.t, params, access_token) :: resp
   def publish(edge, parent_id, params, access_token) do
     params = params
+               |> add_app_secret(access_token)
                |> add_access_token(access_token)
 
     ~s(/#{parent_id}/#{edge})
