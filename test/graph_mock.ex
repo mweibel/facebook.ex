@@ -1,5 +1,9 @@
 defmodule Facebook.GraphMock do
-  def error() do
+  @moduledoc """
+    Graph Mock
+  """
+
+  def error do
     JSON.encode(%{"error": %{
       "message": "Invalid OAuth access token.",
       "type": "OAuthException",
@@ -11,7 +15,7 @@ defmodule Facebook.GraphMock do
   def long_lived_access_token(:success) do
     JSON.encode(%{
       "access_token" => "access_token",
-      "expires_in" => 5184000,
+      "expires_in" => 5_184_000,
       "token_type" => "bearer"
     })
   end
@@ -75,7 +79,7 @@ defmodule Facebook.GraphMock do
 
   def page(:success, :fan_count) do
     JSON.encode(%{
-      "id": "19292868552", "fan_count": 5469088
+      "id": "19292868552", "fan_count": 5_469_088
     })
   end
 
