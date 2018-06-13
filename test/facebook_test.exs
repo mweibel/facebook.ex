@@ -17,8 +17,8 @@ defmodule FacebookTest do
 
   @app_id "123"
   @app_secret "456"
-  @page_id 19292868552          # This is the facebook for developers page id
-  @test_page_id 629965917187496 # `page_id` the test user created
+  @page_id 19_292_868_552          # This is the facebook for developers page id
+  @test_page_id 629_965_917_187_496 # `page_id` the test user created
   @payment_id "11639730386596"
 
   setup do
@@ -45,7 +45,7 @@ defmodule FacebookTest do
       with_mock :hackney, GraphMock.mock_options(
         fn(_) -> GraphMock.error() end
       ) do
-        assert {:error, %{"code" => _,"message" => _,}} = Facebook.me(
+        assert {:error, %{"code" => _, "message" => _}} = Facebook.me(
           "id,first_name",
           invalid_access_token
         )
@@ -73,7 +73,8 @@ defmodule FacebookTest do
       with_mock :hackney, GraphMock.mock_options(
         fn(_) -> GraphMock.error() end
       ) do
-        assert {:error, %{"code" => _,"message" => _,}} = Facebook.my_accounts(invalid_access_token)
+        assert {:error, %{"code" => _, "message" => _}} =
+                 Facebook.my_accounts(invalid_access_token)
       end
     end
   end
@@ -394,7 +395,7 @@ defmodule FacebookTest do
       with_mock :hackney, GraphMock.mock_options(
         fn(_) -> GraphMock.payment(:success, :no_fields) end
       ) do
-        assert {:ok, %{"id" => "#{@payment_id}", "created_time" => "2018-01-28T00:33:19+0000"}} = Facebook.payment(
+        assert {:ok, %{"id" => @payment_id, "created_time" => "2018-01-28T00:33:19+0000"}} = Facebook.payment(
           @payment_id,
           app_access_token
         )
@@ -407,7 +408,9 @@ defmodule FacebookTest do
       with_mock :hackney, GraphMock.mock_options(
         fn(_) -> GraphMock.payment(:success, :with_fields) end
       ) do
-        assert {:ok, %{"request_id" => "A76449","id" => "#{@payment_id}", "actions" => [ %{} ]}} = Facebook.payment(
+        assert {:ok,
+                 %{"request_id" => "A76449", "id" => @payment_id,
+                   "actions" => [%{}]}} = Facebook.payment(
           @payment_id,
           app_access_token,
           "id,request_id,actions,payout_foreign_exchange_rate"
