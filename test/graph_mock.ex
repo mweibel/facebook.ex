@@ -55,6 +55,25 @@ defmodule Facebook.GraphMock do
     })
   end
 
+  def get_object(:success) do
+    JSON.encode(%{
+      "id": "1234567"
+    })
+  end
+
+  def get_object(:success, :with_fields) do
+    JSON.encode(%{
+      "id": "1234567",
+      "name": "name"
+    })
+  end
+
+  def get_object_edge(:success) do
+    JSON.encode(%{"data": [
+      %{"id": "1234567", "name": "label1"}
+    ]})
+  end
+
   def page(:success) do
     JSON.encode(%{
       "id": "19292868552", "name": "Facebook for Developers"

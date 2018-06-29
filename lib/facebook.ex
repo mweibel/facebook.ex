@@ -373,6 +373,59 @@ defmodule Facebook do
   end
 
   @doc """
+  Basic Graph object information by object ID
+
+  ## Example
+      iex> Facebook.get_object("1234567", "<Access Token>")
+      {:ok, %{"id" => id}}
+  """
+  @spec get_object(object_id :: String.t, access_token) :: resp
+  def get_object(object_id, access_token) do
+    get_object(object_id, access_token, [])
+  end
+
+  @doc """
+  Get Graph object information for the specified params for the provided object ID
+
+  ## Example
+      iex> Facebook.get_object("1234567", "<Access Token>", [fields: "id,name"])
+      {:ok, %{"id" => id, "name" => name}
+
+  See: https://developers.facebook.com/docs/graph-api/reference/page
+  """
+  @spec get_object(object_id, access_token, params) :: resp
+  def get_object(object_id, access_token, params) do
+    params = params
+               |> add_app_secret(access_token)
+               |> add_access_token(access_token)
+
+    ~s(/#{object_id})
+      |> GraphAPI.get([], params: params)
+      |> ResponseFormatter.format_response
+  end
+
+  @doc """
+  Gets an object edge for a specific object ID
+
+  ## Examples
+      iex> Facebook.get_object_edge(:adlabels, "act_12345", "<Access Token>")
+      iex> Facebook.page_feed(:leads, "1223344332", "<Access Token>", [fields: "created_time,id,ad_id,form_id,field_data"])
+      {:ok, %{"data" => [...]}}
+
+  """
+  # credo:disable-for-lines:1 Credo.Check.Readability.MaxLineLength
+  @spec get_object_edge(edge :: atom | String.t, object_id :: String.t, access_token, params) :: resp
+  def get_object_edge(edge, object_id, access_token, params \\ []) do
+    params = params
+               |> add_app_secret(access_token)
+               |> add_access_token(access_token)
+
+    ~s(/#{object_id}/#{edge})
+      |> GraphAPI.get([], params: params)
+      |> ResponseFormatter.format_response
+  end
+
+  @doc """
   Basic page information for the provided `t:page_id/0`
 
   ## Example
@@ -398,12 +451,7 @@ defmodule Facebook do
   @spec page(page_id, access_token, fields) :: resp
   def page(page_id, access_token, fields) do
     params = [fields: Enum.join(fields, ",")]
-               |> add_app_secret(access_token)
-               |> add_access_token(access_token)
-
-    ~s(/#{page_id})
-      |> GraphAPI.get([], params: params)
-      |> ResponseFormatter.format_response
+    get_object(page_id, access_token, params)
   end
 
   @doc """
@@ -435,12 +483,7 @@ defmodule Facebook do
   @spec page_feed(scope, page_id, access_token, limit, fields :: String.t) :: resp
   def page_feed(scope, page_id, access_token, limit \\ 25, fields \\ "") when limit <= 100 do
     params = [limit: limit, fields: fields]
-               |> add_app_secret(access_token)
-               |> add_access_token(access_token)
-
-    ~s(/#{page_id}/#{scope})
-      |> GraphAPI.get([], params: params)
-      |> ResponseFormatter.format_response
+    get_object_edge(scope, page_id, access_token, params)
   end
 
   @doc """
