@@ -258,6 +258,87 @@ defmodule FacebookTest do
     end
   end
 
+  describe "get_object" do
+    test "success", %{app_access_token: app_access_token} do
+      with_mock :hackney, GraphMock.mock_options(
+        fn(_) -> GraphMock.get_object(:success) end
+      ) do
+        assert {:ok, %{
+          "id" => id
+        }} = Facebook.get_object("1234567", app_access_token)
+
+        assert(String.length(id) > 0)
+      end
+    end
+
+    test "error", %{invalid_access_token: invalid_access_token} do
+      with_mock :hackney, GraphMock.mock_options(
+        fn(_) -> GraphMock.error() end
+      ) do
+        assert {:error, _} = Facebook.get_object("1234567", invalid_access_token)
+      end
+    end
+  end
+
+  describe "get_object with fields" do
+    test "success", %{app_access_token: app_access_token} do
+      with_mock :hackney, GraphMock.mock_options(
+        fn(_) -> GraphMock.get_object(:success, :with_fields) end
+      ) do
+        assert {:ok, %{
+          "id" => id,
+          "name" => name
+        }} = Facebook.get_object("1234567", app_access_token, [fields: "name"])
+
+        assert(String.length(id) > 0)
+        assert(String.length(name) > 0)
+      end
+    end
+
+    test "error", %{invalid_access_token: invalid_access_token} do
+      with_mock :hackney, GraphMock.mock_options(
+        fn(_) -> GraphMock.error() end
+      ) do
+        assert {:error, _} = Facebook.get_object(
+          "1234567",
+          invalid_access_token,
+          [fields: "name"]
+        )
+      end
+    end
+  end
+
+  describe "get_object_edge" do
+    test "success", %{app_access_token: app_access_token} do
+      with_mock :hackney, GraphMock.mock_options(
+        fn(_) -> GraphMock.get_object_edge(:success) end
+      ) do
+        assert {:ok, %{"data" => [data | _]}} = Facebook.get_object_edge(
+          :adlabels,
+          "act_123456",
+          app_access_token
+        )
+
+        assert %{
+          "id" => _,
+          "name" => _
+        } = data
+      end
+    end
+
+    test "error", %{invalid_access_token: invalid_access_token} do
+      with_mock :hackney, GraphMock.mock_options(
+        fn(_) -> GraphMock.error() end
+      ) do
+        assert {:error, _} = Facebook.get_object_edge(
+          :adlabels,
+          "act_123456",
+          invalid_access_token
+        )
+      end
+    end
+  end
+
   describe "page" do
     test "success", %{app_access_token: app_access_token} do
       with_mock :hackney, GraphMock.mock_options(
