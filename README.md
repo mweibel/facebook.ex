@@ -10,7 +10,7 @@ Add facebook.ex as a dependency in your `mix.exs` file.
 
 ```elixir
 defp deps do
-  [{:facebook, "~> 0.19.0"}]
+  [{:facebook, "~> 0.20.0"}]
 end
 ```
 
