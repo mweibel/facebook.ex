@@ -94,11 +94,34 @@ defmodule FacebookTest do
       end
     end
 
+    test "success with custom dimensions", %{id: id, access_token: access_token} do
+      with_mock :hackney, GraphMock.mock_options(
+        fn(_) -> GraphMock.picture(:success) end
+      ) do
+        {:ok, %{"data" => picture_data}} = Facebook.picture(
+          id,
+          320,
+          320,
+          access_token
+        )
+
+        assert(String.length(picture_data["url"]) > 0)
+      end
+    end
+
     test "error", %{id: id, invalid_access_token: invalid_access_token} do
       with_mock :hackney, GraphMock.mock_options(
         fn(_) -> GraphMock.error() end
       ) do
         assert {:error, _} = Facebook.picture(id, "small", invalid_access_token)
+      end
+    end
+
+    test "error with custom dimensions", %{id: id, invalid_access_token: invalid_access_token} do
+      with_mock :hackney, GraphMock.mock_options(
+        fn(_) -> GraphMock.error() end
+      ) do
+        assert {:error, _} = Facebook.picture(id, 320, 320, invalid_access_token)
       end
     end
   end
