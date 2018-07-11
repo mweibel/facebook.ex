@@ -319,6 +319,26 @@ defmodule Facebook do
   end
 
   @doc """
+  A Picture for a Facebook User with custom dimensions
+
+  ## Example
+      iex> Facebook.picture("<Some Id>", 480, 480, "<Access Token>")
+      {:ok, %{"data": "..."}}
+
+  See: https://developers.facebook.com/docs/graph-api/reference/user/picture/
+  """
+  @spec picture(page_id, width :: integer, height :: integer, access_token) :: resp
+  def picture(page_id, width, height, access_token) do
+    params = [width: width, height: height, redirect: false]
+             |> add_app_secret(access_token)
+             |> add_access_token(access_token)
+
+    ~s(/#{page_id}/picture)
+      |> GraphAPI.get([], params: params)
+      |> ResponseFormatter.format_response
+  end
+
+  @doc """
   Likes of the currently logged in user specified by the `t:access_token/0`
 
   ## Example
