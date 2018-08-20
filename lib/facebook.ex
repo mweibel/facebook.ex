@@ -136,7 +136,8 @@ defmodule Facebook do
   @type using_app_secret :: boolean
 
   @doc """
-  If you want to use an appsecret proof, pass it into set_app_secret:
+  Sets the app secret at runtime to make the calls send an appsecret proof with every request to the Graph API.
+  Note: the app secret may also be set in the configuration.
 
   ## Example
       iex> Facebook.set_app_secret("app_secret")
@@ -611,61 +612,63 @@ defmodule Facebook do
   end
 
   @doc """
-  Gets payment info about a single payment.
+  Gets payment info about a single payment. Needs the app access token from the configuration.
 
   ## Examples
-      iex> Facebook.payment("769860109692136", "<App Access Token>", "id,request_id,actions")
+      iex> Facebook.payment("769860109692136", "id,request_id,actions")
       {:ok, %{"request_id" => "abc2387238", "id" => "116397053038597", "actions" => [ %{ "type" => "charge", ... } ] } }
 
   See:
     * https://developers.facebook.com/docs/graph-api/reference/payment
   """
-  @spec payment(object_id, access_token, fields) :: resp
-  def payment(payment_id, access_token, fields \\ "") do
+  @spec payment(object_id, fields) :: resp
+  def payment(payment_id, fields \\ "") do
     params = [fields: fields]
-               |> add_access_token(access_token)
+               |> add_app_access_token()
 
     ~s(/#{payment_id})
       |> GraphAPI.get([], params: params)
       |> ResponseFormatter.format_response
   end
+  @spec payment(object_id, access_token, fields) :: resp
+  def payment(_payment_id, _access_token, _fields), do: raise "this method is deprecated, please configure app_access_token and use payment/2"
 
   @doc """
-  Settle a payment dispute.
+  Settle a payment dispute. Needs the app access token from the configuration.
 
   ## Examples
-      iex> Facebook.payment_dispute("769860109692136", "<App Access Token>", :DENIED_REFUND)
+      iex> Facebook.payment_dispute("769860109692136", :DENIED_REFUND)
       {:ok, %{"success" => true}}
 
   See:
     * https://developers.facebook.com/docs/graph-api/reference/payment/dispute
   """
-  @spec payment_dispute(object_id, access_token, dispute_reason) :: resp
-  def payment_dispute(payment_id, access_token, reason) do
-    params = []
-               |> add_access_token(access_token)
+  @spec payment_dispute(object_id, dispute_reason) :: resp
+  def payment_dispute(payment_id, reason) do
+    params = add_app_access_token([])
     body = URI.encode_query(%{reason: reason})
 
     ~s(/#{payment_id}/dispute)
       |> GraphAPI.post(body, params: params)
       |> ResponseFormatter.format_response
   end
+  @spec payment(object_id, access_token, dispute_reason) :: resp
+  def payment_dispute(_payment_id, _access_token, _reason), do: raise "this method is deprecated, please configure app_access_token and use payment_dispute/2"
 
   @doc """
-  Refund a payment.
+  Refund a payment. Needs the app access token from the configuration.
 
   ## Examples
-      iex> Facebook.payment_refunds("769860109692136", "<App Access Token>", "EUR", 10.99, :CUSTOMER_SERVICE)
+      iex> Facebook.payment_refunds("769860109692136", "EUR", 10.99, :CUSTOMER_SERVICE)
       {:ok, %{"success" => true}}
 
   See:
     * https://developers.facebook.com/docs/graph-api/reference/payment/refunds
   """
   # credo:disable-for-lines:1 Credo.Check.Readability.MaxLineLength
-  @spec payment_refunds(object_id, access_token, currency, amount, refunds_reason) :: resp
-  def payment_refunds(payment_id, access_token, currency, amount, reason) do
-    params = []
-               |> add_access_token(access_token)
+  @spec payment_refunds(object_id, currency, amount, refunds_reason) :: resp
+  def payment_refunds(payment_id, currency, amount, reason) do
+    params = add_app_access_token([])
     body = URI.encode_query(%{
       currency: currency,
       amount: amount,
@@ -676,6 +679,9 @@ defmodule Facebook do
       |> GraphAPI.post(body, params: params)
       |> ResponseFormatter.format_response
   end
+  # credo:disable-for-lines:1 Credo.Check.Readability.MaxLineLength
+  @spec payment_refunds(object_id, access_token, currency, amount, refunds_reason) :: resp
+  def payment_refunds(_payment_id, _access_token, _currency, _amount, _reason), do: raise "this method is deprecated, please configure app_access_token and use payment_refunds/4"
 
   @doc """
   Exchange an authorization code for an access token.
@@ -731,15 +737,14 @@ defmodule Facebook do
   end
 
   @doc """
-  Get all test users for an app.
+  Get all test users for an app. Needs the app access token from the configuration.
 
-  The access token in this case needs to be an app access token.
   See:
     - https://developers.facebook.com/docs/facebook-login/access-tokens#apptokens
     - https://developers.facebook.com/docs/graph-api/reference/v2.8/app/accounts/test-users
 
   ## Examples
-      iex> Facebook.test_users("appId", "appId|appSecret")
+      iex> Facebook.test_users("appId")
       {:ok, %{"data" => [
         %{
           "access_token" => "ACCESS_TOKEN",
@@ -748,10 +753,9 @@ defmodule Facebook do
         }
       ]}
   """
-  @spec test_users(client_id, access_token) :: resp
-  def test_users(client_id, access_token) do
-    params = []
-               |> add_access_token(access_token)
+  @spec test_users(client_id) :: resp
+  def test_users(client_id) do
+    params = add_app_access_token([])
     ~s(/#{client_id}/accounts/test-users)
       |> GraphAPI.get([], params: params)
       |> ResponseFormatter.format_response
@@ -767,7 +771,8 @@ defmodule Facebook do
   This may be used to programatically debug issues with large sets of access tokens.
 
   An app access token or an app developer's user access token for the
-  app associated with the input_token is required to acces.
+  app associated with the input_token is required to access.
+  debug_token/1 can be used if an app_access_token was configured and should be used.
 
   See:
    - https://developers.facebook.com/docs/graph-api/reference/v2.11/debug_token
@@ -798,6 +803,17 @@ defmodule Facebook do
     ~s(/debug_token)
     |> GraphAPI.get([], params: params)
     |> ResponseFormatter.format_response()
+  end
+
+  @doc """
+  Calls debug_token/2 with the previously configured app_access_token.
+
+  See:
+   - debug_token/2
+  """
+  @spec debug_token(access_token) :: resp
+  def debug_token(input_token) do
+    debug_token(input_token, Config.app_access_token())
   end
 
   @doc """
@@ -894,5 +910,9 @@ defmodule Facebook do
   ## Add access_token to params
   defp add_access_token(fields, token) do
     fields ++ [access_token: token]
+  end
+
+  defp add_app_access_token(fields) do
+    fields ++ [access_token: Config.app_access_token()]
   end
 end
