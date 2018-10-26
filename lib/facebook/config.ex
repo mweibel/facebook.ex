@@ -51,4 +51,14 @@ defmodule Facebook.Config do
   def app_access_token do
     Application.fetch_env! :facebook, :app_access_token
   end
+
+  # Request conn_timeout
+  def request_conn_timeout do
+    Application.fetch_env(:facebook, :request_conn_timeout)
+  end
+
+  # Request recv_timeout
+  def request_recv_timeout do
+    Application.fetch_env(:facebook, :request_recv_timeout)
+  end
 end
