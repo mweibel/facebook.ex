@@ -17,6 +17,8 @@ defmodule Facebook.GraphAPI do
     end
   end
 
+  def process_url("https://graph.facebook.com/" <> _ = url), do: url
+
   def process_url(url), do: Config.graph_url <> url
 
   def process_response_body(body) do
