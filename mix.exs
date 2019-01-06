@@ -54,14 +54,14 @@ defmodule Facebook.Mixfile do
 
   defp deps do
     [
-      {:json, ">= 0.3.3"},
-      {:httpoison, "~> 0.13"},
+      {:json, ">= 1.2.5"},
+      {:httpoison, "~> 1.4"},
 
-      {:mock, "~> 0.2.0", only: :test},
-      {:mix_test_watch, "~> 0.3", only: :dev, runtime: false},
+      {:mock, "~> 0.3.2", only: :test},
+      {:mix_test_watch, "~> 0.9", only: :dev, runtime: false},
 
-      {:credo, "~> 0.8", only: [:dev, :test], runtime: false},
-      {:ex_doc, ">= 0.13.0", only: :dev}
+      {:credo, "~> 1.0.0", only: [:dev, :test], runtime: false},
+      {:ex_doc, ">= 0.19.2", only: :dev}
     ]
   end
 
