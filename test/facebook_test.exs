@@ -33,7 +33,7 @@ defmodule FacebookTest do
   describe "me" do
     test "success", %{id: id, access_token: access_token} do
       with_mock :hackney, GraphMock.mock_options(
-        fn(_) -> GraphMock.me(:success) end
+        fn(_, _) -> GraphMock.me(:success) end
       ) do
         assert {:ok, user} = Facebook.me("id,first_name", access_token)
         assert(user["id"] == id)
@@ -43,7 +43,7 @@ defmodule FacebookTest do
 
     test "error", %{invalid_access_token: invalid_access_token} do
       with_mock :hackney, GraphMock.mock_options(
-        fn(_) -> GraphMock.error() end
+        fn(_, _) -> GraphMock.error() end
       ) do
         assert {:error, %{"code" => _, "message" => _}} = Facebook.me(
           "id,first_name",
@@ -56,7 +56,7 @@ defmodule FacebookTest do
   describe "my_accounts" do
     test "success", %{access_token: access_token} do
       with_mock :hackney, GraphMock.mock_options(
-        fn(_) -> GraphMock.my_accounts(:success) end
+        fn(_, _) -> GraphMock.my_accounts(:success) end
       ) do
         assert {:ok, %{"data" => [data | _]}} = Facebook.my_accounts(access_token)
         assert %{
@@ -71,7 +71,7 @@ defmodule FacebookTest do
 
     test "error", %{invalid_access_token: invalid_access_token} do
       with_mock :hackney, GraphMock.mock_options(
-        fn(_) -> GraphMock.error() end
+        fn(_, _) -> GraphMock.error() end
       ) do
         assert {:error, %{"code" => _, "message" => _}} =
                  Facebook.my_accounts(invalid_access_token)
@@ -82,7 +82,7 @@ defmodule FacebookTest do
   describe "picture" do
     test "success", %{id: id, access_token: access_token} do
       with_mock :hackney, GraphMock.mock_options(
-        fn(_) -> GraphMock.picture(:success) end
+        fn(_, _) -> GraphMock.picture(:success) end
       ) do
         {:ok, %{"data" => picture_data}} = Facebook.picture(
           id,
@@ -96,7 +96,7 @@ defmodule FacebookTest do
 
     test "success with custom dimensions", %{id: id, access_token: access_token} do
       with_mock :hackney, GraphMock.mock_options(
-        fn(_) -> GraphMock.picture(:success) end
+        fn(_, _) -> GraphMock.picture(:success) end
       ) do
         {:ok, %{"data" => picture_data}} = Facebook.picture(
           id,
@@ -111,7 +111,7 @@ defmodule FacebookTest do
 
     test "error", %{id: id, invalid_access_token: invalid_access_token} do
       with_mock :hackney, GraphMock.mock_options(
-        fn(_) -> GraphMock.error() end
+        fn(_, _) -> GraphMock.error() end
       ) do
         assert {:error, _} = Facebook.picture(id, "small", invalid_access_token)
       end
@@ -119,7 +119,7 @@ defmodule FacebookTest do
 
     test "error with custom dimensions", %{id: id, invalid_access_token: invalid_access_token} do
       with_mock :hackney, GraphMock.mock_options(
-        fn(_) -> GraphMock.error() end
+        fn(_, _) -> GraphMock.error() end
       ) do
         assert {:error, _} = Facebook.picture(id, 320, 320, invalid_access_token)
       end
@@ -129,7 +129,7 @@ defmodule FacebookTest do
   describe "publish" do
     test "feed - success", %{id: id, access_token: access_token} do
       with_mock :hackney, GraphMock.mock_options(
-        fn(_) -> GraphMock.publish(:success, :feed) end
+        fn(_, _) -> GraphMock.publish(:success, :feed) end
       ) do
         {:ok, response} = Facebook.publish(
           :feed,
@@ -144,7 +144,7 @@ defmodule FacebookTest do
 
     test "feed - error", %{id: id, invalid_access_token: invalid_access_token} do
       with_mock :hackney, GraphMock.mock_options(
-        fn(_) -> GraphMock.error() end
+        fn(_, _) -> GraphMock.error() end
       ) do
         assert {:error, _} = Facebook.publish(
           :feed,
@@ -158,7 +158,7 @@ defmodule FacebookTest do
 
     test "photo - success", %{id: id, access_token: access_token} do
       with_mock :hackney, GraphMock.mock_options(
-        fn(_) -> GraphMock.publish(:success, :image) end
+        fn(_, _) -> GraphMock.publish(:success, :image) end
       ) do
         file_path = "test/assets/sample_image.png"
         assert {:ok, %{"id" => _, "post_id" => _}} = Facebook.publish(
@@ -173,7 +173,7 @@ defmodule FacebookTest do
 
     test "photo - error", %{id: id, invalid_access_token: invalid_access_token} do
       with_mock :hackney, GraphMock.mock_options(
-        fn(_) -> GraphMock.error() end
+        fn(_, _) -> GraphMock.error() end
       ) do
         file_path = "test/assets/sample_image.png"
         assert {:error, _} = Facebook.publish(
@@ -188,7 +188,7 @@ defmodule FacebookTest do
 
     test "video - success", %{id: id, access_token: access_token} do
       with_mock :hackney, GraphMock.mock_options(
-        fn(_) -> GraphMock.publish(:success, :image) end
+        fn(_, _) -> GraphMock.publish(:success, :image) end
       ) do
         file_path = "test/assets/sample_video.mpg"
         assert {:ok, response} = Facebook.publish(
@@ -204,7 +204,7 @@ defmodule FacebookTest do
 
     test "video - error", %{id: id, invalid_access_token: invalid_access_token} do
       with_mock :hackney, GraphMock.mock_options(
-        fn(_) -> GraphMock.error() end
+        fn(_, _) -> GraphMock.error() end
       ) do
         file_path = "test/assets/sample_image.png"
         assert {:error, _} = Facebook.publish(
@@ -221,7 +221,7 @@ defmodule FacebookTest do
   describe "my_likes" do
     test "success", %{access_token: access_token} do
       with_mock :hackney, GraphMock.mock_options(
-        fn(_) -> GraphMock.my_likes(:success) end
+        fn(_, _) -> GraphMock.my_likes(:success) end
       ) do
         {:ok, likes_data} = Facebook.my_likes(access_token)
 
@@ -231,7 +231,7 @@ defmodule FacebookTest do
 
     test "error", %{invalid_access_token: invalid_access_token} do
       with_mock :hackney, GraphMock.mock_options(
-        fn(_) -> GraphMock.error() end
+        fn(_, _) -> GraphMock.error() end
       ) do
         assert {:error, _} = Facebook.my_likes(invalid_access_token)
       end
@@ -241,7 +241,7 @@ defmodule FacebookTest do
   describe "permissions" do
     test "success", %{id: id, access_token: access_token} do
       with_mock :hackney, GraphMock.mock_options(
-        fn(_) -> GraphMock.permissions(:success) end
+        fn(_, _) -> GraphMock.permissions(:success) end
       ) do
         assert {:ok, %{"data" => data}} = Facebook.permissions(id, access_token)
 
@@ -253,7 +253,7 @@ defmodule FacebookTest do
 
     test "error", %{id: id, invalid_access_token: invalid_access_token} do
       with_mock :hackney, GraphMock.mock_options(
-        fn(_) -> GraphMock.error() end
+        fn(_, _) -> GraphMock.error() end
       ) do
         assert {:error, _} = Facebook.permissions(id, invalid_access_token)
       end
@@ -263,7 +263,7 @@ defmodule FacebookTest do
   describe "fan_count" do
     test "success", %{app_access_token: app_access_token} do
       with_mock :hackney, GraphMock.mock_options(
-        fn(_) -> GraphMock.page(:success, :fan_count) end
+        fn(_, _) -> GraphMock.page(:success, :fan_count) end
       ) do
         assert {:ok, %{"fan_count" => _}} = Facebook.fan_count(
           @page_id,
@@ -274,7 +274,7 @@ defmodule FacebookTest do
 
     test "error", %{invalid_access_token: invalid_access_token} do
       with_mock :hackney, GraphMock.mock_options(
-        fn(_) -> GraphMock.error() end
+        fn(_, _) -> GraphMock.error() end
       ) do
         assert {:error, _} = Facebook.fan_count(@page_id, invalid_access_token)
       end
@@ -284,7 +284,7 @@ defmodule FacebookTest do
   describe "get_object" do
     test "success", %{app_access_token: app_access_token} do
       with_mock :hackney, GraphMock.mock_options(
-        fn(_) -> GraphMock.get_object(:success) end
+        fn(_, _) -> GraphMock.get_object(:success) end
       ) do
         assert {:ok, %{
           "id" => id
@@ -296,7 +296,7 @@ defmodule FacebookTest do
 
     test "error", %{invalid_access_token: invalid_access_token} do
       with_mock :hackney, GraphMock.mock_options(
-        fn(_) -> GraphMock.error() end
+        fn(_, _) -> GraphMock.error() end
       ) do
         assert {:error, _} = Facebook.get_object("1234567", invalid_access_token)
       end
@@ -306,7 +306,7 @@ defmodule FacebookTest do
   describe "get_object with fields" do
     test "success", %{app_access_token: app_access_token} do
       with_mock :hackney, GraphMock.mock_options(
-        fn(_) -> GraphMock.get_object(:success, :with_fields) end
+        fn(_, _) -> GraphMock.get_object(:success, :with_fields) end
       ) do
         assert {:ok, %{
           "id" => id,
@@ -320,7 +320,7 @@ defmodule FacebookTest do
 
     test "error", %{invalid_access_token: invalid_access_token} do
       with_mock :hackney, GraphMock.mock_options(
-        fn(_) -> GraphMock.error() end
+        fn(_, _) -> GraphMock.error() end
       ) do
         assert {:error, _} = Facebook.get_object(
           "1234567",
@@ -334,7 +334,7 @@ defmodule FacebookTest do
   describe "get_object_edge" do
     test "success", %{app_access_token: app_access_token} do
       with_mock :hackney, GraphMock.mock_options(
-        fn(_) -> GraphMock.get_object_edge(:success) end
+        fn(_, _) -> GraphMock.get_object_edge(:success) end
       ) do
         assert {:ok, %{"data" => [data | _]}} = Facebook.get_object_edge(
           :adlabels,
@@ -351,7 +351,7 @@ defmodule FacebookTest do
 
     test "error", %{invalid_access_token: invalid_access_token} do
       with_mock :hackney, GraphMock.mock_options(
-        fn(_) -> GraphMock.error() end
+        fn(_, _) -> GraphMock.error() end
       ) do
         assert {:error, _} = Facebook.get_object_edge(
           :adlabels,
@@ -365,7 +365,7 @@ defmodule FacebookTest do
   describe "page" do
     test "success", %{app_access_token: app_access_token} do
       with_mock :hackney, GraphMock.mock_options(
-        fn(_) -> GraphMock.page(:success) end
+        fn(_, _) -> GraphMock.page(:success) end
       ) do
         assert {:ok, %{
           "name" => name,
@@ -379,7 +379,7 @@ defmodule FacebookTest do
 
     test "error", %{invalid_access_token: invalid_access_token} do
       with_mock :hackney, GraphMock.mock_options(
-        fn(_) -> GraphMock.error() end
+        fn(_, _) -> GraphMock.error() end
       ) do
         assert {:error, _} = Facebook.page(@page_id, invalid_access_token)
       end
@@ -389,7 +389,7 @@ defmodule FacebookTest do
   describe "page with fields" do
     test "success", %{app_access_token: app_access_token} do
       with_mock :hackney, GraphMock.mock_options(
-        fn(_) -> GraphMock.page(:success, :with_fields) end
+        fn(_, _) -> GraphMock.page(:success, :with_fields) end
       ) do
         assert {:ok, %{
           "id" => id,
@@ -403,7 +403,7 @@ defmodule FacebookTest do
 
     test "error", %{invalid_access_token: invalid_access_token} do
       with_mock :hackney, GraphMock.mock_options(
-        fn(_) -> GraphMock.error() end
+        fn(_, _) -> GraphMock.error() end
       ) do
         assert {:error, _} = Facebook.page(
           @page_id,
@@ -417,7 +417,7 @@ defmodule FacebookTest do
   describe "page feed" do
     test "success", %{app_access_token: app_access_token} do
       with_mock :hackney, GraphMock.mock_options(
-        fn(_) -> GraphMock.page(:success, :feed) end
+        fn(_, _) -> GraphMock.page(:success, :feed) end
       ) do
         assert {:ok, %{"data" => [data | _]}} = Facebook.page_feed(
           :feed,
@@ -437,7 +437,7 @@ defmodule FacebookTest do
 
     test "error", %{invalid_access_token: invalid_access_token} do
       with_mock :hackney, GraphMock.mock_options(
-        fn(_) -> GraphMock.error() end
+        fn(_, _) -> GraphMock.error() end
       ) do
         assert {:error, _} = Facebook.page_feed(
           :feed,
@@ -452,7 +452,7 @@ defmodule FacebookTest do
   describe "object count" do
     test "success", %{access_token: access_token} do
       with_mock :hackney, GraphMock.mock_options(
-        fn(_) -> GraphMock.object_count(:success, :likes) end
+        fn(_, _) -> GraphMock.object_count(:success, :likes) end
       ) do
         assert {:ok, 10} = Facebook.object_count(
           :likes,
@@ -466,7 +466,7 @@ defmodule FacebookTest do
   describe "object reaction count" do
     test "success", %{access_token: access_token} do
       with_mock :hackney, GraphMock.mock_options(
-        fn(_) -> GraphMock.object_count(:success, :likes) end
+        fn(_, _) -> GraphMock.object_count(:success, :likes) end
       ) do
         assert {:ok, 10} = Facebook.object_count(
           :reaction,
@@ -481,7 +481,7 @@ defmodule FacebookTest do
   describe "object count all" do
     test "success", %{access_token: access_token} do
       with_mock :hackney, GraphMock.mock_options(
-        fn(_) -> GraphMock.object_count_all(:success) end
+        fn(_, _) -> GraphMock.object_count_all(:success) end
       ) do
         assert {:ok, %{"haha" => haha, "love" => love}} = Facebook.object_count_all(
           "#{@test_page_id}_629967087187379",
@@ -497,7 +497,7 @@ defmodule FacebookTest do
   describe "payment" do
     test "success", %{app_access_token: app_access_token} do
       with_mock :hackney, GraphMock.mock_options(
-        fn(_) -> GraphMock.payment(:success, :no_fields) end
+        fn(_, _) -> GraphMock.payment(:success, :no_fields) end
       ) do
         assert {:ok, %{"id" => @payment_id, "created_time" => "2018-01-28T00:33:19+0000"}} = Facebook.payment(
           @payment_id,
@@ -510,7 +510,7 @@ defmodule FacebookTest do
   describe "payment with fields" do
     test "success", %{app_access_token: app_access_token} do
       with_mock :hackney, GraphMock.mock_options(
-        fn(_) -> GraphMock.payment(:success, :with_fields) end
+        fn(_, _) -> GraphMock.payment(:success, :with_fields) end
       ) do
         assert {:ok,
                  %{"request_id" => "A76449", "id" => @payment_id,
@@ -526,7 +526,7 @@ defmodule FacebookTest do
   describe "payment dispute" do
     test "success", %{app_access_token: app_access_token} do
       with_mock :hackney, GraphMock.mock_options(
-        fn(_) -> GraphMock.dispute(:success) end
+        fn(_, _) -> GraphMock.dispute(:success) end
       ) do
         assert {:ok, %{"success" => true}} = Facebook.payment_dispute(
           @payment_id,
@@ -540,7 +540,7 @@ defmodule FacebookTest do
   describe "payment refunds" do
     test "success", %{app_access_token: app_access_token} do
       with_mock :hackney, GraphMock.mock_options(
-        fn(_) -> GraphMock.refunds(:success) end
+        fn(_, _) -> GraphMock.refunds(:success) end
                 ) do
         assert {:ok, %{"success" => true}} = Facebook.payment_refunds(
           @payment_id,
@@ -572,7 +572,7 @@ defmodule FacebookTest do
   describe "long lived access token" do
     test "success", %{access_token: access_token} do
       with_mock :hackney, GraphMock.mock_options(
-        fn(_) -> GraphMock.long_lived_access_token(:success) end
+        fn(_, _) -> GraphMock.long_lived_access_token(:success) end
       ) do
         assert {:ok, %{
           "access_token" => access_token,
@@ -592,7 +592,7 @@ defmodule FacebookTest do
 
     test "error", %{invalid_access_token: invalid_access_token} do
       with_mock :hackney, GraphMock.mock_options(
-        fn(_) -> GraphMock.error() end
+        fn(_, _) -> GraphMock.error() end
       ) do
         assert {:error, _} = Facebook.long_lived_access_token(
           @app_id,
@@ -606,7 +606,7 @@ defmodule FacebookTest do
   describe "new stream" do
     test "success", %{app_access_token: app_access_token} do
       with_mock :hackney, GraphMock.mock_options(
-        fn(_) -> GraphMock.page(:success, :feed) end
+        fn(_, _) -> GraphMock.page(:success, :feed) end
       ) do
         posts = Facebook.page_feed(
           :feed,
