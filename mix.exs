@@ -10,7 +10,6 @@ defmodule Facebook.Mixfile do
       elixir: "~> 1.0",
       description: description(),
       package: package(),
-      aliases: aliases(),
       deps: deps(),
       source_url: "https://github.com/mweibel/facebook.ex"
     ]
@@ -60,16 +59,6 @@ defmodule Facebook.Mixfile do
       {:mix_test_watch, "~> 0.9", only: :dev, runtime: false},
       {:credo, "~> 1.0.0", only: [:dev, :test], runtime: false},
       {:ex_doc, ">= 0.19.2", only: :dev}
-    ]
-  end
-
-  defp aliases do
-    [
-      quality: [
-        "test",
-        "format --check-formatted",
-        "credo --strict"
-      ]
     ]
   end
 end

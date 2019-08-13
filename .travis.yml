@@ -1,6 +1,9 @@
 language: elixir
 sudo: false
-script: MIX_ENV=test mix quality
+script:
+  - if [[ `elixir -v` = *"1.9"* ]] ; then mix format --check-formatted ; fi
+  - mix credo --strict
+  - mix test
 matrix:
   # Compatible versions are taken from
   # https://hexdocs.pm/elixir/compatibility-and-deprecations.html#compatibility-between-elixir-and-erlang-otp
