@@ -67,6 +67,7 @@ defmodule Facebook.Mixfile do
     [
       quality: [
         "test",
+        "format --check-formatted",
         "credo --strict"
       ]
     ]
