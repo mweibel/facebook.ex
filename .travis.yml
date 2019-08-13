@@ -4,16 +4,23 @@ elixir:
   - 1.5
   - 1.6
   - 1.7
+  - 1.8
+  - 1.9
 sudo: false
 otp_release:
   - 18.1
   - 19.0
   - 20.3
-  - 21.0
+  - 21.3
+  - 22.0
 script: MIX_ENV=test mix quality
 matrix:
   exclude:
     - elixir: 1.4
-      otp_release: 21.0
+      otp_release: 21.3
+    - elixir: 1.4
+      otp_release: 22.0
     - elixir: 1.5
-      otp_release: 21.0
+      otp_release: 21.3
+    - elixir: 1.5
+      otp_release: 22.0
