@@ -5,10 +5,7 @@ defmodule Facebook.GraphVideoAPI do
 
   alias Facebook.Config
 
-  def process_url(url), do: Config.graph_video_url <> url
+  def process_url(url), do: Config.graph_video_url() <> url
 
-  def process_response_body(body) do
-    body
-      |> JSON.decode
-  end
+  def process_response_body(body), do: JSON.decode(body)
 end

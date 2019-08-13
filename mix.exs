@@ -1,4 +1,4 @@
-Code.ensure_loaded?(Hex) and Hex.start
+Code.ensure_loaded?(Hex) and Hex.start()
 
 defmodule Facebook.Mixfile do
   use Mix.Project
@@ -19,7 +19,7 @@ defmodule Facebook.Mixfile do
   # Configuration for the OTP application
   def application do
     [
-      mod: { Facebook, [] },
+      mod: {Facebook, []},
       applications: [:httpoison, :json, :logger],
       env: [
         env: :dev,
@@ -56,10 +56,8 @@ defmodule Facebook.Mixfile do
     [
       {:json, ">= 1.2.5"},
       {:httpoison, "~> 1.4"},
-
       {:mock, "~> 0.3.2", only: :test},
       {:mix_test_watch, "~> 0.9", only: :dev, runtime: false},
-
       {:credo, "~> 1.0.0", only: [:dev, :test], runtime: false},
       {:ex_doc, ">= 0.19.2", only: :dev}
     ]
@@ -67,7 +65,7 @@ defmodule Facebook.Mixfile do
 
   defp aliases do
     [
-      "quality": [
+      quality: [
         "test",
         "credo --strict"
       ]
