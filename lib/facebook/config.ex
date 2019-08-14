@@ -102,13 +102,25 @@ defmodule Facebook.Config do
     |> parse_config_value()
   end
 
-  defp parse_config_value({:system, env_name}), do: System.fetch_env!(env_name)
+  defp parse_config_value({:system, env_name}), do: fetch_env!(env_name)
 
   defp parse_config_value({:system, :integer, env_name}) do
     env_name
-    |> System.fetch_env!()
+    |> fetch_env!()
     |> String.to_integer()
   end
 
   defp parse_config_value(value), do: value
+
+  # System.fetch_env!/1 support for older versions of Elixir
+  defp fetch_env!(env_name) do
+    case System.get_env(env_name) do
+      nil ->
+        raise ArgumentError,
+          message: "could not fetch environment variable \"#{env_name}\" because it is not set"
+
+      value ->
+        value
+    end
+  end
 end
