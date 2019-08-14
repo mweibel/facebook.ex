@@ -23,23 +23,46 @@ $ mix deps.get
 ## Configuration
 
 You can configure facebook.ex in your mix `config.exs` (or, if you're using the Phoenix Framework, in your `config/dev.exs|test.exs|prod.exs`, respectively) with the following keys, which state the library defaults:
+
 ```
 config :facebook,
   app_id: nil,
   app_secret: nil,
   app_access_token: nil,
   graph_url: "https://graph.facebook.com",
-  graph_video_url: "https://graph-video.facebook.com"
+  graph_video_url: "https://graph-video.facebook.com",
+  request_conn_timeout: nil,
+  request_recv_timeout: nil
 ```
-For graph_url and video_graph_url, Facebook automatically uses the oldest active Graph API version available if you don't specify a version in the url. You may use versioned urls to pin your calls to a specific API versions (recommended), e.g. like so:
+
+For `graph_url` and `video_graph_url`, Facebook automatically uses the oldest active Graph API version available if you don't specify a version in the url. You may use versioned urls to pin your calls to a specific API versions (recommended), e.g. like so:
+
 ```
   graph_url: "https://graph.facebook.com/v2.11",
   graph_video_url: "https://graph-video.facebook.com/v2.8"
 ```
+
 Note that you *must not* end the urls with a slash or the requests will fail (Facebook will report an error about unknown url components)!
 
 `app_id`, `app_secret` and `app_access_token` do not need to be supplied if you are using no Graph API calls that require them (e.g. payment calls).
-If you supply the `app_secret`, an [appsecret_proof](https://developers.facebook.com/docs/graph-api/securing-requests) will be submitted along with the Graph API requests. The app_secret can be changed (or set) at runtime using `Facebook.set_app_secret("<app secret>")`.
+
+If you supply the `app_secret`, an [appsecret_proof](https://developers.facebook.com/docs/graph-api/securing-requests) will be submitted along with the Graph API requests. The `app_secret` can be changed (or set) at runtime using `Facebook.set_app_secret("<app secret>")`.
+
+You can also configure `facebook.ex` library in runtime using `{:system, _}` tuples:
+
+```
+config :facebook,
+  app_id: {:system, "APP_ID"},
+  app_secret: {:system, "APP_SECRET"},
+  app_access_token: {:system, "APP_ACCESS_TOKEN"},
+  graph_url: {:system, "GRAPH_URL"},
+  graph_video_url: {:system, "GRAPH_VIDEO_URL"},
+  request_conn_timeout: {:system, :integer, "REQUEST_CONN_TIMEOUT"},
+  request_recv_timeout: {:system, :integer, "REQUEST_RECV_TIMEOUT"}
+```
+
+Note that if you use `{:system, _}` (or `{:system, :integer, _}`) tuple but don't provide the corresponding
+environment variable application will crash on startup to prevent unexpected behaviour later.
 
 ## Usage
 
