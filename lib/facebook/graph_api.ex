@@ -8,12 +8,12 @@ defmodule Facebook.GraphAPI do
   def process_request_options(options) do
     updated_options =
       case Config.request_conn_timeout() do
-        :error -> options
+        nil -> options
         val -> options ++ [timeout: val]
       end
 
     case Config.request_recv_timeout() do
-      :error -> updated_options
+      nil -> updated_options
       val -> updated_options ++ [recv_timeout: val]
     end
   end
@@ -22,8 +22,5 @@ defmodule Facebook.GraphAPI do
 
   def process_url(url), do: Config.graph_url() <> url
 
-  def process_response_body(body) do
-    body
-    |> JSON.decode()
-  end
+  def process_response_body(body), do: JSON.decode(body)
 end

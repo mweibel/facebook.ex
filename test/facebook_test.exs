@@ -527,7 +527,11 @@ defmodule FacebookTest do
   end
 
   describe "signing" do
-    Facebook.set_app_secret(@app_secret)
+    setup do
+      Facebook.set_app_secret(@app_secret)
+
+      :ok
+    end
 
     test "payload" do
       payload = JSON.encode!(%{id: @payment_id})
