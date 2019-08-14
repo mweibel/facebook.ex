@@ -39,17 +39,17 @@ defmodule Facebook do
   or using the
   [Graph Api Explorer](https://developers.facebook.com/tools/explorer/).
   """
-  @type access_token :: String.t
+  @type access_token :: String.t()
 
   @typedoc """
   Also referred to as an App ID, this may be found on your app dashboard.
   """
-  @type client_id :: String.t
+  @type client_id :: String.t()
 
   @typedoc """
   Also referred to as an App Secret, this may be found on your app dashboard.
   """
-  @type client_secret :: String.t
+  @type client_secret :: String.t()
 
   @typedoc """
   Query values used for supplying or requesting edge attributes.
@@ -59,16 +59,16 @@ defmodule Facebook do
   @typedoc """
   Relative path to media file.
   """
-  @type file_path :: String.t
+  @type file_path :: String.t()
 
   @type limit :: number
-  @type num_resp :: {:ok, number} | {:error, Map.t}
+  @type num_resp :: {:ok, number} | {:error, Map.t()}
 
   @typedoc """
   An id composed of a page and post ids separated with an underscore.
   """
-  @type object_id :: String.t
-  @type page_id :: String.t | integer
+  @type object_id :: String.t()
+  @type page_id :: String.t() | integer
 
   @typedoc """
   Additional attributes for media file uploads
@@ -87,7 +87,7 @@ defmodule Facebook do
   """
   @type react_type :: atom
   @type reaction :: :reaction
-  @type resp :: {:ok, Map.t} | {:error, Map.t}
+  @type resp :: {:ok, Map.t()} | {:error, Map.t()}
 
   @typedoc """
   A type of feed or object.
@@ -102,7 +102,7 @@ defmodule Facebook do
     * `:likes`
     * `:comments`
   """
-  @type scope :: atom | String.t
+  @type scope :: atom | String.t()
 
   @typedoc """
   A reason for settling a payment dispute.
@@ -112,7 +112,7 @@ defmodule Facebook do
     * `:DENIED_REFUND`
     * `:BANNED_USER`
   """
-  @type dispute_reason :: atom | String.t
+  @type dispute_reason :: atom | String.t()
 
   @typedoc """
   A reason for refunding a payment.
@@ -122,16 +122,16 @@ defmodule Facebook do
     * `:FRIENDLY_FRAUD`
     * `:CUSTOMER_SERVICE`
   """
-  @type refunds_reason :: atom | String.t
+  @type refunds_reason :: atom | String.t()
 
-  @type currency :: String.t
-  @type amount :: Number.t
+  @type currency :: String.t()
+  @type amount :: Number.t()
 
   @typedoc """
   A base64-encoded JSON string, concatenated to a signature with a single dot.
   E.g.: "<base64-encoded hmac/sha256 signature>.<base64-encoded JSON payload>"
   """
-  @type signed_request :: String.t
+  @type signed_request :: String.t()
 
   @type using_app_secret :: boolean
 
@@ -159,20 +159,21 @@ defmodule Facebook do
 
   See: https://developers.facebook.com/docs/graph-api/reference/user/
   """
-  @spec me(fields :: String.t, access_token) :: resp
+  @spec me(fields :: String.t(), access_token) :: resp
   def me(fields, access_token) when is_binary(fields) do
     me([fields: fields], access_token)
   end
 
   @spec me(fields, access_token) :: resp
   def me(fields, access_token) do
-    params = fields
-               |> add_app_secret(access_token)
-               |> add_access_token(access_token)
+    params =
+      fields
+      |> add_app_secret(access_token)
+      |> add_access_token(access_token)
 
     ~s(/me)
-      |> GraphAPI.get([], params: params)
-      |> ResponseFormatter.format_response
+    |> GraphAPI.get([], params: params)
+    |> ResponseFormatter.format_response()
   end
 
   @doc """
@@ -186,13 +187,14 @@ defmodule Facebook do
   """
   @spec my_accounts(access_token) :: resp
   def my_accounts(access_token) do
-    params = []
-               |> add_app_secret(access_token)
-               |> add_access_token(access_token)
+    params =
+      []
+      |> add_app_secret(access_token)
+      |> add_access_token(access_token)
 
     ~s(/me/accounts)
-      |> GraphAPI.get([], params: params)
-      |> ResponseFormatter.format_response
+    |> GraphAPI.get([], params: params)
+    |> ResponseFormatter.format_response()
   end
 
   @doc """
@@ -222,15 +224,16 @@ defmodule Facebook do
       iex> Facebook.publish(:campaigns, "act_1234546", [objective: "LINK_CLICKS", name: "a campaign"], "<Access Token>")
       {:ok, %{"id" => "{campaign_id}"}}
   """
-  @spec publish(edge :: atom(), parent_id :: String.t, params, access_token) :: resp
+  @spec publish(edge :: atom(), parent_id :: String.t(), params, access_token) :: resp
   def publish(edge, parent_id, params, access_token) do
-    params = params
-               |> add_app_secret(access_token)
-               |> add_access_token(access_token)
+    params =
+      params
+      |> add_app_secret(access_token)
+      |> add_access_token(access_token)
 
     ~s(/#{parent_id}/#{edge})
-      |> GraphAPI.post("", [], params: params)
-      |> ResponseFormatter.format_response
+    |> GraphAPI.post("", [], params: params)
+    |> ResponseFormatter.format_response()
   end
 
   @doc """
@@ -250,44 +253,50 @@ defmodule Facebook do
   """
   @spec publish(:photo, page_id, file_path, params, access_token) :: resp
   def publish(:photo, page_id, file_path, params, access_token) do
-    params = params
-               |> add_access_token(access_token)
+    params =
+      params
+      |> add_access_token(access_token)
+
     payload = media_payload(file_path)
 
     ~s(/#{page_id}/photos)
-      |> GraphAPI.post(payload, [], params: params)
-      |> ResponseFormatter.format_response
+    |> GraphAPI.post(payload, [], params: params)
+    |> ResponseFormatter.format_response()
   end
 
   @spec publish(
-    :video,
-    page_id,
-    file_path,
-    params,
-    access_token,
-    options :: list
-  ) :: resp
+          :video,
+          page_id,
+          file_path,
+          params,
+          access_token,
+          options :: list
+        ) :: resp
   # credo:disable-for-next-line Credo.Check.Refactor.FunctionArity
   def publish(:video, page_id, file_path, params, access_token, options \\ []) do
-    params = params
-               |> add_access_token(access_token)
+    params =
+      params
+      |> add_access_token(access_token)
+
     options = options ++ [params: params]
     payload = media_payload(file_path)
 
     ~s(/#{page_id}/videos)
-      |> GraphVideoAPI.post(payload, [], options)
-      |> ResponseFormatter.format_response
+    |> GraphVideoAPI.post(payload, [], options)
+    |> ResponseFormatter.format_response()
   end
 
   defp media_payload(file_path) do
     {
       :multipart,
-      [{
-        :file,
-        file_path,
-        {"form-data", [filename: Path.basename(file_path)]},
-        []
-      }]
+      [
+        {
+          :file,
+          file_path,
+          {"form-data", [filename: Path.basename(file_path)]},
+          []
+        }
+      ]
     }
   end
 
@@ -307,15 +316,16 @@ defmodule Facebook do
 
   See: https://developers.facebook.com/docs/graph-api/reference/user/picture/
   """
-  @spec picture(page_id, type :: String.t, access_token) :: resp
+  @spec picture(page_id, type :: String.t(), access_token) :: resp
   def picture(page_id, type, access_token) do
-    params = [type: type, redirect: false]
-               |> add_app_secret(access_token)
-               |> add_access_token(access_token)
+    params =
+      [type: type, redirect: false]
+      |> add_app_secret(access_token)
+      |> add_access_token(access_token)
 
     ~s(/#{page_id}/picture)
-      |> GraphAPI.get([], params: params)
-      |> ResponseFormatter.format_response
+    |> GraphAPI.get([], params: params)
+    |> ResponseFormatter.format_response()
   end
 
   @doc """
@@ -329,13 +339,14 @@ defmodule Facebook do
   """
   @spec picture(page_id, width :: integer, height :: integer, access_token) :: resp
   def picture(page_id, width, height, access_token) do
-    params = [width: width, height: height, redirect: false]
-             |> add_app_secret(access_token)
-             |> add_access_token(access_token)
+    params =
+      [width: width, height: height, redirect: false]
+      |> add_app_secret(access_token)
+      |> add_access_token(access_token)
 
     ~s(/#{page_id}/picture)
-      |> GraphAPI.get([], params: params)
-      |> ResponseFormatter.format_response
+    |> GraphAPI.get([], params: params)
+    |> ResponseFormatter.format_response()
   end
 
   @doc """
@@ -349,13 +360,14 @@ defmodule Facebook do
   """
   @spec my_likes(access_token) :: resp
   def my_likes(access_token) do
-    params = []
-               |> add_app_secret(access_token)
-               |> add_access_token(access_token)
+    params =
+      []
+      |> add_app_secret(access_token)
+      |> add_access_token(access_token)
 
     ~s(/me/likes)
-      |> GraphAPI.get([], params: params)
-      |> ResponseFormatter.format_response
+    |> GraphAPI.get([], params: params)
+    |> ResponseFormatter.format_response()
   end
 
   @doc """
@@ -369,13 +381,14 @@ defmodule Facebook do
   """
   @spec permissions(page_id, access_token) :: resp
   def permissions(page_id, access_token) do
-    params = []
-               |> add_app_secret(access_token)
-               |> add_access_token(access_token)
+    params =
+      []
+      |> add_app_secret(access_token)
+      |> add_access_token(access_token)
 
     ~s(/#{page_id}/permissions)
-      |> GraphAPI.get([], params: params)
-      |> ResponseFormatter.format_response
+    |> GraphAPI.get([], params: params)
+    |> ResponseFormatter.format_response()
   end
 
   @doc """
@@ -399,7 +412,7 @@ defmodule Facebook do
       iex> Facebook.get_object("1234567", "<Access Token>")
       {:ok, %{"id" => id}}
   """
-  @spec get_object(object_id :: String.t, access_token) :: resp
+  @spec get_object(object_id :: String.t(), access_token) :: resp
   def get_object(object_id, access_token) do
     get_object(object_id, access_token, [])
   end
@@ -415,13 +428,14 @@ defmodule Facebook do
   """
   @spec get_object(object_id, access_token, params) :: resp
   def get_object(object_id, access_token, params) do
-    params = params
-               |> add_app_secret(access_token)
-               |> add_access_token(access_token)
+    params =
+      params
+      |> add_app_secret(access_token)
+      |> add_access_token(access_token)
 
     ~s(/#{object_id})
-      |> GraphAPI.get([], params: params)
-      |> ResponseFormatter.format_response
+    |> GraphAPI.get([], params: params)
+    |> ResponseFormatter.format_response()
   end
 
   @doc """
@@ -434,15 +448,17 @@ defmodule Facebook do
 
   """
   # credo:disable-for-lines:1 Credo.Check.Readability.MaxLineLength
-  @spec get_object_edge(edge :: atom | String.t, object_id :: String.t, access_token, params) :: resp
+  @spec get_object_edge(edge :: atom | String.t(), object_id :: String.t(), access_token, params) ::
+          resp
   def get_object_edge(edge, object_id, access_token, params \\ []) do
-    params = params
-               |> add_app_secret(access_token)
-               |> add_access_token(access_token)
+    params =
+      params
+      |> add_app_secret(access_token)
+      |> add_access_token(access_token)
 
     ~s(/#{object_id}/#{edge})
-      |> GraphAPI.get([], params: params)
-      |> ResponseFormatter.format_response
+    |> GraphAPI.get([], params: params)
+    |> ResponseFormatter.format_response()
   end
 
   @doc """
@@ -500,7 +516,7 @@ defmodule Facebook do
 
   """
   # credo:disable-for-lines:2 Credo.Check.Readability.MaxLineLength
-  @spec page_feed(scope, page_id, access_token, limit, fields :: String.t) :: resp
+  @spec page_feed(scope, page_id, access_token, limit, fields :: String.t()) :: resp
   def page_feed(scope, page_id, access_token, limit \\ 25, fields \\ "") when limit <= 100 do
     params = [limit: limit, fields: fields]
     get_object_edge(scope, page_id, access_token, params)
@@ -529,19 +545,21 @@ defmodule Facebook do
   """
   @spec object_count(scope, object_id, access_token) :: num_resp
   def object_count(scope, object_id, access_token) when is_atom(scope) do
-    params = [summary: true]
-               |> add_app_secret(access_token)
-               |> add_access_token(access_token)
+    params =
+      [summary: true]
+      |> add_app_secret(access_token)
+      |> add_access_token(access_token)
 
-    scp = scope
-            |> Atom.to_string
-            |> String.downcase
+    scp =
+      scope
+      |> Atom.to_string()
+      |> String.downcase()
 
     ~s(/#{object_id}/#{scp})
-      |> GraphAPI.get([], params: params)
-      |> ResponseFormatter.format_response
-      |> get_summary
-      |> summary_count
+    |> GraphAPI.get([], params: params)
+    |> ResponseFormatter.format_response()
+    |> get_summary
+    |> summary_count
   end
 
   @doc """
@@ -567,19 +585,21 @@ defmodule Facebook do
   """
   @spec object_count(reaction, react_type, object_id, access_token) :: num_resp
   def object_count(:reaction, react_type, object_id, access_token) when is_atom(react_type) do
-    type = react_type
-             |> Atom.to_string
-             |> String.upcase
+    type =
+      react_type
+      |> Atom.to_string()
+      |> String.upcase()
 
-    params = [type: type, summary: "total_count"]
-               |> add_app_secret(access_token)
-               |> add_access_token(access_token)
+    params =
+      [type: type, summary: "total_count"]
+      |> add_app_secret(access_token)
+      |> add_access_token(access_token)
 
     ~s(/#{object_id}/reactions)
-      |> GraphAPI.get([], params: params)
-      |> ResponseFormatter.format_response
-      |> get_summary
-      |> summary_count
+    |> GraphAPI.get([], params: params)
+    |> ResponseFormatter.format_response()
+    |> get_summary
+    |> summary_count
   end
 
   @doc """
@@ -600,14 +620,15 @@ defmodule Facebook do
     reactions.type(ANGRY).summary(total_count).limit(0).as(angry)
     """
 
-    params = [fields: graph_query]
-               |> add_app_secret(access_token)
-               |> add_access_token(access_token)
+    params =
+      [fields: graph_query]
+      |> add_app_secret(access_token)
+      |> add_access_token(access_token)
 
     ~s(/#{object_id})
-      |> GraphAPI.get([], params: params)
-      |> ResponseFormatter.format_response
-      |> summary_count_all
+    |> GraphAPI.get([], params: params)
+    |> ResponseFormatter.format_response()
+    |> summary_count_all
   end
 
   @doc """
@@ -622,12 +643,13 @@ defmodule Facebook do
   """
   @spec payment(object_id, access_token, fields) :: resp
   def payment(payment_id, access_token, fields \\ "") do
-    params = [fields: fields]
-               |> add_access_token(access_token)
+    params =
+      [fields: fields]
+      |> add_access_token(access_token)
 
     ~s(/#{payment_id})
-      |> GraphAPI.get([], params: params)
-      |> ResponseFormatter.format_response
+    |> GraphAPI.get([], params: params)
+    |> ResponseFormatter.format_response()
   end
 
   @doc """
@@ -642,13 +664,15 @@ defmodule Facebook do
   """
   @spec payment_dispute(object_id, access_token, dispute_reason) :: resp
   def payment_dispute(payment_id, access_token, reason) do
-    params = []
-               |> add_access_token(access_token)
+    params =
+      []
+      |> add_access_token(access_token)
+
     body = URI.encode_query(%{reason: reason})
 
     ~s(/#{payment_id}/dispute)
-      |> GraphAPI.post(body, params: params)
-      |> ResponseFormatter.format_response
+    |> GraphAPI.post(body, params: params)
+    |> ResponseFormatter.format_response()
   end
 
   @doc """
@@ -664,17 +688,20 @@ defmodule Facebook do
   # credo:disable-for-lines:1 Credo.Check.Readability.MaxLineLength
   @spec payment_refunds(object_id, access_token, currency, amount, refunds_reason) :: resp
   def payment_refunds(payment_id, access_token, currency, amount, reason) do
-    params = []
-               |> add_access_token(access_token)
-    body = URI.encode_query(%{
-      currency: currency,
-      amount: amount,
-      reason: reason
-    })
+    params =
+      []
+      |> add_access_token(access_token)
+
+    body =
+      URI.encode_query(%{
+        currency: currency,
+        amount: amount,
+        reason: reason
+      })
 
     ~s(/#{payment_id}/refunds)
-      |> GraphAPI.post(body, params: params)
-      |> ResponseFormatter.format_response
+    |> GraphAPI.post(body, params: params)
+    |> ResponseFormatter.format_response()
   end
 
   @doc """
@@ -695,7 +722,7 @@ defmodule Facebook do
 
   See: https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow#confirm
   """
-  @spec access_token(client_id, client_secret, String.t, String.t) :: resp
+  @spec access_token(client_id, client_secret, String.t(), String.t()) :: resp
   def access_token(client_id, client_secret, redirect_uri, code) do
     [
       client_id: client_id,
@@ -703,7 +730,7 @@ defmodule Facebook do
       redirect_uri: redirect_uri,
       code: code
     ]
-      |> get_access_token
+    |> get_access_token
   end
 
   @doc """
@@ -727,7 +754,7 @@ defmodule Facebook do
       client_secret: client_secret,
       fb_exchange_token: access_token
     ]
-      |> get_access_token
+    |> get_access_token
   end
 
   @doc """
@@ -750,11 +777,13 @@ defmodule Facebook do
   """
   @spec test_users(client_id, access_token) :: resp
   def test_users(client_id, access_token) do
-    params = []
-               |> add_access_token(access_token)
+    params =
+      []
+      |> add_access_token(access_token)
+
     ~s(/#{client_id}/accounts/test-users)
-      |> GraphAPI.get([], params: params)
-      |> ResponseFormatter.format_response
+    |> GraphAPI.get([], params: params)
+    |> ResponseFormatter.format_response()
   end
 
   @doc """
@@ -806,13 +835,12 @@ defmodule Facebook do
   """
   @spec decode_signed_request(signed_request) :: resp
   def decode_signed_request(signed_request) do
-    with [signature_str | [payload_str | _]]
-           <- String.split(signed_request, "."),
+    with [signature_str | [payload_str | _]] <-
+           String.split(signed_request, "."),
          {:ok, signature} <- Base.url_decode64(signature_str),
          _signature_verification = ^signature <- signature(payload_str),
          {:ok, payload} <- Base.url_decode64(payload_str),
-         {:ok, payload} <- JSON.decode(payload)
-    do
+         {:ok, payload} <- JSON.decode(payload) do
       {:ok, payload}
     else
       _ -> {:error, %{}}
@@ -829,8 +857,8 @@ defmodule Facebook do
   # response
   defp get_access_token(params) do
     ~s(/oauth/access_token)
-      |> GraphAPI.get([], params: params)
-      |> ResponseFormatter.format_response
+    |> GraphAPI.get([], params: params)
+    |> ResponseFormatter.format_response()
   end
 
   # Provides the summary of a GET request when the 'summary' query parameter is
@@ -856,13 +884,15 @@ defmodule Facebook do
   # Calculate the reactions summary
   defp summary_count_all(summary) do
     summary
-      |> Map.keys()
-      |> Enum.reject(fn(x) -> x === "id" end)
-      |> Enum.map(fn(x) ->
-        [x, get_in(summary[x], ["summary", "total_count"])] end)
-      |> Enum.reduce(%{}, fn([name, count], acc) ->
-        Map.put(acc, name, count) end)
-      |> (& {:ok, &1}).()
+    |> Map.keys()
+    |> Enum.reject(fn x -> x === "id" end)
+    |> Enum.map(fn x ->
+      [x, get_in(summary[x], ["summary", "total_count"])]
+    end)
+    |> Enum.reduce(%{}, fn [name, count], acc ->
+      Map.put(acc, name, count)
+    end)
+    |> (&{:ok, &1}).()
   end
 
   # Hashes the token together with the app secret according to the
