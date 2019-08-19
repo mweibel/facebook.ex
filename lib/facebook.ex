@@ -1,32 +1,22 @@
 defmodule Facebook do
-  use Application
-  use Supervisor
-
   @moduledoc """
   Provides API wrappers for the Facebook Graph API
 
   See: https://developers.facebook.com/docs/graph-api
   """
 
+  use Application
+
   alias Facebook.Config
   alias Facebook.GraphAPI
   alias Facebook.GraphVideoAPI
   alias Facebook.ResponseFormatter
 
-  @doc "Start hook"
   def start(_type, _args) do
-    start_link([])
-  end
+    children = [Config]
+    opts = [strategy: :one_for_one, name: Facebook.Supervisor]
 
-  @doc "Supervisor start"
-  def start_link(_) do
-    Supervisor.start_link(__MODULE__, [])
-  end
-
-  def init(_) do
-    children = []
-
-    supervise(children, strategy: :one_for_one)
+    Supervisor.start_link(children, opts)
   end
 
   @typedoc """
