@@ -373,7 +373,7 @@ defmodule FacebookTest do
                 %{
                   "id" => id,
                   "about" => about
-                }} = Facebook.page(@page_id, app_access_token, ["about"])
+                }} = Facebook.page(@page_id, app_access_token, "about")
 
         assert(String.length(about) > 0)
         assert(id == Integer.to_string(@page_id, 10))
@@ -386,7 +386,7 @@ defmodule FacebookTest do
                  Facebook.page(
                    @page_id,
                    invalid_access_token,
-                   ["about"]
+                   "about"
                  )
       end
     end
