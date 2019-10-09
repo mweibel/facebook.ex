@@ -43,8 +43,10 @@ defmodule Facebook do
 
   @typedoc """
   Query values used for supplying or requesting edge attributes.
+  Fields are represented as a string of comma separated values.
+  For example, "id,first_name"
   """
-  @type fields :: list
+  @type fields :: String.t()
 
   @typedoc """
   Relative path to media file.
@@ -144,20 +146,12 @@ defmodule Facebook do
       iex> Facebook.me("id,first_name", "<Access Token>")
       {:ok, %{"first_name" => "...", "id" => "..."}}
 
-      iex> Facebook.me([fields: "id,first_name"], "<Access Token>")
-      {:ok, %{"first_name" => "...", "id" => "..."}}
-
   See: https://developers.facebook.com/docs/graph-api/reference/user/
   """
-  @spec me(fields :: String.t(), access_token) :: resp
-  def me(fields, access_token) when is_binary(fields) do
-    me([fields: fields], access_token)
-  end
-
   @spec me(fields, access_token) :: resp
   def me(fields, access_token) do
     params =
-      fields
+      [fields: fields]
       |> add_app_secret(access_token)
       |> add_access_token(access_token)
 
@@ -390,9 +384,9 @@ defmodule Facebook do
 
   See: https://developers.facebook.com/docs/graph-api/reference/page/
   """
-  @spec fan_count(page_id, access_token) :: integer
+  @spec fan_count(page_id, access_token) :: resp
   def fan_count(page_id, access_token) do
-    page(page_id, access_token, ["fan_count"])
+    page(page_id, access_token, "fan_count")
   end
 
   @doc """
@@ -462,7 +456,7 @@ defmodule Facebook do
   """
   @spec page(page_id, access_token) :: resp
   def page(page_id, access_token) do
-    page(page_id, access_token, [])
+    page(page_id, access_token, "")
   end
 
   @doc """
@@ -476,7 +470,7 @@ defmodule Facebook do
   """
   @spec page(page_id, access_token, fields) :: resp
   def page(page_id, access_token, fields) do
-    params = [fields: Enum.join(fields, ",")]
+    params = [fields: fields]
     get_object(page_id, access_token, params)
   end
 
