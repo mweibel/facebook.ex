@@ -10,7 +10,7 @@ Add facebook.ex as a dependency in your `mix.exs` file.
 
 ```elixir
 defp deps do
-  [{:facebook, "~> 0.20.0"}]
+  [{:facebook, "~> 0.24.0"}]
 end
 ```
 
@@ -24,7 +24,7 @@ $ mix deps.get
 
 You can configure facebook.ex in your mix `config.exs` (or, if you're using the Phoenix Framework, in your `config/dev.exs|test.exs|prod.exs`, respectively) with the following keys, which state the library defaults:
 
-```
+```elixir
 config :facebook,
   app_id: nil,
   app_secret: nil,
@@ -37,7 +37,7 @@ config :facebook,
 
 For `graph_url` and `video_graph_url`, Facebook automatically uses the oldest active Graph API version available if you don't specify a version in the url. You may use versioned urls to pin your calls to a specific API versions (recommended), e.g. like so:
 
-```
+```elixir
   graph_url: "https://graph.facebook.com/v2.11",
   graph_video_url: "https://graph-video.facebook.com/v2.8"
 ```
@@ -50,7 +50,7 @@ If you supply the `app_secret`, an [appsecret_proof](https://developers.facebook
 
 You can also configure `facebook.ex` library in runtime using `{:system, _}` tuples:
 
-```
+```elixir
 config :facebook,
   app_id: {:system, "APP_ID"},
   app_secret: {:system, "APP_SECRET"},
@@ -79,7 +79,7 @@ $ iex -S mix
 
 Then try some API calls:
 
-```
+```elixir
 iex(1)> Facebook.me("first_name", "ACCESSTOKEN")
 {:ok, %{"first_name" => "Michael"}} # <--- that's the return value
 
