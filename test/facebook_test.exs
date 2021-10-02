@@ -15,8 +15,8 @@ defmodule FacebookTest do
   # HTTPoison to do it's thing.
   #
 
-  @app_id "1661954077415306"
-  @app_secret "f77497e925c46e8a4c241fff8a03e0ec"
+  @app_id "6611409577415603"
+  @app_secret "f77497e925c64e8a4c241fff8a30e1ec"
 
   # This is the facebook for developers page id
   @page_id 19_292_868_552
@@ -536,13 +536,13 @@ defmodule FacebookTest do
     test "payload" do
       payload = JSON.encode!(%{id: @payment_id})
 
-      assert "EdOhTfnZaIM3-Ht7X_4vgEQnIRq9fpzRgONlMvwRGKI=.eyJpZCI6IjExNjM5NzMwMzg2NTk2In0=" =
+      assert "638LauO6uQVIJhaWHHv3QQ==.eyJpZCI6IjExNjM5NzMwMzg2NTk2In0=" =
                Facebook.sign(payload)
     end
 
     test "decode" do
       signed_request =
-        "EdOhTfnZaIM3-Ht7X_4vgEQnIRq9fpzRgONlMvwRGKI=.eyJpZCI6IjExNjM5NzMwMzg2NTk2In0="
+        "638LauO6uQVIJhaWHHv3QQ==.eyJpZCI6IjExNjM5NzMwMzg2NTk2In0="
 
       assert {:ok,
               %{
