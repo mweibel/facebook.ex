@@ -882,7 +882,7 @@ defmodule Facebook do
   # Hashes the token together with the app secret according to the
   # guidelines of facebook to build an unencoded/raw signature.
   defp signature(str) do
-    :crypto.hmac(:sha256, Config.app_secret(), str)
+    :crypto.mac(:hmac, :sha256, Config.app_secret(), str)
   end
 
   # Uses signature/1 to build a urlsafe base64-encoded signature
